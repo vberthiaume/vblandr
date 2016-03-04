@@ -6,7 +6,9 @@ import numpy as np
 
 def softmax(x):
     """Compute softmax values for each sets of scores in x."""
-    pass  # TODO: Compute and return softmax(x)
+    #for each column, find the sum of all elements, and divide each row element by its column sum
+    sum_rows = np.sum(x,0) 
+    return x / sum_rows
 
 print(softmax(scores))
 
