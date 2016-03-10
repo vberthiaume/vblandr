@@ -1,6 +1,8 @@
 #vim
 *.swp
 *.kate-swp
+#big files
+*.gz
 #C++ GITIGNORE
 # Compiled Object files
 *.slo
