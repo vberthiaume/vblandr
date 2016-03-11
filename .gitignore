@@ -1,8 +1,11 @@
 #vim
 *.swp
 *.kate-swp
-#big files
+#big or random files
 *.gz
+.directory
+notMNIST_large/
+notMNIST_small/
 #C++ GITIGNORE
 # Compiled Object files
 *.slo
