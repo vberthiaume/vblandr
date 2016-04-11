@@ -5,7 +5,7 @@ import tensorflow as tf
 from six.moves import cPickle as pickle
 
 #First reload the data we generated in notmist.ipynb.
-pickle_file = 'notMNIST.pickle'
+pickle_file = '../../udacity/notMNIST.pickle'
 
 with open(pickle_file, 'rb') as f:
     save = pickle.load(f)
@@ -36,7 +36,7 @@ def reformat(dataset, labels):
 
 train_dataset, train_labels = reformat(train_dataset, train_labels)
 valid_dataset, valid_labels = reformat(valid_dataset, valid_labels)
-test_dataset, test_labels = reformat(test_dataset, test_labels)
+test_dataset,  test_labels  = reformat(test_dataset, test_labels)
 
 print('Training set', train_dataset.shape, train_labels.shape)
 print('Validation set', valid_dataset.shape, valid_labels.shape)
@@ -47,7 +47,9 @@ def accuracy(predictions, labels):
   
   
 #Problem 1
-#Introduce and tune L2 regularization for both logistic and neural network models. Remember that L2 amounts to adding a penalty on the norm of the weights to the loss. In TensorFlow, you can compute the L2 loss for a tensor t using nn.l2_loss(t). The right amount of regularization should improve your validation / test accuracy.
+#Introduce and tune L2 regularization for both logistic and neural network models. Remember that L2 amounts to adding
+# a penalty on the norm of the weights to the loss. In TensorFlow, you can compute the L2 loss for a tensor t using
+# nn.l2_loss(t). The right amount of regularization should improve your validation / test accuracy.
 
 
 #Problem 2
@@ -55,12 +57,15 @@ def accuracy(predictions, labels):
 
 
 #Problem 3
-#Introduce Dropout on the hidden layer of the neural network. Remember: Dropout should only be introduced during training, not evaluation, otherwise your evaluation results would be stochastic as well. TensorFlow provides nn.dropout() for that, but you have to make sure it's only inserted during training.
+#Introduce Dropout on the hidden layer of the neural network. Remember: Dropout should only be introduced during
+# training, not evaluation, otherwise your evaluation results would be stochastic as well. TensorFlow provides
+# nn.dropout() for that, but you have to make sure it's only inserted during training.
 #What happens to our extreme overfitting case?
 
 
 #Problem 4
-#Try to get the best performance you can using a multi-layer model! The best reported test accuracy using a deep network is 97.1%.
+#Try to get the best performance you can using a multi-layer model! The best reported test accuracy using a deep
+# network is 97.1%.
 #One avenue you can explore is to add multiple layers.
 #Another one is to use learning rate decay:
 #	global_step = tf.Variable(0)  # count the number of steps taken.
