@@ -66,19 +66,19 @@ with graph.as_default():
     tf_valid_dataset = tf.constant(valid_dataset)
     tf_test_dataset  = tf.constant(test_dataset)
 
-    # Input layer
-    weights = tf.Variable(tf.truncated_normal([flat_img_size, hidden1_units]))
-    biases  = tf.Variable(tf.zeros([hidden1_units]))
-    InputLayerOutput = tf.matmul(tf_train_dataset, weights) + biases
+    # Input layer                                                               # input is 1 x 784
+    weights = tf.Variable(tf.truncated_normal([flat_img_size, hidden1_units]))  # Weights is 784 x 1024
+    biases  = tf.Variable(tf.zeros([hidden1_units]))                            # Bias is 1 x 1024
+    InputLayerOutput = tf.matmul(tf_train_dataset, weights) + biases            # Output of input layer is (inputs X weights) + bias = 1 x 1024
 
     # 1st hidden layer
-    hidden1_input = tf.nn.relu(InputLayerOutput)
-    weights1= tf.Variable(tf.truncated_normal([hidden1_units, num_labels]))
-    biases1 = tf.Variable(tf.zeros([num_labels]))
+    hidden1_input = tf.nn.relu(InputLayerOutput)                                # Input is nn.relu(inputLayerOutput), so 1 x 1024
+    weights1= tf.Variable(tf.truncated_normal([hidden1_units, num_labels]))     # Weights is 1024 x 10
+    biases1 = tf.Variable(tf.zeros([num_labels]))                               # Bias is 1 x 10
 
     # Training computation.
     # logits = tf.matmul(tf_train_dataset, weights) + biases
-    logits = tf.matmul(hidden1_input, weights1) + biases1
+    logits = tf.matmul(hidden1_input, weights1) + biases1                       # logits are (inputs X weights) + bias = 1 x 10
     loss   = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
 
     # Optimizer.
@@ -87,34 +87,6 @@ with graph.as_default():
     train_prediction = tf.nn.softmax(logits)
     valid_prediction = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_valid_dataset, weights) + biases), weights1) + biases1)
     test_prediction  = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_test_dataset, weights) + biases), weights1) + biases1)
-
-#another person's code from the forum, also works. basically is the same.
-# num_nodes= 1024
-# batch_size = 128
-# graph = tf.Graph()
-# with graph.as_default():
-#     # Input data. For the training data, we use a placeholder that will be fed
-#     # at run time with a training minibatch.
-#     tf_train_dataset = tf.placeholder(tf.float32, shape=(batch_size, flat_img_size))
-#     tf_train_labels = tf.placeholder(tf.float32, shape=(batch_size, num_labels))
-#     tf_valid_dataset = tf.constant(valid_dataset)
-#     tf_test_dataset = tf.constant(test_dataset)
-#     # Variables.
-#     weights_1 = tf.Variable(tf.truncated_normal([flat_img_size, num_nodes]))
-#     biases_1 = tf.Variable(tf.zeros([num_nodes]))
-#     weights_2 = tf.Variable(tf.truncated_normal([num_nodes, num_labels]))
-#     biases_2 = tf.Variable(tf.zeros([num_labels]))
-#     # Training computation.
-#     relu_layer=tf.nn.relu(tf.matmul(tf_train_dataset, weights_1) + biases_1)
-#     logits = tf.matmul(relu_layer, weights_2) + biases_2
-#     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
-#     # Optimizer.
-#     optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
-#     # Predictions for the training, validation, and test data.
-#     train_prediction = tf.nn.softmax(logits)
-#     valid_prediction = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_valid_dataset, weights_1) + biases_1), weights_2) + biases_2)
-#     test_prediction =  tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_test_dataset, weights_1) + biases_1), weights_2) + biases_2)
-
 
 #train the thing
 num_steps = 3001
@@ -140,7 +112,7 @@ with tf.Session(graph=graph) as session:
     print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
 
     end_time = time.clock()
-    print("Whole thing took: ", end_time - start_time)
+    print("Whole thing took: ", (end_time - start_time)/60, " minutes")
 
 #================================================== Problem 2 ==================================================
 #Let's demonstrate an extreme case of overfitting. Restrict your training data to just a few batches. What happens?
