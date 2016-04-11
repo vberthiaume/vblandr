@@ -50,13 +50,13 @@ def accuracy(predictions, labels):
 #Introduce and tune L2 regularization for both logistic and neural network models. Remember that L2 amounts to adding
 # a penalty on the norm of the weights to the loss. In TensorFlow, you can compute the L2 loss for a tensor t using
 # nn.l2_loss(t). The right amount of regularization should improve your validation / test accuracy.
+
 import time
 flat_img_size   = image_size * image_size
 
 batch_size = 128 #this random number of training patterns will be used
 graph = tf.Graph()
 hidden1_units = 1024
-
 
 #initialize everything
 with graph.as_default():
@@ -80,6 +80,11 @@ with graph.as_default():
     # logits = tf.matmul(tf_train_dataset, weights) + biases
     logits = tf.matmul(hidden1_input, weights1) + biases1                       # logits are (inputs X weights) + bias = 1 x 10
     loss   = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
+
+    beta_L2 = .05  #I believe this is called beta
+    regularizers = (tf.nn.l2_loss(weights) + tf.nn.l2_loss(biases) + tf.nn.l2_loss(weights1) + tf.nn.l2_loss(biases1))
+    # Add the regularization term to the loss.
+    loss += 5e-4 * regularizers
 
     # Optimizer.
     optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
