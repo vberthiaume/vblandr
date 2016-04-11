@@ -50,7 +50,97 @@ def accuracy(predictions, labels):
 #Introduce and tune L2 regularization for both logistic and neural network models. Remember that L2 amounts to adding
 # a penalty on the norm of the weights to the loss. In TensorFlow, you can compute the L2 loss for a tensor t using
 # nn.l2_loss(t). The right amount of regularization should improve your validation / test accuracy.
+import time
+flat_img_size   = image_size * image_size
 
+batch_size = 128 #this random number of training patterns will be used
+graph = tf.Graph()
+hidden1_units = 1024
+
+
+#initialize everything
+with graph.as_default():
+    # Input data. The training data is currently empty, but a random minibatch will be fed in the placeholder during training
+    tf_train_dataset = tf.placeholder(tf.float32, shape=(batch_size, flat_img_size))
+    tf_train_labels  = tf.placeholder(tf.float32, shape=(batch_size, num_labels))
+    tf_valid_dataset = tf.constant(valid_dataset)
+    tf_test_dataset  = tf.constant(test_dataset)
+
+    # Input layer
+    weights = tf.Variable(tf.truncated_normal([flat_img_size, hidden1_units]))
+    biases  = tf.Variable(tf.zeros([hidden1_units]))
+    InputLayerOutput = tf.matmul(tf_train_dataset, weights) + biases
+
+    # 1st hidden layer
+    hidden1_input = tf.nn.relu(InputLayerOutput)
+    weights1= tf.Variable(tf.truncated_normal([hidden1_units, num_labels]))
+    biases1 = tf.Variable(tf.zeros([num_labels]))
+
+    # Training computation.
+    # logits = tf.matmul(tf_train_dataset, weights) + biases
+    logits = tf.matmul(hidden1_input, weights1) + biases1
+    loss   = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
+
+    # Optimizer.
+    optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
+    # Predictions for the training, validation, and test data.
+    train_prediction = tf.nn.softmax(logits)
+    valid_prediction = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_valid_dataset, weights) + biases), weights1) + biases1)
+    test_prediction  = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_test_dataset, weights) + biases), weights1) + biases1)
+
+#another person's code from the forum, also works. basically is the same.
+# num_nodes= 1024
+# batch_size = 128
+# graph = tf.Graph()
+# with graph.as_default():
+#     # Input data. For the training data, we use a placeholder that will be fed
+#     # at run time with a training minibatch.
+#     tf_train_dataset = tf.placeholder(tf.float32, shape=(batch_size, flat_img_size))
+#     tf_train_labels = tf.placeholder(tf.float32, shape=(batch_size, num_labels))
+#     tf_valid_dataset = tf.constant(valid_dataset)
+#     tf_test_dataset = tf.constant(test_dataset)
+#     # Variables.
+#     weights_1 = tf.Variable(tf.truncated_normal([flat_img_size, num_nodes]))
+#     biases_1 = tf.Variable(tf.zeros([num_nodes]))
+#     weights_2 = tf.Variable(tf.truncated_normal([num_nodes, num_labels]))
+#     biases_2 = tf.Variable(tf.zeros([num_labels]))
+#     # Training computation.
+#     relu_layer=tf.nn.relu(tf.matmul(tf_train_dataset, weights_1) + biases_1)
+#     logits = tf.matmul(relu_layer, weights_2) + biases_2
+#     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
+#     # Optimizer.
+#     optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
+#     # Predictions for the training, validation, and test data.
+#     train_prediction = tf.nn.softmax(logits)
+#     valid_prediction = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_valid_dataset, weights_1) + biases_1), weights_2) + biases_2)
+#     test_prediction =  tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_test_dataset, weights_1) + biases_1), weights_2) + biases_2)
+
+
+#train the thing
+num_steps = 3001
+with tf.Session(graph=graph) as session:
+    tf.initialize_all_variables().run()
+
+    start_time = time.clock()
+
+    print("Initialized")
+    for step in range(num_steps):
+        # Generate a minibatch by pick an offset within the (randomized) training data. Note: we could use better randomization across epochs.
+        offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
+        batch_data   = train_dataset[offset:(offset + batch_size), :]
+        batch_labels = train_labels [offset:(offset + batch_size), :]
+        # Dictionary telling the session where to feed the minibatch. Keys are the placeholder nodes and the value are the numpy arrays.
+        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels}
+        # Run the thing
+        _, l, predictions = session.run([optimizer, loss, train_prediction], feed_dict=feed_dict)
+        if (step % 500 == 0):
+            print("Minibatch loss at step %d: %f" % (step, l))
+            print("Minibatch accuracy: %.1f%%"  % accuracy(predictions, batch_labels))
+            print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(), valid_labels))
+    print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+
+    end_time = time.clock()
+    print("Whole thing took: ", end_time - start_time)
 
 #================================================== Problem 2 ==================================================
 #Let's demonstrate an extreme case of overfitting. Restrict your training data to just a few batches. What happens?
