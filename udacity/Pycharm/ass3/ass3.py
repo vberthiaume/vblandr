@@ -46,24 +46,24 @@ def accuracy(predictions, labels):
     return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1)) / predictions.shape[0])
   
   
-#Problem 1
+#================================================== Problem 1 ==================================================
 #Introduce and tune L2 regularization for both logistic and neural network models. Remember that L2 amounts to adding
 # a penalty on the norm of the weights to the loss. In TensorFlow, you can compute the L2 loss for a tensor t using
 # nn.l2_loss(t). The right amount of regularization should improve your validation / test accuracy.
 
 
-#Problem 2
+#================================================== Problem 2 ==================================================
 #Let's demonstrate an extreme case of overfitting. Restrict your training data to just a few batches. What happens?
 
 
-#Problem 3
+#================================================== Problem 3 ==================================================
 #Introduce Dropout on the hidden layer of the neural network. Remember: Dropout should only be introduced during
 # training, not evaluation, otherwise your evaluation results would be stochastic as well. TensorFlow provides
 # nn.dropout() for that, but you have to make sure it's only inserted during training.
 #What happens to our extreme overfitting case?
 
 
-#Problem 4
+#================================================== Problem 4 ==================================================
 #Try to get the best performance you can using a multi-layer model! The best reported test accuracy using a deep
 # network is 97.1%.
 #One avenue you can explore is to add multiple layers.
