@@ -55,6 +55,13 @@ import time
 flat_img_size   = image_size * image_size
 
 batch_size = 128 #this random number of training patterns will be used
+
+#======================= FOR PROBLEM 2 ==================
+# training_size = 15 * batch_size
+# train_dataset = train_dataset[:training_size]
+# train_labels  = train_labels[:training_size]
+# print ("training contains ", train_dataset.shape, " patterns")
+
 graph = tf.Graph()
 hidden1_units = 1024
 
@@ -121,13 +128,14 @@ with tf.Session(graph=graph) as session:
 
 #================================================== Problem 2 ==================================================
 #Let's demonstrate an extreme case of overfitting. Restrict your training data to just a few batches. What happens?
-
+# SEE AROUND LINES 60 TO 63
 
 #================================================== Problem 3 ==================================================
 #Introduce Dropout on the hidden layer of the neural network. Remember: Dropout should only be introduced during
 # training, not evaluation, otherwise your evaluation results would be stochastic as well. TensorFlow provides
 # nn.dropout() for that, but you have to make sure it's only inserted during training.
-#What happens to our extreme overfitting case?
+#
+# What happens to our extreme overfitting case?
 
 
 #================================================== Problem 4 ==================================================
