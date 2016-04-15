@@ -57,10 +57,10 @@ flat_img_size   = image_size * image_size
 batch_size = 128 #this random number of training patterns will be used
 
 #======================= FOR PROBLEM 2 ==================
-# training_size = 15 * batch_size
-# train_dataset = train_dataset[:training_size]
-# train_labels  = train_labels[:training_size]
-# print ("training contains ", train_dataset.shape, " patterns")
+training_size = 15 * batch_size
+train_dataset = train_dataset[:training_size]
+train_labels  = train_labels[:training_size]
+print ("training contains ", train_dataset.shape, " patterns")
 
 graph = tf.Graph()
 hidden1_units = 1024
@@ -85,11 +85,11 @@ with graph.as_default():
 
     #DROPOUT PROBLEM 3
     keep_prob = tf.placeholder(tf.float32)
-    h_drop_activations = tf.nn.dropout(hidden1_input, keep_prob)
+    # hidden1_input = tf.nn.dropout(hidden1_input, keep_prob)
 
     # Training computation.
-    #logits = tf.matmul(hidden1_input, weights1) + biases1                       # logits are (inputs X weights) + bias = 1 x 10
-    logits = tf.matmul(h_drop_activations, weights1) + biases1
+    # logits = tf.matmul(hidden1_input, weights1) + biases1                       # logits are (inputs X weights) + bias = 1 x 10
+    logits = tf.nn.dropout(tf.matmul(hidden1_input, weights1) + biases1, keep_prob)  # logits are (inputs X weights) + bias = 1 x 10
     loss   = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
 
     beta_L2 = .05  #I believe this is called beta
@@ -125,8 +125,9 @@ with tf.Session(graph=graph) as session:
             print("Minibatch loss at step %d: %f" % (step, l))
             print("Minibatch accuracy: %.1f%%"  % accuracy(predictions, batch_labels))
             print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(feed_dict={keep_prob: 1.0}), valid_labels))
+            # print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(), valid_labels))
     print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(feed_dict={keep_prob: 1.0}), test_labels))
-
+    # print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
     end_time = time.clock()
     print("Whole thing took: ", (end_time - start_time)/60, " minutes")
 
