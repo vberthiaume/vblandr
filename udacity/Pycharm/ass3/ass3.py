@@ -56,11 +56,11 @@ flat_img_size   = image_size * image_size
 
 batch_size = 128 #this random number of training patterns will be used
 
-#======================= FOR PROBLEM 2 ==================
-training_size = 15 * batch_size
-train_dataset = train_dataset[:training_size]
-train_labels  = train_labels[:training_size]
-print ("training contains ", train_dataset.shape, " patterns")
+#======================= OVERFITTING FOR PROBLEM 2 ==================
+# training_size = 15 * batch_size
+# train_dataset = train_dataset[:training_size]
+# train_labels  = train_labels[:training_size]
+# print ("training contains ", train_dataset.shape, " patterns")
 
 graph = tf.Graph()
 hidden1_units = 1024
