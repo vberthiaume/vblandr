@@ -83,9 +83,13 @@ with graph.as_default():
     weights1= tf.Variable(tf.truncated_normal([hidden1_units, num_labels]))     # Weights is 1024 x 10
     biases1 = tf.Variable(tf.zeros([num_labels]))                               # Bias is 1 x 10
 
+    #DROPOUT PROBLEM 3
+    keep_prob = tf.placeholder(tf.float32)
+    h_drop_activations = tf.nn.dropout(hidden1_input, keep_prob)
+
     # Training computation.
-    # logits = tf.matmul(tf_train_dataset, weights) + biases
-    logits = tf.matmul(hidden1_input, weights1) + biases1                       # logits are (inputs X weights) + bias = 1 x 10
+    #logits = tf.matmul(hidden1_input, weights1) + biases1                       # logits are (inputs X weights) + bias = 1 x 10
+    logits = tf.matmul(h_drop_activations, weights1) + biases1
     loss   = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
 
     beta_L2 = .05  #I believe this is called beta
@@ -114,14 +118,14 @@ with tf.Session(graph=graph) as session:
         batch_data   = train_dataset[offset:(offset + batch_size), :]
         batch_labels = train_labels [offset:(offset + batch_size), :]
         # Dictionary telling the session where to feed the minibatch. Keys are the placeholder nodes and the value are the numpy arrays.
-        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels}
+        train_feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, keep_prob : 0.5}
         # Run the thing
-        _, l, predictions = session.run([optimizer, loss, train_prediction], feed_dict=feed_dict)
+        _, l, predictions = session.run([optimizer, loss, train_prediction], feed_dict=train_feed_dict)
         if (step % 500 == 0):
             print("Minibatch loss at step %d: %f" % (step, l))
             print("Minibatch accuracy: %.1f%%"  % accuracy(predictions, batch_labels))
-            print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(), valid_labels))
-    print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+            print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(feed_dict={keep_prob: 1.0}), valid_labels))
+    print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(feed_dict={keep_prob: 1.0}), test_labels))
 
     end_time = time.clock()
     print("Whole thing took: ", (end_time - start_time)/60, " minutes")
@@ -135,6 +139,9 @@ with tf.Session(graph=graph) as session:
 # training, not evaluation, otherwise your evaluation results would be stochastic as well. TensorFlow provides
 # nn.dropout() for that, but you have to make sure it's only inserted during training.
 #
+
+
+
 # What happens to our extreme overfitting case?
 
 
