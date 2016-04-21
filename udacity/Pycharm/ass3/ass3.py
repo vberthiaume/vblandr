@@ -84,20 +84,24 @@ with graph.as_default():
 
     # 1st hidden layer
     hidden1_input    = tf.nn.dropout(tf.nn.relu(InputLayerOutput), keep_prob)                       # Input is nn.relu(inputLayerOutput), so 1 x 1024
-    weights1         = tf.Variable(tf.truncated_normal([hidden_layer_units, hidden_layer_units]))   # Weights is 1024 x 1024
-    biases1          = tf.Variable(tf.zeros([hidden_layer_units]))                                  # Bias is 1 x 1024
-    hidden1_output   = tf.matmul(hidden1_input, weights1) + biases1
+    # weights1         = tf.Variable(tf.truncated_normal([hidden_layer_units, hidden_layer_units]))   # Weights is 1024 x 1024
+    weights1         = tf.Variable(tf.truncated_normal([hidden_layer_units, num_labels]))   # Weights is 1024 x 1024
+    biases1          = tf.Variable(tf.zeros([num_labels]))                                  # Bias is 1 x 1024
+    # biases1          = tf.Variable(tf.zeros([hidden_layer_units]))                                  # Bias is 1 x 1024
+    # hidden1_output   = tf.matmul(hidden1_input, weights1) + biases1
+    logits           = tf.matmul(hidden1_input, weights1) + biases1
 
     # 2nd hidden layer
-    hidden2_input    = tf.nn.dropout(tf.nn.relu(hidden1_output), keep_prob)                 # Input is nn.relu(inputLayerOutput), so 1 x 1024
-    weights2         = tf.Variable(tf.truncated_normal([hidden_layer_units, num_labels]))   # Weights is 1024 x 10
-    biases2          = tf.Variable(tf.zeros([num_labels]))                                  # Bias is 1 x 10
-    logits           = tf.matmul(hidden2_input, weights2) + biases2                         # logits are (inputs X weights) + bias = 1 x 10
+    # hidden2_input    = tf.nn.dropout(tf.nn.relu(hidden1_output), keep_prob)                 # Input is nn.relu(inputLayerOutput), so 1 x 1024
+    # weights2         = tf.Variable(tf.truncated_normal([hidden_layer_units, num_labels]))   # Weights is 1024 x 10
+    # biases2          = tf.Variable(tf.zeros([num_labels]))                                  # Bias is 1 x 10
+    # logits           = tf.matmul(hidden2_input, weights2) + biases2                         # logits are (inputs X weights) + bias = 1 x 10
 
     # Training computations
     loss    = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
     beta_L2 = .05  #I believe this is called beta
-    regularizers = (tf.nn.l2_loss(weights) + tf.nn.l2_loss(biases) + tf.nn.l2_loss(weights1) + tf.nn.l2_loss(biases1) + tf.nn.l2_loss(weights2) + tf.nn.l2_loss(biases2))
+    # regularizers = tf.nn.l2_loss(weights) + tf.nn.l2_loss(biases) + tf.nn.l2_loss(weights1) + tf.nn.l2_loss(biases1) + tf.nn.l2_loss(weights2) + tf.nn.l2_loss(biases2)
+    regularizers = tf.nn.l2_loss(weights) + tf.nn.l2_loss(biases) + tf.nn.l2_loss(weights1) + tf.nn.l2_loss(biases1)
     # Add the regularization term to the loss.
     loss += 5e-4 * regularizers
 
@@ -105,9 +109,10 @@ with graph.as_default():
     optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
     # Predictions for the training, validation, and test data.
     train_prediction = tf.nn.softmax(logits)
-    valid_prediction = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tf_valid_dataset, weights) + biases), weights1) + biases1), weights2) + biases2)
-    test_prediction  = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tf_test_dataset, weights) + biases), weights1) + biases1), weights2) + biases2)
-
+    # valid_prediction = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tf_valid_dataset, weights) + biases), weights1) + biases1), weights2) + biases2)
+    # test_prediction  = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tf_test_dataset, weights) + biases), weights1) + biases1), weights2) + biases2)
+    valid_prediction = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_valid_dataset, weights) + biases), weights1) + biases1)
+    test_prediction  = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_test_dataset, weights) + biases), weights1) + biases1)
 #train the thing
 num_steps = 3001
 with tf.Session(graph=graph) as session:
