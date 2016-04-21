@@ -105,8 +105,8 @@ with graph.as_default():
     optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
     # Predictions for the training, validation, and test data.
     train_prediction = tf.nn.softmax(logits)
-    valid_prediction = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_valid_dataset, weights) + biases), weights1) + biases1)
-    test_prediction  = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf_test_dataset, weights) + biases), weights1) + biases1)
+    valid_prediction = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tf_valid_dataset, weights) + biases), weights1) + biases1), weights2) + biases2)
+    test_prediction  = tf.nn.softmax(tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tf_test_dataset, weights) + biases), weights1) + biases1), weights2) + biases2)
 
 #train the thing
 num_steps = 3001
