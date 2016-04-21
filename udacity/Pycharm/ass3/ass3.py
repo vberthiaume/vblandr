@@ -77,17 +77,22 @@ with graph.as_default():
     keep_prob = tf.placeholder(tf.float32)
 
     # ------------ DEFINING LAYERS ------------
-    # Input layer                                                                               # input is 1 x 784
+    # Input layer                                                                            # input is 1 x 784
     weights          = tf.Variable(tf.truncated_normal([flat_img_size, hidden_layer_units])) # Weights is 784 x 1024
     biases           = tf.Variable(tf.zeros([hidden_layer_units]))                           # Bias is 1 x 1024
     InputLayerOutput = tf.matmul(tf_train_dataset, weights) + biases                         # Output of input layer is (inputs X weights) + bias = 1 x 1024
 
     # 1st hidden layer
-    hidden1_input    = tf.nn.dropout(tf.nn.relu(InputLayerOutput), keep_prob)                                  # Input is nn.relu(inputLayerOutput), so 1 x 1024
-    weights1         = tf.Variable(tf.truncated_normal([hidden_layer_units, num_labels]))    # Weights is 1024 x 10
-    biases1          = tf.Variable(tf.zeros([num_labels]))                                   # Bias is 1 x 10
-    logits = tf.matmul(hidden1_input, weights1) + biases1                             # logits are (inputs X weights) + bias = 1 x 10
-    # logits = tf.nn.dropout(tf.matmul(hidden1_input, weights1) + biases1, keep_prob)     # logits are (inputs X weights) + bias = 1 x 10
+    hidden1_input    = tf.nn.dropout(tf.nn.relu(InputLayerOutput), keep_prob)                       # Input is nn.relu(inputLayerOutput), so 1 x 1024
+    weights1         = tf.Variable(tf.truncated_normal([hidden_layer_units, hidden_layer_units]))   # Weights is 1024 x 1024
+    biases1          = tf.Variable(tf.zeros([hidden_layer_units]))                                  # Bias is 1 x 1024
+    hidden1_output   = tf.matmul(hidden1_input, weights1) + biases1
+
+    # 2nd hidden layer
+    hidden2_input    = tf.nn.dropout(tf.nn.relu(hidden1_output), keep_prob)                 # Input is nn.relu(inputLayerOutput), so 1 x 1024
+    weights2         = tf.Variable(tf.truncated_normal([hidden_layer_units, num_labels]))   # Weights is 1024 x 10
+    biases2          = tf.Variable(tf.zeros([num_labels]))                                  # Bias is 1 x 10
+    logits           = tf.matmul(hidden2_input, weights2) + biases2                         # logits are (inputs X weights) + bias = 1 x 10
 
     # Training computations
     loss   = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
