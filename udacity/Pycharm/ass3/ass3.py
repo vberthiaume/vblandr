@@ -95,9 +95,9 @@ with graph.as_default():
     logits           = tf.matmul(hidden2_input, weights2) + biases2                         # logits are (inputs X weights) + bias = 1 x 10
 
     # Training computations
-    loss   = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
+    loss    = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
     beta_L2 = .05  #I believe this is called beta
-    regularizers = (tf.nn.l2_loss(weights) + tf.nn.l2_loss(biases) + tf.nn.l2_loss(weights1) + tf.nn.l2_loss(biases1))
+    regularizers = (tf.nn.l2_loss(weights) + tf.nn.l2_loss(biases) + tf.nn.l2_loss(weights1) + tf.nn.l2_loss(biases1) + tf.nn.l2_loss(weights2) + tf.nn.l2_loss(biases2))
     # Add the regularization term to the loss.
     loss += 5e-4 * regularizers
 
