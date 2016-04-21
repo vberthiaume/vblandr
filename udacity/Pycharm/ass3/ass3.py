@@ -63,7 +63,7 @@ batch_size = 128 #this random number of training patterns will be used
 # print ("training contains ", train_dataset.shape, " patterns")
 
 graph = tf.Graph()
-hidden1_units = 1024
+hidden_layer_units = 1024
 
 #initialize everything
 with graph.as_default():
@@ -73,25 +73,24 @@ with graph.as_default():
     tf_valid_dataset = tf.constant(valid_dataset)
     tf_test_dataset  = tf.constant(test_dataset)
 
-    # Input layer                                                               # input is 1 x 784
-    weights = tf.Variable(tf.truncated_normal([flat_img_size, hidden1_units]))  # Weights is 784 x 1024
-    biases  = tf.Variable(tf.zeros([hidden1_units]))                            # Bias is 1 x 1024
-    InputLayerOutput = tf.matmul(tf_train_dataset, weights) + biases            # Output of input layer is (inputs X weights) + bias = 1 x 1024
+    # DROPOUT PROBLEM 3
+    keep_prob = tf.placeholder(tf.float32)
+
+    # ------------ DEFINING LAYERS ------------
+    # Input layer                                                                               # input is 1 x 784
+    weights          = tf.Variable(tf.truncated_normal([flat_img_size, hidden_layer_units])) # Weights is 784 x 1024
+    biases           = tf.Variable(tf.zeros([hidden_layer_units]))                           # Bias is 1 x 1024
+    InputLayerOutput = tf.matmul(tf_train_dataset, weights) + biases                         # Output of input layer is (inputs X weights) + bias = 1 x 1024
 
     # 1st hidden layer
-    hidden1_input = tf.nn.relu(InputLayerOutput)                                # Input is nn.relu(inputLayerOutput), so 1 x 1024
-    weights1= tf.Variable(tf.truncated_normal([hidden1_units, num_labels]))     # Weights is 1024 x 10
-    biases1 = tf.Variable(tf.zeros([num_labels]))                               # Bias is 1 x 10
+    hidden1_input    = tf.nn.dropout(tf.nn.relu(InputLayerOutput), keep_prob)                                  # Input is nn.relu(inputLayerOutput), so 1 x 1024
+    weights1         = tf.Variable(tf.truncated_normal([hidden_layer_units, num_labels]))    # Weights is 1024 x 10
+    biases1          = tf.Variable(tf.zeros([num_labels]))                                   # Bias is 1 x 10
+    logits = tf.matmul(hidden1_input, weights1) + biases1                             # logits are (inputs X weights) + bias = 1 x 10
+    # logits = tf.nn.dropout(tf.matmul(hidden1_input, weights1) + biases1, keep_prob)     # logits are (inputs X weights) + bias = 1 x 10
 
-    #DROPOUT PROBLEM 3
-    keep_prob = tf.placeholder(tf.float32)
-    # hidden1_input = tf.nn.dropout(hidden1_input, keep_prob)
-
-    # Training computation.
-    # logits = tf.matmul(hidden1_input, weights1) + biases1                       # logits are (inputs X weights) + bias = 1 x 10
-    logits = tf.nn.dropout(tf.matmul(hidden1_input, weights1) + biases1, keep_prob)  # logits are (inputs X weights) + bias = 1 x 10
+    # Training computations
     loss   = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
-
     beta_L2 = .05  #I believe this is called beta
     regularizers = (tf.nn.l2_loss(weights) + tf.nn.l2_loss(biases) + tf.nn.l2_loss(weights1) + tf.nn.l2_loss(biases1))
     # Add the regularization term to the loss.
@@ -149,7 +148,9 @@ with tf.Session(graph=graph) as session:
 #================================================== Problem 4 ==================================================
 #Try to get the best performance you can using a multi-layer model! The best reported test accuracy using a deep
 # network is 97.1%.
+
 #One avenue you can explore is to add multiple layers.
+
 #Another one is to use learning rate decay:
 #	global_step = tf.Variable(0)  # count the number of steps taken.
 #	learning_rate = tf.train.exponential_decay(0.5, global_step, ...)
