@@ -116,7 +116,7 @@ target/
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff:
-ass3/.idea/workspace.xml
+udacity/Pycharm/ass3/.idea/workspace.xml
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/dictionaries
