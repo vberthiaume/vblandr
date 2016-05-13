@@ -1,6 +1,9 @@
 import os, os.path
 
-# path joining version for other paths
+
+def count_files( dir ):
+	return len([name for name in os.listdir(dir) if os.path.isfile(os.path.join(dir, name))])
+
 music_dir = '/media/kxstudio/Wisdom/music/From Parts Unknown'
-file_cnt = len([name for name in os.listdir(music_dir) if os.path.isfile(os.path.join(music_dir, name))])
-print "folder", music_dir, "contains", file_cnt, "files."
+
+print "folder", music_dir, "contains", count_files(music_dir), "files."
