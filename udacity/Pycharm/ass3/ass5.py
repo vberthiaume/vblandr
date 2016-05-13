@@ -53,7 +53,6 @@ print('Data size %d' % len(words))
 # Build the dictionary and replace rare words with UNK token.
 vocabulary_size = 50000
 
-
 def build_dataset(words):
     count = [['UNK', -1]]
     count.extend(collections.Counter(words).most_common(vocabulary_size - 1))
@@ -73,7 +72,6 @@ def build_dataset(words):
     reverse_dictionary = dict(zip(dictionary.values(), dictionary.keys()))
     return data, count, dictionary, reverse_dictionary
 
-
 data, count, dictionary, reverse_dictionary = build_dataset(words)
 print('Most common words (+UNK)', count[:5])
 print('Sample data', data[:10])
@@ -83,7 +81,6 @@ del words  # Hint to reduce memory.
 
 # Function to generate a training batch for the skip-gram model.
 data_index = 0
-
 
 def generate_batch(batch_size, num_skips, skip_window):
     global data_index
@@ -108,7 +105,6 @@ def generate_batch(batch_size, num_skips, skip_window):
         buffer.append(data[data_index])
         data_index = (data_index + 1) % len(data)
     return batch, labels
-
 
 print('data:', [reverse_dictionary[di] for di in data[:8]])
 
@@ -143,20 +139,15 @@ with graph.as_default(), tf.device('/cpu:0'):
     valid_dataset = tf.constant(valid_examples, dtype=tf.int32)
 
     # Variables.
-    embeddings = tf.Variable(
-        tf.random_uniform([vocabulary_size, embedding_size], -1.0, 1.0))
-    softmax_weights = tf.Variable(
-        tf.truncated_normal([vocabulary_size, embedding_size],
-                            stddev=1.0 / math.sqrt(embedding_size)))
+    embeddings = tf.Variable(tf.random_uniform([vocabulary_size, embedding_size], -1.0, 1.0))
+    softmax_weights = tf.Variable(tf.truncated_normal([vocabulary_size, embedding_size], stddev=1.0 / math.sqrt(embedding_size)))
     softmax_biases = tf.Variable(tf.zeros([vocabulary_size]))
 
     # Model.
     # Look up embeddings for inputs.
     embed = tf.nn.embedding_lookup(embeddings, train_dataset)
     # Compute the softmax loss, using a sample of the negative labels each time.
-    loss = tf.reduce_mean(
-        tf.nn.sampled_softmax_loss(softmax_weights, softmax_biases, embed,
-                                   train_labels, num_sampled, vocabulary_size))
+    loss = tf.reduce_mean(tf.nn.sampled_softmax_loss(softmax_weights, softmax_biases, embed, train_labels, num_sampled, vocabulary_size))
 
     # Optimizer.
     optimizer = tf.train.AdagradOptimizer(1.0).minimize(loss)
@@ -165,8 +156,7 @@ with graph.as_default(), tf.device('/cpu:0'):
     # We use the cosine distance:
     norm = tf.sqrt(tf.reduce_sum(tf.square(embeddings), 1, keep_dims=True))
     normalized_embeddings = embeddings / norm
-    valid_embeddings = tf.nn.embedding_lookup(
-        normalized_embeddings, valid_dataset)
+    valid_embeddings = tf.nn.embedding_lookup(normalized_embeddings, valid_dataset)
     similarity = tf.matmul(valid_embeddings, tf.transpose(normalized_embeddings))
 
 # ======================================================================================================
