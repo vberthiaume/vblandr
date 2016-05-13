@@ -34,9 +34,7 @@ def maybe_download(filename, expected_bytes):
             'Failed to verify ' + filename + '. Can you get to it with a browser?')
     return filename
 
-
-filename = maybe_download('text8.zip', 31344016)
-
+filename = maybe_download('text8.zip', 31344016)    # text8.zip is 30mb!
 
 # ======================================================================================================
 
@@ -46,7 +44,6 @@ def read_data(filename):
     for name in f.namelist():
         return tf.compat.as_str(f.read(name)).split()
     f.close()
-
 
 words = read_data(filename)
 print('Data size %d' % len(words))
