@@ -17,7 +17,7 @@ from six.moves import range
 from six.moves.urllib.request import urlretrieve
 from sklearn.manifold import TSNE
 
-
+#======================================================================================================
 
 # Download the data from the source website if necessary.
 url = 'http://mattmahoney.net/dc/'
@@ -37,7 +37,7 @@ def maybe_download(filename, expected_bytes):
 
 filename = maybe_download('text8.zip', 31344016)
 
-
+#======================================================================================================
 
 # Read the data into a string.
 def read_data(filename):
@@ -49,9 +49,7 @@ def read_data(filename):
 words = read_data(filename)
 print('Data size %d' % len(words))
 
-
-
-
+#======================================================================================================
 
 # Build the dictionary and replace rare words with UNK token.
 vocabulary_size = 50000
@@ -80,10 +78,7 @@ print('Most common words (+UNK)', count[:5])
 print('Sample data', data[:10])
 del words  # Hint to reduce memory.
 
-
-
-
-
+#======================================================================================================
 
 # Function to generate a training batch for the skip-gram model.
 data_index = 0
@@ -122,7 +117,7 @@ for num_skips, skip_window in [(2, 1), (4, 2)]:
     print('    labels:', [reverse_dictionary[li] for li in labels.reshape(8)])
 
 
-
+#======================================================================================================
 
 # Train a skip-gram model.
 batch_size = 128
@@ -173,91 +168,64 @@ with graph.as_default(), tf.device('/cpu:0'):
     normalized_embeddings, valid_dataset)
   similarity = tf.matmul(valid_embeddings, tf.transpose(normalized_embeddings))
 
+# ======================================================================================================
+
+num_steps = 100001
+
+with tf.Session(graph=graph) as session:
+  tf.initialize_all_variables().run()
+  print('Initialized')
+  average_loss = 0
+  for step in range(num_steps):
+      batch_data, batch_labels = generate_batch(
+          batch_size, num_skips, skip_window)
+      feed_dict = {train_dataset: batch_data, train_labels: batch_labels}
+      _, l = session.run([optimizer, loss], feed_dict=feed_dict)
+      average_loss += l
+      if step % 2000 == 0:
+          if step > 0:
+              average_loss = average_loss / 2000
+          # The average loss is an estimate of the loss over the last 2000 batches.
+          print('Average loss at step %d: %f' % (step, average_loss))
+          average_loss = 0
+      # note that this is expensive (~20% slowdown if computed every 500 steps)
+      if step % 10000 == 0:
+          sim = similarity.eval()
+          for i in xrange(valid_size):
+              valid_word = reverse_dictionary[valid_examples[i]]
+              top_k = 8  # number of nearest neighbors
+              nearest = (-sim[i, :]).argsort()[1:top_k + 1]
+              log = 'Nearest to %s:' % valid_word
+              for k in xrange(top_k):
+                  close_word = reverse_dictionary[nearest[k]]
+                  log = '%s %s,' % (log, close_word)
+              print(log)
+  final_embeddings = normalized_embeddings.eval()
+
+# ======================================================================================================
+
+num_points = 400
+
+tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
+two_d_embeddings = tsne.fit_transform(final_embeddings[1:num_points + 1, :])
+
+# ======================================================================================================
+
+def plot(embeddings, labels):
+  assert embeddings.shape[0] >= len(labels), 'More labels than embeddings'
+  pylab.figure(figsize=(15, 15))  # in inches
+  for i, label in enumerate(labels):
+      x, y = embeddings[i, :]
+      pylab.scatter(x, y)
+      pylab.annotate(label, xy=(x, y), xytext=(5, 2), textcoords='offset points',
+                     ha='right', va='bottom')
+  pylab.show()
 
 
+words = [reverse_dictionary[i] for i in range(1, num_points + 1)]
+plot(two_d_embeddings, words)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  num_steps = 100001
-
-  with tf.Session(graph=graph) as session:
-      tf.initialize_all_variables().run()
-      print('Initialized')
-      average_loss = 0
-      for step in range(num_steps):
-          batch_data, batch_labels = generate_batch(
-              batch_size, num_skips, skip_window)
-          feed_dict = {train_dataset: batch_data, train_labels: batch_labels}
-          _, l = session.run([optimizer, loss], feed_dict=feed_dict)
-          average_loss += l
-          if step % 2000 == 0:
-              if step > 0:
-                  average_loss = average_loss / 2000
-              # The average loss is an estimate of the loss over the last 2000 batches.
-              print('Average loss at step %d: %f' % (step, average_loss))
-              average_loss = 0
-          # note that this is expensive (~20% slowdown if computed every 500 steps)
-          if step % 10000 == 0:
-              sim = similarity.eval()
-              for i in xrange(valid_size):
-                  valid_word = reverse_dictionary[valid_examples[i]]
-                  top_k = 8  # number of nearest neighbors
-                  nearest = (-sim[i, :]).argsort()[1:top_k + 1]
-                  log = 'Nearest to %s:' % valid_word
-                  for k in xrange(top_k):
-                      close_word = reverse_dictionary[nearest[k]]
-                      log = '%s %s,' % (log, close_word)
-                  print(log)
-      final_embeddings = normalized_embeddings.eval()
-
-
-
-
-
-
-
-      num_points = 400
-
-      tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
-      two_d_embeddings = tsne.fit_transform(final_embeddings[1:num_points + 1, :])
-
-
-
-
-
-
-
-
-
-      def plot(embeddings, labels):
-          assert embeddings.shape[0] >= len(labels), 'More labels than embeddings'
-          pylab.figure(figsize=(15, 15))  # in inches
-          for i, label in enumerate(labels):
-              x, y = embeddings[i, :]
-              pylab.scatter(x, y)
-              pylab.annotate(label, xy=(x, y), xytext=(5, 2), textcoords='offset points',
-                             ha='right', va='bottom')
-          pylab.show()
-
-
-      words = [reverse_dictionary[i] for i in range(1, num_points + 1)]
-      plot(two_d_embeddings, words)
-
-
-
-
+#======================================================================================================
 
 # Problem
 #
