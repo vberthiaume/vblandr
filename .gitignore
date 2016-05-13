@@ -6,6 +6,8 @@
 .directory
 notMNIST_large/
 notMNIST_small/
+notMNIST_large
+notMNIST_small
 *.pickle
 *.zip
 #C++ GITIGNORE

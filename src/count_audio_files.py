@@ -16,9 +16,6 @@ music_dir = '/media/kxstudio/Wisdom/music/Audiobooks'
 
 
 
-
-
-
 def printAndCountFolders(filename):
 
   	data_folders = [os.path.join(filename, d) for d in sorted(os.listdir(filename)) if os.path.isdir(os.path.join(filename, d))]
