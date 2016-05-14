@@ -19,12 +19,11 @@ import os, os.path
 # 	-files that start with .
 # 	-files that end in something else than .mp3, wav, flac, wmv ???
 
-def count_files( dir ):
-	return len([name for name in os.listdir(dir) if os.path.isfile(os.path.join(dir, name))])
-	
 
 def count_files_rec(dir):
-	return sum([len(files) for r, d, files in os.walk(dir)])
+	# return sum([len(files) for path, dirs, files in os.walk(dir)])
+	lstNumberOfFilesContainedInEachFolder = [len(files) for path, dirs, files in os.walk(dir)]
+	return sum(lstNumberOfFilesContainedInEachFolder)
 
 music_dir = '/media/kxstudio/Wisdom/music/Audiobooks'
 
