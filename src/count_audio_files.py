@@ -23,6 +23,8 @@ import os, os.path
 def count_files_rec(dir):
 	# return sum([len(files) for path, dirs, files in os.walk(dir)])
 	lstNumberOfFilesContainedInEachFolder = [len(files) for path, dirs, files in os.walk(dir)]
+	# oddly, this doesn't work. why? Isn't path, dirs and files returned from os.walk()?
+	# print dirs
 	return sum(lstNumberOfFilesContainedInEachFolder)
 
 music_dir = '/media/kxstudio/Wisdom/music/Audiobooks'
