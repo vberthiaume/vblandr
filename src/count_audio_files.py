@@ -21,15 +21,21 @@ import os, os.path
 
 
 def count_files_rec(dir):
-	# return sum([len(files) for path, dirs, files in os.walk(dir)])
-	lstNumberOfFilesContainedInEachFolder = [len(files) for path, dirs, files in os.walk(dir)]
-	# oddly, this doesn't work. why? Isn't path, dirs and files returned from os.walk()?
-	# print dirs
-	return sum(lstNumberOfFilesContainedInEachFolder)
+	#lstNumberOfFilesContainedInEachFolder = [len(files) for path, dirs, files in os.walk(dir)]
+	#return sum(lstNumberOfFilesContainedInEachFolder)
+
+	#files is a 2 layer list with cells containing the file names in each dirs folder
+	for path, dirs, files in os.walk(dir):
+		print path
+		print dirs
+		print files
+		print "=================="
+
+	
 
 music_dir = '/media/kxstudio/Wisdom/music/Audiobooks'
-
-print "folder", music_dir, "contains", count_files_rec(music_dir), "files."
+count_files_rec(music_dir)
+#print "folder", music_dir, "contains", count_files_rec(music_dir), "files."
 
 
 
