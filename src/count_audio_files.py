@@ -25,7 +25,7 @@ def find_audio_files(dir):
 music_dir = '/media/kxstudio/Wisdom/music/Audiobooks'
 allAudioFiles = find_audio_files(music_dir)
 print "total audio files = ", len(allAudioFiles)
-
+print allAudioFiles[1]
 (fs, x) = UF.wavread(allAudioFiles[1])
 print fs
 #print "folder", music_dir, "contains", count_files_rec(music_dir), "files."
