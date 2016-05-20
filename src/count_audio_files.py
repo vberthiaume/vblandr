@@ -28,22 +28,21 @@ def count_files_rec(dir):
 	#	* set path to current path
 	#	* set dirs to a list of directories that the current path contains
 	#	* set files to a list of files that the current path contains
-	totalNumberOfAudioFiles = 0
+
+	allAudioFiles = []
 	for path, dirs, files in os.walk(dir):
 		# print path
 		# print dirs
 		# print files
 		for file in files:
 			if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
-				# print file
-				totalNumberOfAudioFiles += 1
-		# print "=================="
-	return totalNumberOfAudioFiles
+				allAudioFiles.append(path+file)
+	return allAudioFiles
 
 	
 
 music_dir = '/media/kxstudio/Wisdom/music/Audiobooks'
-print "total audio files = ", count_files_rec(music_dir)
+print "total audio files = ", len(count_files_rec(music_dir))
 #print "folder", music_dir, "contains", count_files_rec(music_dir), "files."
 
 
