@@ -1,5 +1,11 @@
 import os, os.path
 
+#import stuff from sms-tools
+import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
+import utilFunctions as UF
+
+
 
 def find_audio_files(dir):
 	"return the path of all audio files (wav and mp3) in dir and its subfolders"
@@ -17,7 +23,11 @@ def find_audio_files(dir):
 	
 
 music_dir = '/media/kxstudio/Wisdom/music/Audiobooks'
-print "total audio files = ", len(find_audio_files(music_dir))
+allAudioFiles = find_audio_files(music_dir)
+print "total audio files = ", len(allAudioFiles)
+
+(fs, x) = UF.wavread(allAudioFiles[1])
+print fs
 #print "folder", music_dir, "contains", count_files_rec(music_dir), "files."
 
 
