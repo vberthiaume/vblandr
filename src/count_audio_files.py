@@ -17,7 +17,7 @@ def find_audio_files(dir):
 	for path, dirs, files in os.walk(dir):
 		for file in files:
 			if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
-				allAudioFiles.append(path+file)
+				allAudioFiles.append(path+"/"+file)
 	return allAudioFiles
 
 	
