@@ -120,6 +120,7 @@ target/
 
 # User-specific stuff:
 udacity/Pycharm/ass3/.idea/workspace.xml
+Pycharm/.idea/workspace.xml
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/dictionaries
