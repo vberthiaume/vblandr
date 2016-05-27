@@ -11,24 +11,24 @@ def find_audio_genres_and_files(dir):
     #   * set path to current path
     #   * set dirs to a list of directories that the current path contains
     #   * set files to a list of files that the current path contains
-    # allAudioGenres = []
-    allAudioFiles = [][]
+    allAudioGenres = []
+    allAudioFiles = []
     in_top_dir = True
     for path, dirs, files in os.walk(dir):
         #top sub folders will be used as labels
         if in_top_dir:
             allAudioGenres = list(dirs)
-            
-            # is this going to work??
-            allAudioFiles = list(allAudioGenres)
-            in_top_dir = False
+
+            # # is this going to work??
+            # allAudioFiles = list(allAudioGenres)
+            # in_top_dir = False
 
         #find label id
 
         #insert file in correct label id
         for file in files:
             if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
-                allAudioFiles[cur_label_id].append(path+"/"+file)
+                allAudioFiles.append(path+"/"+file)
 
     return (allAudioGenres, allAudioFiles)
 
@@ -37,12 +37,16 @@ def find_audio_genres_and_files(dir):
 # I need to build a training set. First thing is to match input patterns with target patterns (labels).
 # let's say the first folder is the label, and all audio files in sub dirs are
     
-music_dir = '/media/kxstudio/Wisdom/music/Audiobooks'
+music_dir = '/media/kxstudio/LUSSIER/music/audiobooks'
 allAudioGenres, allAudioFiles = find_audio_genres_and_files(music_dir)
+
 print "total audio files = ", len(allAudioFiles)
 print allAudioFiles[1]
-(fs, x) = UF.wavread(allAudioFiles[1])
-print fs
+
+
+# (fs, x) = UF.wavread(allAudioFiles[1])
+# print fs
+
 #print "folder", music_dir, "contains", count_files_rec(music_dir), "files."
 
 
