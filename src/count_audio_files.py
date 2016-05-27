@@ -12,15 +12,24 @@ def find_audio_genres_and_files(dir):
     #   * set dirs to a list of directories that the current path contains
     #   * set files to a list of files that the current path contains
     # allAudioGenres = []
-    allAudioFiles = []
+    allAudioFiles = [][]
     in_top_dir = True
     for path, dirs, files in os.walk(dir):
+        #top sub folders will be used as labels
         if in_top_dir:
             allAudioGenres = list(dirs)
+            
+            # is this going to work??
+            allAudioFiles = list(allAudioGenres)
             in_top_dir = False
+
+        #find label id
+
+        #insert file in correct label id
         for file in files:
             if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
-                allAudioFiles.append(path+"/"+file)
+                allAudioFiles[cur_label_id].append(path+"/"+file)
+
     return (allAudioGenres, allAudioFiles)
 
 # for now using .wavs, but most of my collection is in mp3, so need to figure how to use mp3s.
