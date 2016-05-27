@@ -11,7 +11,7 @@ def find_audio_genres_and_files(dir):
     #   * set path to current path
     #   * set dirs to a list of directories that the current path contains
     #   * set files to a list of files that the current path contains
-    allAudioGenres = []
+    # allAudioGenres = []
     allAudioFiles = []
     in_top_dir = True
     for path, dirs, files in os.walk(dir):
@@ -27,7 +27,7 @@ def find_audio_genres_and_files(dir):
 
 # I need to build a training set. First thing is to match input patterns with target patterns (labels).
 # let's say the first folder is the label, and all audio files in sub dirs are
-    a
+    
 music_dir = '/media/kxstudio/Wisdom/music/Audiobooks'
 allAudioGenres, allAudioFiles = find_audio_genres_and_files(music_dir)
 print "total audio files = ", len(allAudioFiles)
