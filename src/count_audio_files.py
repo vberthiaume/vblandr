@@ -11,17 +11,20 @@ def find_audio_genres_and_files(dir):
     #   * set path to current path
     #   * set dirs to a list of directories that the current path contains
     #   * set files to a list of files that the current path contains
-    allAudioGenres = []
-    allAudioFiles = []
+
+    #could try to use a big array and keep count of indexes in each sub array
+    allAudioFiles = [6][30000]
     in_top_dir = True
     for path, dirs, files in os.walk(dir):
         #top sub folders will be used as labels
         if in_top_dir:
+            #this will need to be a numpy array or whatever tensorflow uses
             allAudioGenres = list(dirs)
+            print len(allAudioGenres)
+            # allAudioFiles = [6][100]
+            in_top_dir = False
 
-            # # is this going to work??
-            # allAudioFiles = list(allAudioGenres)
-            # in_top_dir = False
+           
 
         #find label id
 
@@ -40,8 +43,8 @@ def find_audio_genres_and_files(dir):
 music_dir = '/media/kxstudio/LUSSIER/music/audiobooks'
 allAudioGenres, allAudioFiles = find_audio_genres_and_files(music_dir)
 
-print "total audio files = ", len(allAudioFiles)
-print allAudioFiles[1]
+# print "total audio files = ", len(allAudioFiles)
+# print allAudioFiles[1]
 
 
 # (fs, x) = UF.wavread(allAudioFiles[1])
