@@ -20,7 +20,6 @@ def find_audio_genres_and_files(dir):
         if in_top_dir:
             #this will need to be a numpy array or whatever tensorflow uses
             allAudioGenres = list(dirs)
-            print len(allAudioGenres)
             # allAudioFiles = [6][100]
             in_top_dir = False
 
