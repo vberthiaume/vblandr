@@ -18,7 +18,6 @@ import utilFunctions as UF
 
 
 music_dir = '/media/kxstudio/LUSSIER/music/'
-# path, dirs, files = os.walk(music_dir)
 dirs = os.listdir(music_dir)
 allAudioGenres = []
 for cur_dir in dirs:
@@ -34,20 +33,20 @@ asdfa
 np.random.seed(133)
 
 def maybe_extract(filename, force=False):
-  	root = os.path.splitext(os.path.splitext(filename)[0])[0]  # remove .tar.gz
-  	if os.path.isdir(root) and not force:
-		print('%s already present - Skipping extraction of %s.' % (root, filename))
-  	else:
-		print('Extracting data for %s. This may take a while. Please wait.' % root)
-		tar = tarfile.open(filename)
-		sys.stdout.flush()
-		tar.extractall()
-		tar.close()
-  	data_folders = [os.path.join(root, d) for d in sorted(os.listdir(root)) if os.path.isdir(os.path.join(root, d))]
-  	if len(data_folders) != s_iNum_classes:
-		raise Exception('Expected %d folders, one per class. Found %d instead.' % (s_iNum_classes, len(data_folders)))
-  	print(data_folders)
-  	return data_folders
+    root = os.path.splitext(os.path.splitext(filename)[0])[0]  # remove .tar.gz
+    if os.path.isdir(root) and not force:
+        print('%s already present - Skipping extraction of %s.' % (root, filename))
+    else:
+        print('Extracting data for %s. This may take a while. Please wait.' % root)
+        tar = tarfile.open(filename)
+        sys.stdout.flush()
+        tar.extractall()
+        tar.close()
+    data_folders = [os.path.join(root, d) for d in sorted(os.listdir(root)) if os.path.isdir(os.path.join(root, d))]
+    if len(data_folders) != s_iNum_classes:
+        raise Exception('Expected %d folders, one per class. Found %d instead.' % (s_iNum_classes, len(data_folders)))
+    print(data_folders)
+    return data_folders
 
 print("s_strListExtractedTrainFolderNames: ")
 s_strListExtractedTrainFolderNames = maybe_extract(strRawCompressedTrainSetFilename)
@@ -72,53 +71,53 @@ def load_letter(folder, min_num_images):
   #for each image in the current folder (A, B, etc)
   print(folder)
   for image in os.listdir(folder):
-	#get the full image path
-	image_file = os.path.join(folder, image)
-	try:
-	  #read image as a bunch of floats, and normalize those floats by using pixel_depth 
-	  image_data = (ndimage.imread(image_file).astype(float) - s_fPixel_depth / 2) / s_fPixel_depth
-	  #ensure image shape is standard
-	  if image_data.shape != (s_iImage_size, s_iImage_size):
-		raise Exception('Unexpected image shape: %s' % str(image_data.shape))
-	  #and put it in the dataset
-	  dataset[image_index, :, :] = image_data
-	  image_index += 1
-	except IOError as e:
-	  print('Could not read:', image_file, ':', e, '- it\'s ok, skipping.')
-	
+    #get the full image path
+    image_file = os.path.join(folder, image)
+    try:
+      #read image as a bunch of floats, and normalize those floats by using pixel_depth 
+      image_data = (ndimage.imread(image_file).astype(float) - s_fPixel_depth / 2) / s_fPixel_depth
+      #ensure image shape is standard
+      if image_data.shape != (s_iImage_size, s_iImage_size):
+        raise Exception('Unexpected image shape: %s' % str(image_data.shape))
+      #and put it in the dataset
+      dataset[image_index, :, :] = image_data
+      image_index += 1
+    except IOError as e:
+      print('Could not read:', image_file, ':', e, '- it\'s ok, skipping.')
+    
   num_images = image_index
   dataset = dataset[0:num_images, :, :]
   if num_images < min_num_images:
-	raise Exception('Many fewer images than expected: %d < %d' %
-					(num_images, min_num_images))
-	
+    raise Exception('Many fewer images than expected: %d < %d' %
+                    (num_images, min_num_images))
+    
   print('Full dataset tensor:', dataset.shape)
   print('Mean:', np.mean(dataset))
   print('Standard deviation:', np.std(dataset))
   return dataset
-		
+        
 def maybe_pickle(p_strDataFolderNames, p_iMin_num_images_per_class, p_bForce=False):
   dataset_names = []
   #data_folders are either the train or test set. folders within those are A, B, etc
   for strCurFolderName in p_strDataFolderNames:
-	#we will serialize those subfolders (A, B, etc), that's what pickling is
-	strCurSetFilename = strCurFolderName + '.pickle'
-	#add the name of the current pickled subfolder to the list
-	dataset_names.append(strCurSetFilename)
-	#if the pickled folder already exists, skip
-	if os.path.exists(strCurSetFilename) and not p_bForce:
-	  # You may override by setting force=True.
-	  print('%s already present - Skipping pickling.' % strCurSetFilename)
-	else:
-	  #call the load_letter function def above 
-	  print('Pickling %s.' % strCurSetFilename)
-	  dataset = load_letter(strCurFolderName, p_iMin_num_images_per_class)
-	  try:
-		#and try to pickle it
-		with open(strCurSetFilename, 'wb') as f:
-		  pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
-	  except Exception as e:
-		print('Unable to save data to', set_filename, ':', e)
+    #we will serialize those subfolders (A, B, etc), that's what pickling is
+    strCurSetFilename = strCurFolderName + '.pickle'
+    #add the name of the current pickled subfolder to the list
+    dataset_names.append(strCurSetFilename)
+    #if the pickled folder already exists, skip
+    if os.path.exists(strCurSetFilename) and not p_bForce:
+      # You may override by setting force=True.
+      print('%s already present - Skipping pickling.' % strCurSetFilename)
+    else:
+      #call the load_letter function def above 
+      print('Pickling %s.' % strCurSetFilename)
+      dataset = load_letter(strCurFolderName, p_iMin_num_images_per_class)
+      try:
+        #and try to pickle it
+        with open(strCurSetFilename, 'wb') as f:
+          pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
+      except Exception as e:
+        print('Unable to save data to', set_filename, ':', e)
   
   return dataset_names
 
@@ -136,10 +135,10 @@ print("\ns_strListPickledTestFilenames: ", s_strListPickledTestFilenames)
 #  return labels: an empty vector that is [p_iNb_rows]
 def make_arrays(p_iNb_rows, p_iImg_size):
   if p_iNb_rows:
-	dataset = np.ndarray((p_iNb_rows, p_iImg_size, p_iImg_size), dtype=np.float32)
-	labels = np.ndarray(p_iNb_rows, dtype=np.int32)
+    dataset = np.ndarray((p_iNb_rows, p_iImg_size, p_iImg_size), dtype=np.float32)
+    labels = np.ndarray(p_iNb_rows, dtype=np.int32)
   else:
-	dataset, labels = None, None
+    dataset, labels = None, None
   return dataset, labels
 
 #p_strListPickle_files is an array containing the filenames of the pickled data
@@ -148,7 +147,7 @@ def merge_datasets(p_strListPickledFilenames, p_iTrainSize, p_iValidSize=0):
   #make empty arrays for validation and training sets and labels
   valid_dataset, valid_labels = make_arrays(p_iValidSize, s_iImage_size)
   train_dataset, train_labels = make_arrays(p_iTrainSize, s_iImage_size)
-	
+    
   #number of items per class. // is an int division in python3, not sure in python2
   iNbrOfValidItemsPerClass = p_iValidSize // iNum_classes
   iNbrOfTrainItemPerClass = p_iTrainSize // iNum_classes
@@ -159,40 +158,40 @@ def merge_datasets(p_strListPickledFilenames, p_iTrainSize, p_iValidSize=0):
   iEndListId = iNbrOfValidItemsPerClass+iNbrOfTrainItemPerClass
   
   #for each file in p_strListPickledFilenames
-  for iPickleFileId, strPickleFilename in enumerate(p_strListPickledFilenames):	   
-	try:
-	  #open the file
-	  with open(strPickleFilename, 'rb') as f:
-		print (strPickleFilename)
-		#unpicke 3d array for current file
-		threeDCurLetterSet = pickle.load(f)
-		# let's shuffle the items to have random validation and training set. 
-		# np.random.shuffle suffles only first dimension
-		np.random.shuffle(threeDCurLetterSet)
-		
-		#if we asked for a validation set
-		if valid_dataset is not None:
-		  #the first iNbrOfValidItemsPerClass items in letter_set are used for the validation set
-		  threeDValidItems = threeDCurLetterSet[:iNbrOfValidItemsPerClass, :, :]
-		  valid_dataset[iStartValidId:iEndValidId, :, :] = threeDValidItems
-		  #label all images with the current file id 
-		  valid_labels[iStartValidId:iEndValidId] = iPickleFileId
-		  #update ids for the train set
-		  iStartValidId += iNbrOfValidItemsPerClass
-		  iEndValidId   += iNbrOfValidItemsPerClass
-					
-		#the rest of the items are used for the training set
-		threeDTrainItems = threeDCurLetterSet[iNbrOfValidItemsPerClass:iEndListId, :, :]
-		train_dataset[iStartTrainId:iEndTrainId, :, :] = threeDTrainItems
-		train_labels[iStartTrainId:iEndTrainId] = iPickleFileId
-		iStartTrainId += iNbrOfTrainItemPerClass
-		iEndTrainId += iNbrOfTrainItemPerClass
-	except Exception as e:
-	  print('Unable to process data from', strPickleFilename, ':', e)
-	  raise	
+  for iPickleFileId, strPickleFilename in enumerate(p_strListPickledFilenames):    
+    try:
+      #open the file
+      with open(strPickleFilename, 'rb') as f:
+        print (strPickleFilename)
+        #unpicke 3d array for current file
+        threeDCurLetterSet = pickle.load(f)
+        # let's shuffle the items to have random validation and training set. 
+        # np.random.shuffle suffles only first dimension
+        np.random.shuffle(threeDCurLetterSet)
+        
+        #if we asked for a validation set
+        if valid_dataset is not None:
+          #the first iNbrOfValidItemsPerClass items in letter_set are used for the validation set
+          threeDValidItems = threeDCurLetterSet[:iNbrOfValidItemsPerClass, :, :]
+          valid_dataset[iStartValidId:iEndValidId, :, :] = threeDValidItems
+          #label all images with the current file id 
+          valid_labels[iStartValidId:iEndValidId] = iPickleFileId
+          #update ids for the train set
+          iStartValidId += iNbrOfValidItemsPerClass
+          iEndValidId   += iNbrOfValidItemsPerClass
+                    
+        #the rest of the items are used for the training set
+        threeDTrainItems = threeDCurLetterSet[iNbrOfValidItemsPerClass:iEndListId, :, :]
+        train_dataset[iStartTrainId:iEndTrainId, :, :] = threeDTrainItems
+        train_labels[iStartTrainId:iEndTrainId] = iPickleFileId
+        iStartTrainId += iNbrOfTrainItemPerClass
+        iEndTrainId += iNbrOfTrainItemPerClass
+    except Exception as e:
+      print('Unable to process data from', strPickleFilename, ':', e)
+      raise 
   return valid_dataset, valid_labels, train_dataset, train_labels
 
-#original values			
+#original values            
 # s_iTrainSize = 200000
 # s_iValid_size = 10000
 # s_iTestSize = 10000
@@ -202,21 +201,21 @@ s_iTestSize = 10000
 
 #call merge_datasets on data_sets and labels
 s_threeDValidDataset, s_vValidLabels, s_threeDTrainDataset, s_vTrainLabels = merge_datasets(s_strListPickledTrainFilenames, s_iTrainSize, s_iValid_size)
-_,					_,			  s_threeDTestDataset,  s_vTestLabels  = merge_datasets(s_strListPickledTestFilenames, s_iTestSize)
+_,                  _,            s_threeDTestDataset,  s_vTestLabels  = merge_datasets(s_strListPickledTestFilenames, s_iTestSize)
 
 #print shapes for data sets and their respective labels. data sets are 3d arrays with [image_id,x,y] and labels
 #are [image_ids]
 print('Training:',   s_threeDTrainDataset.shape, s_vTrainLabels.shape)
 print('Validation:', s_threeDValidDataset.shape, s_vValidLabels.shape)
-print('Testing:',	s_threeDTestDataset.shape,  s_vTestLabels.shape)
+print('Testing:',   s_threeDTestDataset.shape,  s_vTestLabels.shape)
 
 # Next, we'll randomize the data. It's important to have the labels well shuffled for the training and test distributions to match.
 def randomize(p_3dDataset, p_vLabels):
-	#with int x as parameter, np.random.permutation returns a random permutation of np.arange(x)
-	vPermutation = np.random.permutation(p_vLabels.shape[0])
-	threeDShuffledDataset = p_3dDataset[vPermutation,:,:]
-	threeDShuffledLabels  = p_vLabels  [vPermutation]
-	return threeDShuffledDataset, threeDShuffledLabels
+    #with int x as parameter, np.random.permutation returns a random permutation of np.arange(x)
+    vPermutation = np.random.permutation(p_vLabels.shape[0])
+    threeDShuffledDataset = p_3dDataset[vPermutation,:,:]
+    threeDShuffledLabels  = p_vLabels  [vPermutation]
+    return threeDShuffledDataset, threeDShuffledLabels
 
 s_threeDTrainDataset, s_vTrainLabels = randomize(s_threeDTrainDataset, s_vTrainLabels)
 s_threeDTestDataset,  s_vTestLabels  = randomize(s_threeDTestDataset,  s_vTestLabels)
@@ -232,13 +231,13 @@ pickle_file = 'notMNIST.pickle'
 try:
   f = open(pickle_file, 'wb')
   save = {
-	'train_dataset': s_threeDTrainDataset,
-	'train_labels': s_vTrainLabels,
-	'valid_dataset': s_threeDValidDataset,
-	'valid_labels': s_vValidLabels,
-	'test_dataset': s_threeDTestDataset,
-	'test_labels': s_vTestLabels,
-	}
+    'train_dataset': s_threeDTrainDataset,
+    'train_labels': s_vTrainLabels,
+    'valid_dataset': s_threeDValidDataset,
+    'valid_labels': s_vValidLabels,
+    'test_dataset': s_threeDTestDataset,
+    'test_labels': s_vTestLabels,
+    }
   pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
   f.close()
 except Exception as e:
@@ -262,7 +261,7 @@ from sklearn import datasets
 from sklearn.calibration import calibration_curve
 
 train_samples = 100  # number of samples used for training
-test_samples = 50	#number of samples for test
+test_samples = 50   #number of samples for test
 
 #training patterns. x is input pattern, y is target pattern or label
 X_train = s_threeDTrainDataset[:train_samples]
@@ -289,7 +288,7 @@ lr.fit(X_train, y_train)
 
 #assess how confident (how probable it is correct) the model is at predicting test classifications
 prob_pos = lr.predict_proba(X_test)[:, 1]
-	
+    
 #fraction_of_positives, mean_predicted_value = calibration_curve(y_test, prob_pos, n_bins=10)
 
 #ax1.plot(mean_predicted_value, fraction_of_positives, "s-", label="%s" % (name, ))
