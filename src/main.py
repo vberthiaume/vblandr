@@ -28,7 +28,8 @@ for cur_dir in dirs:
 s_iNum_genres = len(allAudioGenres)
 
            
-
+np.random.seed(133)
+FFMPEG_BIN = "ffmpeg"
 
 #TESTING THE STUFF
 
@@ -41,27 +42,23 @@ for path, dirs, files in os.walk(allAudioGenres[0]):
             all_song_paths.append(path+"/"+file)
 
 #for each song in the current genre
-for cur_song_file in os.listdir(all_song_paths):
-    try:
-        #read image as a bunch of floats, and normalize those floats by using pixel_depth
-        #use ffmpeg to convert mp3 data to pcm
-        command = [ FFMPEG_BIN,
+for cur_song_file in all_song_paths:
+    #read image as a bunch of floats, and normalize those floats by using pixel_depth
+    #use ffmpeg to convert mp3 data to pcm
+    command = [ FFMPEG_BIN,
         '-i', cur_song_file,
         '-f', 's16le',
         '-acodec', 'pcm_s16le',
         '-ar', '22050', # output will have 22050 Hz
         '-ac', '1',     # set to '1' for mono
         '-']
-        pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=10**8)
+    pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=10**8)
 
 
 
-        mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
 
 
-
-np.random.seed(133)
-FFMPEG_BIN = "ffmpeg"
 
 # pickling data for each genre, to make it more manageable
 def load_genre(folder, min_num_songs):
