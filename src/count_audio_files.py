@@ -5,6 +5,40 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
 import utilFunctions as UF
 
+
+
+
+
+#STUFF FROM UDACITY ASS1
+folder = "folder path" 
+song_count = os.listdir(folder)
+#gindc
+#   * converts the first minute of mp3s to mono, 22k wavs, using ffmpeg, that's 1323000 data points
+#   * does a FFT, with 10 blocks of 6secs = 1000 data points
+#   * does a FFT of the whole song (not first minute only?), and averages that in 1000 data points
+#   * does a FFT of the energy levels of whole song (square of the amplitude), which is supposed to represent beats
+#   * normalizes those 3000 points to [0,1] using min max scaler
+#   * does a PCA to reduce those 3000 points to 500 points
+#   * select best 100 of 500 points using K best algorithm. Those are the data used as input pattern.
+# for now, I will use the PCM of the first 1000 samples...
+sample_count = 1000
+#in udacity, these datasets are dumped as pickled files, which is not a bad idea
+dataset_for_one_genre = np.ndarray(shape=(len(song_count), sample_count), dtype=np.float32)
+
+#then they are unpacked in a giant array containing all data. in fact, i should probably start from their code. 
+# I will copy ass1.py and start again from there
+
+
+
+
+
+
+
+
+
+
+
+
 def find_audio_genres_and_files(dir):
     "return the path of all audio files (wav and mp3) in dir and its subfolders"
     #os.walk will go through each folder in dir (including dir), and for each folder will
