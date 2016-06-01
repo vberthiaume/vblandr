@@ -29,32 +29,46 @@ s_iNum_genres = len(allAudioGenres)
 
            
 np.random.seed(133)
-FFMPEG_BIN = "ffmpeg"
 
 #TESTING THE STUFF
 
 
-all_song_paths = []
-for path, dirs, files in os.walk(allAudioGenres[0]):
-    #insert file in correct label id
-    for file in files:
-        if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
-            all_song_paths.append(path+"/"+file)
+# all_song_paths = []
+# for path, dirs, files in os.walk(allAudioGenres[0]):
+#     #insert file in correct label id
+#     for file in files:
+#         if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
+#             all_song_paths.append(path+"/"+file)
 
 #for each song in the current genre
-for cur_song_file in all_song_paths:
-    #read image as a bunch of floats, and normalize those floats by using pixel_depth
+# for cur_song_file in all_song_paths:
     #use ffmpeg to convert mp3 data to pcm
-    command = [ FFMPEG_BIN,
-        '-i', cur_song_file,
-        '-f', 's16le',
-        '-acodec', 'pcm_s16le',
-        '-ar', '22050', # output will have 22050 Hz
-        '-ac', '1',     # set to '1' for mono
-        '-']
-    pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=10**8)
+# command = [ 'ffmpeg',
+#     '-i', '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/Alice_In_Wonderland_ch_01.mp3',
+#     # '-f', 's16le',
+#     '-acodec', 'pcm_s16le',
+#     '-ar', '22050', # output will have 22050 Hz
+#     '-ac', '1',     # set to '1' for mono
+#     'test2.wav']# '-']
+path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
+command = ['ffmpeg', '-i', path+'Alice_In_Wonderland_ch_01.mp3', 
+           '-acodec', 'pcm_u8', '-ar', '22050', path+'song.wav']
 
 
+pipe = sp.Popen(command, stdout=sp.PIPE)
+print ("pipe done")
+
+raw_audio = pipe.proc.stdout.read(88200*4)
+
+audio_array = numpy.fromstring(raw_audio, dtype="int16")
+audio_array = audio_array.reshape((len(audio_array)/2,2))
+
+
+import pygame
+pygame.init()
+pygame.mixer.init(44100, -16, 2) # 44100 Hz, 16bit, 2 channels
+sound = pygame.sndarray.make_sound( audio_array )
+sound.play()
 
 mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
 
