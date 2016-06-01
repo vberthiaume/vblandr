@@ -1,16 +1,7 @@
-# Assignment 1
-
-# The objective of this assignment is to learn about simple data curation practices, and familiarize you with some of the data we'll be reusing later.
-
-# This notebook uses the notMNIST dataset to be used with python experiments. This dataset is designed to look like the classic MNIST dataset, while looking a little more like real data: it's a harder task, and the data is a lot less 'clean' than MNIST.
-
-
-# These are all the modules we'll be using later. Make sure you can import them
-# before proceeding further.
 from __future__ import print_function
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import os, os.path
 import sys
 import tarfile
 from IPython.display import display, Image
@@ -18,26 +9,28 @@ from scipy import ndimage
 from sklearn.linear_model import LogisticRegression
 from six.moves.urllib.request import urlretrieve
 from six.moves import cPickle as pickle
-
-url = 'http://yaroslavvb.com/upload/notMNIST/'
-
-def maybe_download(filename, expected_bytes, force=False):
-	"""Download a file if not present, and make sure it's the right size."""
-	if force or not os.path.exists(filename):
-		filename, _ = urlretrieve(url + filename, filename)
-	statinfo = os.stat(filename)
-	if statinfo.st_size == expected_bytes:
-		print('Found and verified', filename)
-  	else:
-		raise Exception(
-	  	'Failed to verify ' + filename + '. Can you get to it with a browser?')
-  	return filename
-
-strRawCompressedTrainSetFilename = maybe_download('notMNIST_large.tar.gz', 247336696)
-strRawCompressedTestSetFilename  = maybe_download('notMNIST_small.tar.gz', 8458043)
+#sms-tools stuff
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
+import utilFunctions as UF
 
 
-s_iNum_classes = 10
+#TODO : figure out a test set
+
+
+music_dir = '/media/kxstudio/LUSSIER/music/'
+# path, dirs, files = os.walk(music_dir)
+dirs = os.listdir(music_dir)
+allAudioGenres = []
+for cur_dir in dirs:
+            if not cur_dir.startswith('.') :
+                allAudioGenres.append(music_dir+cur_dir)
+
+s_iNum_classes = len(allAudioGenres)
+
+print (s_iNum_classes, allAudioGenres)
+
+asdfa
+
 np.random.seed(133)
 
 def maybe_extract(filename, force=False):
