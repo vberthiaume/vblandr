@@ -51,16 +51,28 @@ np.random.seed(133)
 #     '-ac', '1',     # set to '1' for mono
 #     'test2.wav']# '-']
 path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
-command = ['ffmpeg', '-i', path+'Alice_In_Wonderland_ch_01.mp3', 
-           '-acodec', 'pcm_u8', '-ar', '22050', '-ac', '1', path+'song.wav']
+# command = ['ffmpeg', '-i', path+'Alice_In_Wonderland_ch_01.mp3', 
+#            '-acodec', 'pcm_u8', '-ar', '22050', '-ac', '1', path+'song.wav']
+# command = ['ffmpeg', '-i', path+'Alice_In_Wonderland_ch_01.mp3', 
+#            '-acodec', 'pcm_u8', '-ar', '22050', '-ac', '1', '-']
 
-#this starts the ffmpeg subprocess, but doesn't wait for it to end
+command = [ 'ffmpeg',
+        '-i', path+'Alice_In_Wonderland_ch_01.mp3',
+        '-f', 's16le',
+        '-acodec', 'pcm_s16le',
+        '-ar', '22050', # ouput will have 44100 Hz
+        '-ac', '1', # stereo (set to '1' for mono)
+        '-']
 pipe = sp.Popen(command, stdout=sp.PIPE)
 
-#this waits for pipe to end and puts stuff in raw_audio. this is actually not working!!!
-stdoutdata, stderrdata = pipe.communicate()  # raw_audio = pipe.proc.stdout.read(88200*4)
+#this starts the ffmpeg subprocess, but doesn't wait for it to end
+# pipe = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
 
-print (len(stdoutdata))
+#this waits for pipe to end and puts stuff in raw_audio. this is actually not working!!!
+# stdoutdata, stderrdata = pipe.communicate()  
+stdoutdata = pipe.stdout.read()
+
+print ("size = ", len(stdoutdata), " that's it")
 
 audio_array = np.fromstring(stdoutdata, dtype="int16")
 # audio_array = audio_array.reshape((len(audio_array)/2,2))
