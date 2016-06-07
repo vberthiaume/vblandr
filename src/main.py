@@ -57,18 +57,24 @@ command = ['ffmpeg', '-i', path+'Alice_In_Wonderland_ch_01.mp3',
 #this starts the ffmpeg subprocess, but doesn't wait for it to end
 pipe = sp.Popen(command, stdout=sp.PIPE)
 
-#this waits for pipe to end and puts stuff in raw_audio
+#this waits for pipe to end and puts stuff in raw_audio. this is actually not working!!!
 stdoutdata, stderrdata = pipe.communicate()  # raw_audio = pipe.proc.stdout.read(88200*4)
 
+print (len(stdoutdata))
+
 audio_array = np.fromstring(stdoutdata, dtype="int16")
-audio_array = audio_array.reshape((len(audio_array)/2,2))
+# audio_array = audio_array.reshape((len(audio_array)/2,2))
+
+import scikits.audiolab
+# scikits.audiolab.play(audio_array, fs=22050)
+scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=22050, enc='pcm16')
 
 
-import pygame
-pygame.init()
-pygame.mixer.init(44100, -16, 2) # 44100 Hz, 16bit, 2 channels
-sound = pygame.sndarray.make_sound( audio_array )
-sound.play()
+# import pygame
+# pygame.init()
+# pygame.mixer.init(22050, -8, 1) # 44100 Hz, 16bit, 2 channels
+# sound = pygame.sndarray.make_sound( audio_array )
+# sound.play()
 
 mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
 
