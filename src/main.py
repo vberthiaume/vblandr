@@ -52,7 +52,7 @@ np.random.seed(133)
 #     'test2.wav']# '-']
 path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
 command = ['ffmpeg', '-i', path+'Alice_In_Wonderland_ch_01.mp3', 
-           '-acodec', 'pcm_u8', '-ar', '22050', path+'song.wav']
+           '-acodec', 'pcm_u8', '-ar', '22050', '-ac', '1', path+'song.wav']
 
 #this starts the ffmpeg subprocess, but doesn't wait for it to end
 pipe = sp.Popen(command, stdout=sp.PIPE)
