@@ -43,50 +43,25 @@ np.random.seed(133)
 #for each song in the current genre
 # for cur_song_file in all_song_paths:
     #use ffmpeg to convert mp3 data to pcm
-# command = [ 'ffmpeg',
-#     '-i', '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/Alice_In_Wonderland_ch_01.mp3',
-#     # '-f', 's16le',
-#     '-acodec', 'pcm_s16le',
-#     '-ar', '22050', # output will have 22050 Hz
-#     '-ac', '1',     # set to '1' for mono
-#     'test2.wav']# '-']
 path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
-# command = ['ffmpeg', '-i', path+'Alice_In_Wonderland_ch_01.mp3', 
-#            '-acodec', 'pcm_u8', '-ar', '22050', '-ac', '1', path+'song.wav']
-# command = ['ffmpeg', '-i', path+'Alice_In_Wonderland_ch_01.mp3', 
-#            '-acodec', 'pcm_u8', '-ar', '22050', '-ac', '1', '-']
-
 command = [ 'ffmpeg',
         '-i', path+'Alice_In_Wonderland_ch_01.mp3',
         '-f', 's16le',
         '-acodec', 'pcm_s16le',
-        '-ar', '22050', # ouput will have 44100 Hz
-        '-ac', '1', # stereo (set to '1' for mono)
-        '-']
+        '-ar', '44100', # sms tools wavread can only read 44100 Hz
+        '-ac', '1', # mono file
+        '-']    #instead of having an output file, using '-' sends it in the pipe. not actually sure how this works.
+#run the command
 pipe = sp.Popen(command, stdout=sp.PIPE)
-
-#this starts the ffmpeg subprocess, but doesn't wait for it to end
-# pipe = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
-
-#this waits for pipe to end and puts stuff in raw_audio. this is actually not working!!!
-# stdoutdata, stderrdata = pipe.communicate()  
+#read the output into a numpy array
 stdoutdata = pipe.stdout.read()
-
-print ("size = ", len(stdoutdata), " that's it")
-
 audio_array = np.fromstring(stdoutdata, dtype="int16")
-# audio_array = audio_array.reshape((len(audio_array)/2,2))
-
-import scikits.audiolab
-# scikits.audiolab.play(audio_array, fs=22050)
-scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=22050, enc='pcm16')
+#export this to a wav file, to test it
+# import scikits.audiolab
+# scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=44100, enc='pcm16')
 
 
-# import pygame
-# pygame.init()
-# pygame.mixer.init(22050, -8, 1) # 44100 Hz, 16bit, 2 channels
-# sound = pygame.sndarray.make_sound( audio_array )
-# sound.play()
+
 
 mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
 
