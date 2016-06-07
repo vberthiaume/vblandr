@@ -54,13 +54,13 @@ path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
 command = ['ffmpeg', '-i', path+'Alice_In_Wonderland_ch_01.mp3', 
            '-acodec', 'pcm_u8', '-ar', '22050', path+'song.wav']
 
-
+#this starts the ffmpeg subprocess, but doesn't wait for it to end
 pipe = sp.Popen(command, stdout=sp.PIPE)
-print ("pipe done")
 
-raw_audio = pipe.proc.stdout.read(88200*4)
+#this waits for pipe to end and puts stuff in raw_audio
+stdoutdata, stderrdata = pipe.communicate()  # raw_audio = pipe.proc.stdout.read(88200*4)
 
-audio_array = numpy.fromstring(raw_audio, dtype="int16")
+audio_array = np.fromstring(stdoutdata, dtype="int16")
 audio_array = audio_array.reshape((len(audio_array)/2,2))
 
 
