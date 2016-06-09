@@ -246,62 +246,63 @@ def songFile2pcm(song_path):
 #  return dataset_cur_genre:  an empty 3d array that is [p_iNb_rows, p_iImg_size, p_iImg_size]
 #  return labels: an empty vector that is [p_iNb_rows]
 def make_arrays(p_iNb_rows, p_iImg_size):
-  if p_iNb_rows:
-    dataset_cur_genre = np.ndarray((p_iNb_rows, p_iImg_size, p_iImg_size), dtype=np.float32)
-    labels = np.ndarray(p_iNb_rows, dtype=np.int32)
-  else:
-    dataset_cur_genre, labels = None, None
-  return dataset_cur_genre, labels
+    if p_iNb_rows:
+        dataset_cur_genre = np.ndarray((p_iNb_rows, p_iImg_size, p_iImg_size), dtype=np.float32)
+        labels = np.ndarray(p_iNb_rows, dtype=np.int32)
+    else:
+        dataset_cur_genre, labels = None, None
+    return dataset_cur_genre, labels
 
 #p_strListPickle_files is an array containing the filenames of the pickled data
 def merge_dataset_cur_genres(p_strListPickledFilenames, p_iTrainSize, p_iValidSize=0):
-  iNum_classes = len(p_strListPickledFilenames)
-  #make empty arrays for validation and training sets and labels
-  valid_dataset_cur_genre, valid_labels = make_arrays(p_iValidSize, s_iImage_size)
-  train_dataset_cur_genre, train_labels = make_arrays(p_iTrainSize, s_iImage_size)
+    iNum_classes = len(p_strListPickledFilenames)
+    #make empty arrays for validation and training sets and labels
+    valid_dataset_cur_genre, valid_labels = make_arrays(p_iValidSize, s_iImage_size)
+    train_dataset_cur_genre, train_labels = make_arrays(p_iTrainSize, s_iImage_size)
     
-  #number of items per class. // is an int division in python3, not sure in python2
-  iNbrOfValidItemsPerClass = p_iValidSize // iNum_classes
-  iNbrOfTrainItemPerClass = p_iTrainSize // iNum_classes
+    #number of items per class. // is an int division in python3, not sure in python2
+    iNbrOfValidItemsPerClass = p_iValidSize // iNum_classes
+    iNbrOfTrainItemPerClass = p_iTrainSize // iNum_classes
   
-  #figure out useful indexes for the loop
-  iStartValidId, iStartTrainId = 0, 0
-  iEndValidId, iEndTrainId = iNbrOfValidItemsPerClass, iNbrOfTrainItemPerClass
-  iEndListId = iNbrOfValidItemsPerClass+iNbrOfTrainItemPerClass
+    #figure out useful indexes for the loop
+    iStartValidId, iStartTrainId = 0, 0
+    iEndValidId, iEndTrainId = iNbrOfValidItemsPerClass, iNbrOfTrainItemPerClass
+    iEndListId = iNbrOfValidItemsPerClass+iNbrOfTrainItemPerClass
   
-  #for each file in p_strListPickledFilenames
-  for iPickleFileId, strPickleFilename in enumerate(p_strListPickledFilenames):    
-    try:
-      #open the file
-      with open(strPickleFilename, 'rb') as f:
-        print (strPickleFilename)
-        #unpicke 3d array for current file
-        threeDCurLetterSet = pickle.load(f)
-        # let's shuffle the items to have random validation and training set. 
-        # np.random.shuffle suffles only first dimension
-        np.random.shuffle(threeDCurLetterSet)
+    #for each file in p_strListPickledFilenames
+    for iPickleFileId, strPickleFilename in enumerate(p_strListPickledFilenames):    
+        try:
+            #open the file
+            with open(strPickleFilename, 'rb') as f:
+                print (strPickleFilename)
+            #unpicke 3d array for current file
+            threeDCurLetterSet = pickle.load(f)
+            # let's shuffle the items to have random validation and training set. 
+            # np.random.shuffle suffles only first dimension
+            np.random.shuffle(threeDCurLetterSet)
         
-        #if we asked for a validation set
-        if valid_dataset_cur_genre is not None:
-          #the first iNbrOfValidItemsPerClass items in letter_set are used for the validation set
-          threeDValidItems = threeDCurLetterSet[:iNbrOfValidItemsPerClass, :, :]
-          valid_dataset_cur_genre[iStartValidId:iEndValidId, :, :] = threeDValidItems
-          #label all images with the current file id 
-          valid_labels[iStartValidId:iEndValidId] = iPickleFileId
-          #update ids for the train set
-          iStartValidId += iNbrOfValidItemsPerClass
-          iEndValidId   += iNbrOfValidItemsPerClass
+            #if we asked for a validation set
+            if valid_dataset_cur_genre is not None:
+                #the first iNbrOfValidItemsPerClass items in letter_set are used for the validation set
+                threeDValidItems = threeDCurLetterSet[:iNbrOfValidItemsPerClass, :, :]
+                valid_dataset_cur_genre[iStartValidId:iEndValidId, :, :] = threeDValidItems
+                #label all images with the current file id 
+                valid_labels[iStartValidId:iEndValidId] = iPickleFileId
+                #update ids for the train set
+                iStartValidId += iNbrOfValidItemsPerClass
+                iEndValidId   += iNbrOfValidItemsPerClass
                     
-        #the rest of the items are used for the training set
-        threeDTrainItems = threeDCurLetterSet[iNbrOfValidItemsPerClass:iEndListId, :, :]
-        train_dataset_cur_genre[iStartTrainId:iEndTrainId, :, :] = threeDTrainItems
-        train_labels[iStartTrainId:iEndTrainId] = iPickleFileId
-        iStartTrainId += iNbrOfTrainItemPerClass
-        iEndTrainId += iNbrOfTrainItemPerClass
-    except Exception as e:
-      print('Unable to process data from', strPickleFilename, ':', e)
-      raise 
-  return valid_dataset_cur_genre, valid_labels, train_dataset_cur_genre, train_labels
+            #the rest of the items are used for the training set
+            threeDTrainItems = threeDCurLetterSet[iNbrOfValidItemsPerClass:iEndListId, :, :]
+            train_dataset_cur_genre[iStartTrainId:iEndTrainId, :, :] = threeDTrainItems
+            train_labels[iStartTrainId:iEndTrainId] = iPickleFileId
+            iStartTrainId += iNbrOfTrainItemPerClass
+            iEndTrainId += iNbrOfTrainItemPerClass
+        except Exception as e:
+            print('Unable to process data from', strPickleFilename, ':', e)
+            raise 
+    return valid_dataset_cur_genre, valid_labels, train_dataset_cur_genre, train_labels
+    #END OF merge_dataset_cur_genres
 
 
 
