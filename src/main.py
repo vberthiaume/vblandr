@@ -40,23 +40,23 @@ def main():
     #         if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
     #             all_song_paths.append(path+"/"+file)
 
-    #======= CONVERT EACH SONG IN CURRENT GENRE TO NUMPY ARRAY
+
     #for each song in the current genre
     # for cur_song_file in all_song_paths:
         #use ffmpeg to convert mp3 data to pcm
+
+    #convert current song to numpy array
     genre_path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
     song_path = genre_path +'Alice_In_Wonderland_ch_01.mp3'
     cur_song_pcm = songFile2pcm(song_path)
 
     mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
 
-    #original values            
-    # s_iTrainSize = 200000
-    # s_iValid_size = 10000
-    # s_iTestSize = 10000
-    s_iTrainSize = 200000
+    s_iTrainSize  = 200000
     s_iValid_size = 10000
-    s_iTestSize = 10000
+    s_iTestSize   = 10000
+
+    CHECK ASS1.PY TO SEE WHERE s_strListExtractedTrainFolderNames COMES FROM
 
     s_strListPickledTrainFilenames = maybe_pickle(s_strListExtractedTrainFolderNames, 45000)
     s_strListPickledTestFilenames  = maybe_pickle(s_strListExtractedTestFolderNames, 1800)
