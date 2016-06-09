@@ -15,11 +15,10 @@ import utilFunctions as UF
 #ffmpeg stuff
 import subprocess as sp
 
-
-
 def main():
+    np.random.seed(133)
     
-    #TODO : figure out a test set
+    #---------------------------------- BUILD DATA SETS ----------------------------------
 
     #get a list of all genres
     music_dir = '/media/kxstudio/LUSSIER/music/'
@@ -32,9 +31,8 @@ def main():
     s_iNum_genres = len(allAudioGenres)
 
                
-    np.random.seed(133)
+    
 
-    #TESTING THE STUFF
     # all_song_paths = []
     # for path, dirs, files in os.walk(allAudioGenres[0]):
     #     #insert file in correct label id
@@ -42,25 +40,13 @@ def main():
     #         if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
     #             all_song_paths.append(path+"/"+file)
 
+    #======= CONVERT EACH SONG IN CURRENT GENRE TO NUMPY ARRAY
     #for each song in the current genre
     # for cur_song_file in all_song_paths:
         #use ffmpeg to convert mp3 data to pcm
-    path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
-    command = [ 'ffmpeg',
-            '-i', path+'Alice_In_Wonderland_ch_01.mp3',
-            '-f', 's16le',
-            '-acodec', 'pcm_s16le',
-            '-ar', '44100', # sms tools wavread can only read 44100 Hz
-            '-ac', '1', # mono file
-            '-']    #instead of having an output file, using '-' sends it in the pipe. not actually sure how this works.
-    #run the command
-    pipe = sp.Popen(command, stdout=sp.PIPE)
-    #read the output into a numpy array
-    stdoutdata = pipe.stdout.read()
-    audio_array = np.fromstring(stdoutdata, dtype="int16")
-    #export this to a wav file, to test it
-    # import scikits.audiolab
-    # scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=44100, enc='pcm16')
+    genre_path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
+    song_path = genre_path +'Alice_In_Wonderland_ch_01.mp3'
+    cur_song_pcm = songFile2pcm(song_path)
 
     mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
 
@@ -175,6 +161,27 @@ def main():
     plt.show()
 
 
+
+
+
+
+def songFile2pcm(song_path):
+    command = [ 'ffmpeg',
+            '-i', song_path,
+            '-f', 's16le',
+            '-acodec', 'pcm_s16le',
+            '-ar', '44100', # sms tools wavread can only read 44100 Hz
+            '-ac', '1', # mono file
+            '-']    #instead of having an output file, using '-' sends it in the pipe. not actually sure how this works.
+    #run the command
+    pipe = sp.Popen(command, stdout=sp.PIPE)
+    #read the output into a numpy array
+    stdoutdata = pipe.stdout.read()
+    audio_array = np.fromstring(stdoutdata, dtype="int16")
+    #export this to a wav file, to test it
+    # import scikits.audiolab
+    # scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=44100, enc='pcm16')
+    return audio_array
 
 
 
