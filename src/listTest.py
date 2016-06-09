@@ -1,5 +1,10 @@
-allAudioGenres = ["punk", "poil", "classic"]
-allAudioFiles = [3][3]#list(allAudioGenres)
-# allAudioFiles[1].append("1", "2")
 
-print allAudioFiles
+def main():
+    allAudioGenres = ["punk", "poil", "classic"]
+    printStuff(allAudioGenres)
+    
+def printStuff(stuff):
+    print stuff
+
+if __name__=="__main__":
+   main()
