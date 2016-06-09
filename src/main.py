@@ -20,49 +20,31 @@ def main():
     
     #---------------------------------- BUILD DATA SETS ----------------------------------
 
-    #get a list of all genres
-    music_dir = '/media/kxstudio/LUSSIER/music/'
-    dirs = os.listdir(music_dir)
-    allAudioGenres = []
-    for cur_dir in dirs:
-        if not cur_dir.startswith('.') :
-            allAudioGenres.append(music_dir+cur_dir)
-
-    s_iNum_genres = len(allAudioGenres)
-
-               
-    
-
-    # all_song_paths = []
-    # for path, dirs, files in os.walk(allAudioGenres[0]):
-    #     #insert file in correct label id
-    #     for file in files:
-    #         if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
-    #             all_song_paths.append(path+"/"+file)
-
-
-    #for each song in the current genre
-    # for cur_song_file in all_song_paths:
-        #use ffmpeg to convert mp3 data to pcm
-
-    #convert current song to numpy array
-    genre_path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
-    song_path = genre_path +'Alice_In_Wonderland_ch_01.mp3'
-    cur_song_pcm = songFile2pcm(song_path)
-
-    mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
 
     s_iTrainSize  = 200000
     s_iValid_size = 10000
     s_iTestSize   = 10000
 
-    CHECK ASS1.PY TO SEE WHERE s_strListExtractedTrainFolderNames COMES FROM
+    #get a list of all genres
+    music_dir = '/media/kxstudio/LUSSIER/music/'
+    dirs = os.listdir(music_dir)
+    allAudioGenrePaths = []
+    allAudioGenres = []
+    for cur_dir in dirs:
+        if not cur_dir.startswith('.') :
+            allAudioGenrePaths.append(music_dir+cur_dir)
+            allAudioGenres.append(cur_dir)
+    s_iNum_genres = len(allAudioGenres)
+
+    s_strListExtractedTrainFolderNames = allAudioGenres
+    # s_strListExtractedTestFolderNames = maybe_extract(strRawCompressedTestSetFilename)
+
 
     s_strListPickledTrainFilenames = maybe_pickle(s_strListExtractedTrainFolderNames, 45000)
-    s_strListPickledTestFilenames  = maybe_pickle(s_strListExtractedTestFolderNames, 1800)
+    # s_strListPickledTestFilenames  = maybe_pickle(s_strListExtractedTestFolderNames,  1800)
 
-    print("\ns_strListPickledTrainFilenames: ", s_strListPickledTrainFilenames)
-    print("\ns_strListPickledTestFilenames: ", s_strListPickledTestFilenames)
+
+    mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
 
     #call merge_dataset_cur_genres on data_sets and labels
     s_threeDValiddataset_cur_genre, s_vValidLabels, s_threeDTraindataset_cur_genre, s_vTrainLabels = merge_dataset_cur_genres(s_strListPickledTrainFilenames, s_iTrainSize, s_iValid_size)
@@ -72,7 +54,7 @@ def main():
     #are [image_ids]
     print('Training:',   s_threeDTraindataset_cur_genre.shape, s_vTrainLabels.shape)
     print('Validation:', s_threeDValiddataset_cur_genre.shape, s_vValidLabels.shape)
-    print('Testing:',   s_threeDTestdataset_cur_genre.shape,  s_vTestLabels.shape)
+    print('Testing:',    s_threeDTestdataset_cur_genre.shape,  s_vTestLabels.shape)
 
 
     s_threeDTraindataset_cur_genre, s_vTrainLabels = randomize(s_threeDTraindataset_cur_genre, s_vTrainLabels)
@@ -160,8 +142,75 @@ def main():
     plt.tight_layout()
     plt.show()
 
+    #END MAIN
+
+        
+def maybe_pickle(p_strDataFolderNames, p_bForce=False):
+    dataset_cur_genre_names = []
+    #data_folders are either the train or test set. folders within those are A, B, etc
+    for strCurFolderName in p_strDataFolderNames:
+        #we will serialize those subfolders (A, B, etc), that's what pickling is
+        strCurSetFilename = strCurFolderName + '.pickle'
+        #add the name of the current pickled subfolder to the list
+        dataset_cur_genre_names.append(strCurSetFilename)
+        #if the pickled folder already exists, skip
+        if os.path.exists(strCurSetFilename) and not p_bForce:
+            # You may override by setting force=True.
+            print('%s already present - Skipping pickling.' % strCurSetFilename)
+        else:
+            #call the load_letter function def above 
+            print('Pickling %s.' % strCurSetFilename)
+            dataset_cur_genre = load_genre(strCurFolderName)
+            try:
+                #and try to pickle it
+                with open(strCurSetFilename, 'wb') as f:
+                pickle.dump(dataset_cur_genre, f, pickle.HIGHEST_PROTOCOL)
+            except Exception as e:
+                print('Unable to save data to', set_filename, ':', e)
+    return dataset_cur_genre_names
 
 
+# load data for each genre
+def load_genre(genre_folder):
+    """Load all song data for a single genre"""
+    
+    #figure out the path to all the genre's song files, and how many songs we have
+    all_song_paths = []
+    for path, dirs, files in os.walk(genre_folder):
+        #insert file in correct label id
+        for file in files:
+            if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
+                all_song_paths.append(path+"/"+file)
+
+    #our dataset 2d ndarray will be len(all_song_paths) x sample_count
+    sample_count = 1000
+    dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), sample_count), dtype=np.float32)
+    
+    songId = 0
+    #for each song in the current genre
+    for cur_song_file in all_song_paths:
+        try:
+            # convert current song to numpy array. when using images we were normalizing using pixel depth... should we do something different? Or pcmm is already [0,1]?
+            # genre_path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
+            # song_path = genre_path +'Alice_In_Wonderland_ch_01.mp3'
+            cur_song_pcm = songFile2pcm(cur_song_file)
+
+            # only keep the first sample_count samples
+            cur_song_pcm = cur_song_pcm[0:sample_count]
+
+            #and put it in the dataset_cur_genre
+            dataset_cur_genre[songId, :] = cur_song_pcm
+            songId += 1
+        except IOError as e:
+            print('skipping ', cur_song_file, ':', e)
+    #in case we skipped some songs, only keep the first songId songs in dataset_cur_genre
+    dataset_cur_genre = dataset_cur_genre[0:songId, :, :]
+    
+    print('Full dataset_cur_genre tensor:', dataset_cur_genre.shape)
+    print('Mean:', np.mean(dataset_cur_genre))
+    print('Standard deviation:', np.std(dataset_cur_genre))
+    return dataset_cur_genre
+    #END LOAD GENRE
 
 
 
@@ -183,88 +232,7 @@ def songFile2pcm(song_path):
     # scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=44100, enc='pcm16')
     return audio_array
 
-
-
-
-
-        
-def maybe_pickle(p_strDataFolderNames, p_iMin_num_images_per_class, p_bForce=False):
-  dataset_cur_genre_names = []
-  #data_folders are either the train or test set. folders within those are A, B, etc
-  for strCurFolderName in p_strDataFolderNames:
-    #we will serialize those subfolders (A, B, etc), that's what pickling is
-    strCurSetFilename = strCurFolderName + '.pickle'
-    #add the name of the current pickled subfolder to the list
-    dataset_cur_genre_names.append(strCurSetFilename)
-    #if the pickled folder already exists, skip
-    if os.path.exists(strCurSetFilename) and not p_bForce:
-      # You may override by setting force=True.
-      print('%s already present - Skipping pickling.' % strCurSetFilename)
-    else:
-      #call the load_letter function def above 
-      print('Pickling %s.' % strCurSetFilename)
-      dataset_cur_genre = load_genre(strCurFolderName, p_iMin_num_images_per_class)
-      try:
-        #and try to pickle it
-        with open(strCurSetFilename, 'wb') as f:
-          pickle.dump(dataset_cur_genre, f, pickle.HIGHEST_PROTOCOL)
-      except Exception as e:
-        print('Unable to save data to', set_filename, ':', e)
-  
-  return dataset_cur_genre_names
-
-# pickling data for each genre, to make it more manageable
-def load_genre(folder, min_num_songs):
-    """Load all song data for a single genre, insuring you have at least min_num_songs."""
-    # song_files = os.listdir(folder)
-
-    print(folder)
-
-    all_song_paths = []
-    for path, dirs, files in os.walk(dir):
-        #insert file in correct label id
-        for file in files:
-            if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
-                all_song_paths.append(path+"/"+file)
-
-    #An ndarray is a (often fixed) multidimensional container of items of the same type and size
-    #so here, we're building a 3d array with indexes (image index, x,y), and type float32
-    sample_count = 1000
-    dataset_cur_genre = np.ndarray(shape=(len(song_files), sample_count), dtype=np.float32)
-    songId = 0
-
-    #for each song in the current genre
-    for cur_song_file in os.listdir(all_song_paths):
-        try:
-            #read image as a bunch of floats, and normalize those floats by using pixel_depth
-            #use ffmpeg to convert mp3 data to pcm
-            command = [ FFMPEG_BIN,
-            '-i', cur_song_file,
-            '-f', 's16le',
-            '-acodec', 'pcm_s16le',
-            '-ar', '22050', # output will have 22050 Hz
-            '-ac', '1',     # set to '1' for mono
-            '-']
-            pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=10**8)
-
-            cur_song_data = (ndimage.imread(image_file).astype(float) - s_fPixel_depth / 2) / s_fPixel_depth
-
-
-            #and put it in the dataset_cur_genre
-            dataset_cur_genre[songId, :] = cur_song_data
-            songId += 1
-        except IOError as e:
-            print('Could not read:', image_file, ':', e, '- it\'s ok, skipping.')
-    
-    num_images = songId
-    dataset_cur_genre = dataset_cur_genre[0:num_images, :, :]
-    if num_images < min_num_images:
-        raise Exception('Many fewer images than expected: %d < %d' % (num_images, min_num_images))
-    
-    print('Full dataset_cur_genre tensor:', dataset_cur_genre.shape)
-    print('Mean:', np.mean(dataset_cur_genre))
-    print('Standard deviation:', np.std(dataset_cur_genre))
-    return dataset_cur_genre
+    #END SONGFILE2PCM
 
 
 
