@@ -19,14 +19,121 @@ def main():
     np.random.seed(133)
     
     #---------------------------------- BUILD DATA SETS ----------------------------------
-
-
     s_iTrainSize  = 200000
     s_iValid_size = 10000
     s_iTestSize   = 10000
 
-    #get a list of all genres
-    music_dir = '/media/kxstudio/LUSSIER/music/'
+    #get a list of genres for training and testing
+    trainGenreNames = listGenres('/media/kxstudio/LUSSIER/music/train')
+    testGenreNames  = listGenres('/media/kxstudio/LUSSIER/music/test')
+
+    print ("trainGenreNames: ", trainGenreNames)
+    print ("testGenreNames: ", testGenreNames)
+
+    s_strListPickledTrainFilenames = maybe_pickle(trainGenreNames)
+    # s_strListPickledTestFilenames  = maybe_pickle(testGenreNames)
+
+    if False:
+
+        #call merge_dataset_cur_genres on data_sets and labels
+        s_threeDValiddataset_cur_genre, s_vValidLabels, s_threeDTraindataset_cur_genre, s_vTrainLabels = merge_dataset_cur_genres(s_strListPickledTrainFilenames, s_iTrainSize, s_iValid_size)
+        _,                  _,            s_threeDTestdataset_cur_genre,  s_vTestLabels  = merge_dataset_cur_genres(s_strListPickledTestFilenames, s_iTestSize)
+
+        #print shapes for data sets and their respective labels. data sets are 3d arrays with [image_id,x,y] and labels
+        #are [image_ids]
+        print('Training:',   s_threeDTraindataset_cur_genre.shape, s_vTrainLabels.shape)
+        print('Validation:', s_threeDValiddataset_cur_genre.shape, s_vValidLabels.shape)
+        print('Testing:',    s_threeDTestdataset_cur_genre.shape,  s_vTestLabels.shape)
+
+
+        s_threeDTraindataset_cur_genre, s_vTrainLabels = randomize(s_threeDTraindataset_cur_genre, s_vTrainLabels)
+        s_threeDTestdataset_cur_genre,  s_vTestLabels  = randomize(s_threeDTestdataset_cur_genre,  s_vTestLabels)
+        s_threeDValiddataset_cur_genre, s_vValidLabels = randomize(s_threeDValiddataset_cur_genre, s_vValidLabels)
+
+        print(s_threeDTraindataset_cur_genre.shape)
+        print(s_threeDTestdataset_cur_genre.shape)
+        print(s_threeDValiddataset_cur_genre.shape)
+
+        # Finally, let's save the data for later reuse:
+        pickle_file = 'notMNIST.pickle'
+
+        try:
+          f = open(pickle_file, 'wb')
+          save = {
+            'train_dataset_cur_genre': s_threeDTraindataset_cur_genre,
+            'train_labels': s_vTrainLabels,
+            'valid_dataset_cur_genre': s_threeDValiddataset_cur_genre,
+            'valid_labels': s_vValidLabels,
+            'test_dataset_cur_genre': s_threeDTestdataset_cur_genre,
+            'test_labels': s_vTestLabels,
+            }
+          pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
+          f.close()
+        except Exception as e:
+          print('Unable to save data to', pickle_file, ':', e)
+          raise
+
+
+        statinfo = os.stat(pickle_file)
+        print('Compressed pickle size:', statinfo.st_size)
+
+        # Problem 6
+        # Let's get an idea of what an off-the-shelf classifier can give you on this data. It's always good to check that there is something to learn, and that it's a problem that is not so trivial that a canned solution solves it.
+        # Train a simple model on this data using 50, 100, 1000 and 5000 training samples. Hint: you can use the LogisticRegression model from sklearn.linear_model.
+        # Optional question: train an off-the-shelf model on all the data!
+        ### taking inspiration from http://scikit-learn.org/stable/auto_examples/calibration/plot_compare_calibration.html#example-calibration-plot-compare-calibration-py
+        from sklearn import dataset_cur_genres
+        from sklearn.calibration import calibration_curve
+
+        train_samples = 100  # number of samples used for training
+        test_samples = 50   #number of samples for test
+
+        #training patterns. x is input pattern, y is target pattern or label
+        X_train = s_threeDTraindataset_cur_genre[:train_samples]
+        #fit function below expects to have a vector as the second dimension, not an array
+        X_train = X_train.reshape([X_train.shape[0],X_train.shape[1]*X_train.shape[2]])
+        y_train = s_vTrainLabels[:train_samples]
+
+        #test patterns
+        X_test = s_threeDTestdataset_cur_genre[:test_samples]
+        X_test = X_test.reshape([X_test.shape[0],X_test.shape[1]*X_test.shape[2]])
+        y_test = s_vTestLabels[:test_samples]
+
+        # Create classifier
+        lr = LogisticRegression()
+
+        #create plots
+        plt.figure(figsize=(10, 10))
+        ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
+        ax2 = plt.subplot2grid((3, 1), (2, 0))
+        ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")   
+
+        #try to fit the training data
+        lr.fit(X_train, y_train)
+
+        #assess how confident (how probable it is correct) the model is at predicting test classifications
+        prob_pos = lr.predict_proba(X_test)[:, 1]
+            
+        #fraction_of_positives, mean_predicted_value = calibration_curve(y_test, prob_pos, n_bins=10)
+
+        #ax1.plot(mean_predicted_value, fraction_of_positives, "s-", label="%s" % (name, ))
+        ax2.hist(prob_pos, range=(0, 1), bins=10, label='Logistic', histtype="step", lw=2)
+
+        # ax1.set_ylabel("Fraction of positives")
+        # ax1.set_ylim([-0.05, 1.05])
+        # ax1.legend(loc="lower right")
+        # ax1.set_title('Calibration plots  (reliability curve)')
+
+        ax2.set_xlabel("Mean predicted value")
+        ax2.set_ylabel("Count")
+        ax2.legend(loc="upper center", ncol=2)
+
+        plt.tight_layout()
+        plt.show()
+
+    #END MAIN
+        
+def listGenres(music_dir):
     dirs = os.listdir(music_dir)
     allAudioGenrePaths = []
     allAudioGenres = []
@@ -34,125 +141,16 @@ def main():
         if not cur_dir.startswith('.') :
             allAudioGenrePaths.append(music_dir+cur_dir)
             allAudioGenres.append(cur_dir)
-    s_iNum_genres = len(allAudioGenres)
+    return allAudioGenres
 
-    s_strListExtractedTrainFolderNames = allAudioGenres
-    # s_strListExtractedTestFolderNames = maybe_extract(strRawCompressedTestSetFilename)
-
-
-    s_strListPickledTrainFilenames = maybe_pickle(s_strListExtractedTrainFolderNames, 45000)
-    # s_strListPickledTestFilenames  = maybe_pickle(s_strListExtractedTestFolderNames,  1800)
-
-
-    mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
-
-    #call merge_dataset_cur_genres on data_sets and labels
-    s_threeDValiddataset_cur_genre, s_vValidLabels, s_threeDTraindataset_cur_genre, s_vTrainLabels = merge_dataset_cur_genres(s_strListPickledTrainFilenames, s_iTrainSize, s_iValid_size)
-    _,                  _,            s_threeDTestdataset_cur_genre,  s_vTestLabels  = merge_dataset_cur_genres(s_strListPickledTestFilenames, s_iTestSize)
-
-    #print shapes for data sets and their respective labels. data sets are 3d arrays with [image_id,x,y] and labels
-    #are [image_ids]
-    print('Training:',   s_threeDTraindataset_cur_genre.shape, s_vTrainLabels.shape)
-    print('Validation:', s_threeDValiddataset_cur_genre.shape, s_vValidLabels.shape)
-    print('Testing:',    s_threeDTestdataset_cur_genre.shape,  s_vTestLabels.shape)
-
-
-    s_threeDTraindataset_cur_genre, s_vTrainLabels = randomize(s_threeDTraindataset_cur_genre, s_vTrainLabels)
-    s_threeDTestdataset_cur_genre,  s_vTestLabels  = randomize(s_threeDTestdataset_cur_genre,  s_vTestLabels)
-    s_threeDValiddataset_cur_genre, s_vValidLabels = randomize(s_threeDValiddataset_cur_genre, s_vValidLabels)
-
-    print(s_threeDTraindataset_cur_genre.shape)
-    print(s_threeDTestdataset_cur_genre.shape)
-    print(s_threeDValiddataset_cur_genre.shape)
-
-    # Finally, let's save the data for later reuse:
-    pickle_file = 'notMNIST.pickle'
-
-    try:
-      f = open(pickle_file, 'wb')
-      save = {
-        'train_dataset_cur_genre': s_threeDTraindataset_cur_genre,
-        'train_labels': s_vTrainLabels,
-        'valid_dataset_cur_genre': s_threeDValiddataset_cur_genre,
-        'valid_labels': s_vValidLabels,
-        'test_dataset_cur_genre': s_threeDTestdataset_cur_genre,
-        'test_labels': s_vTestLabels,
-        }
-      pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
-      f.close()
-    except Exception as e:
-      print('Unable to save data to', pickle_file, ':', e)
-      raise
-
-
-    statinfo = os.stat(pickle_file)
-    print('Compressed pickle size:', statinfo.st_size)
-
-    # Problem 6
-    # Let's get an idea of what an off-the-shelf classifier can give you on this data. It's always good to check that there is something to learn, and that it's a problem that is not so trivial that a canned solution solves it.
-    # Train a simple model on this data using 50, 100, 1000 and 5000 training samples. Hint: you can use the LogisticRegression model from sklearn.linear_model.
-    # Optional question: train an off-the-shelf model on all the data!
-    ### taking inspiration from http://scikit-learn.org/stable/auto_examples/calibration/plot_compare_calibration.html#example-calibration-plot-compare-calibration-py
-    from sklearn import dataset_cur_genres
-    from sklearn.calibration import calibration_curve
-
-    train_samples = 100  # number of samples used for training
-    test_samples = 50   #number of samples for test
-
-    #training patterns. x is input pattern, y is target pattern or label
-    X_train = s_threeDTraindataset_cur_genre[:train_samples]
-    #fit function below expects to have a vector as the second dimension, not an array
-    X_train = X_train.reshape([X_train.shape[0],X_train.shape[1]*X_train.shape[2]])
-    y_train = s_vTrainLabels[:train_samples]
-
-    #test patterns
-    X_test = s_threeDTestdataset_cur_genre[:test_samples]
-    X_test = X_test.reshape([X_test.shape[0],X_test.shape[1]*X_test.shape[2]])
-    y_test = s_vTestLabels[:test_samples]
-
-    # Create classifier
-    lr = LogisticRegression()
-
-    #create plots
-    plt.figure(figsize=(10, 10))
-    ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
-    ax2 = plt.subplot2grid((3, 1), (2, 0))
-    ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")   
-
-    #try to fit the training data
-    lr.fit(X_train, y_train)
-
-    #assess how confident (how probable it is correct) the model is at predicting test classifications
-    prob_pos = lr.predict_proba(X_test)[:, 1]
-        
-    #fraction_of_positives, mean_predicted_value = calibration_curve(y_test, prob_pos, n_bins=10)
-
-    #ax1.plot(mean_predicted_value, fraction_of_positives, "s-", label="%s" % (name, ))
-    ax2.hist(prob_pos, range=(0, 1), bins=10, label='Logistic', histtype="step", lw=2)
-
-    # ax1.set_ylabel("Fraction of positives")
-    # ax1.set_ylim([-0.05, 1.05])
-    # ax1.legend(loc="lower right")
-    # ax1.set_title('Calibration plots  (reliability curve)')
-
-    ax2.set_xlabel("Mean predicted value")
-    ax2.set_ylabel("Count")
-    ax2.legend(loc="upper center", ncol=2)
-
-    plt.tight_layout()
-    plt.show()
-
-    #END MAIN
-
-        
 def maybe_pickle(p_strDataFolderNames, p_bForce=False):
-    dataset_cur_genre_names = []
+    dataset_all_genres = []
     #data_folders are either the train or test set. folders within those are A, B, etc
     for strCurFolderName in p_strDataFolderNames:
         #we will serialize those subfolders (A, B, etc), that's what pickling is
         strCurSetFilename = strCurFolderName + '.pickle'
         #add the name of the current pickled subfolder to the list
-        dataset_cur_genre_names.append(strCurSetFilename)
+        dataset_all_genres.append(strCurSetFilename)
         #if the pickled folder already exists, skip
         if os.path.exists(strCurSetFilename) and not p_bForce:
             # You may override by setting force=True.
@@ -164,10 +162,10 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
             try:
                 #and try to pickle it
                 with open(strCurSetFilename, 'wb') as f:
-                pickle.dump(dataset_cur_genre, f, pickle.HIGHEST_PROTOCOL)
+                    pickle.dump(dataset_cur_genre, f, pickle.HIGHEST_PROTOCOL)
             except Exception as e:
                 print('Unable to save data to', set_filename, ':', e)
-    return dataset_cur_genre_names
+    return dataset_all_genres
 
 
 # load data for each genre
@@ -204,15 +202,13 @@ def load_genre(genre_folder):
         except IOError as e:
             print('skipping ', cur_song_file, ':', e)
     #in case we skipped some songs, only keep the first songId songs in dataset_cur_genre
-    dataset_cur_genre = dataset_cur_genre[0:songId, :, :]
+    dataset_cur_genre = dataset_cur_genre[0:songId, :]
     
     print('Full dataset_cur_genre tensor:', dataset_cur_genre.shape)
     print('Mean:', np.mean(dataset_cur_genre))
     print('Standard deviation:', np.std(dataset_cur_genre))
     return dataset_cur_genre
     #END LOAD GENRE
-
-
 
 def songFile2pcm(song_path):
     command = [ 'ffmpeg',
@@ -233,10 +229,6 @@ def songFile2pcm(song_path):
     return audio_array
 
     #END SONGFILE2PCM
-
-
-
-
 
 
 # Merge and prune the training data as needed. Depending on your computer setup, you might not be able to fit it all in memory, and you can tune s_iTrainSize as needed. The labels will be stored into a separate array of integers 0 through 9.
