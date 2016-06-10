@@ -20,12 +20,11 @@ from __future__ import division
 from __future__ import print_function
 
 import time
-
+import math
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
 from tensorflow.examples.tutorials.mnist import input_data
-from tensorflow.examples.tutorials.mnist import mnist
 
 # Basic model parameters as external flags.
 flags = tf.app.flags
@@ -37,6 +36,13 @@ flags.DEFINE_integer('hidden2',       32,     'Number of units in hidden layer 2
 flags.DEFINE_integer('batch_size',    100,    'Batch size. Must divide evenly into the dataset sizes.')
 flags.DEFINE_string ('train_dir',     'data', 'Directory to put the training data.')
 flags.DEFINE_boolean('fake_data',     False,  'If true, uses fake data  for unit testing.')
+
+# The MNIST dataset has 10 classes, representing the digits 0 through 9.
+NUM_CLASSES = 10
+
+# The MNIST images are always 28x28 pixels.
+IMAGE_SIZE = 28
+IMAGE_PIXELS = IMAGE_SIZE * IMAGE_SIZE
 
 
 def placeholder_inputs(batch_size):
@@ -55,10 +61,9 @@ def placeholder_inputs(batch_size):
     # Note that the shapes of the placeholders match the shapes of the full
     # image and label tensors, except the first dimension is now batch_size
     # rather than the full size of the train or test data sets.
-    images_placeholder = tf.placeholder(tf.float32, shape=(batch_size, mnist.IMAGE_PIXELS))
+    images_placeholder = tf.placeholder(tf.float32, shape=(batch_size, IMAGE_PIXELS))
     labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size))
     return images_placeholder, labels_placeholder
-
 
 def fill_feed_dict(data_set, images_pl, labels_pl):
     """Fills the feed_dict for training the given step.
@@ -77,13 +82,10 @@ def fill_feed_dict(data_set, images_pl, labels_pl):
     Returns:
         feed_dict: The feed dictionary mapping from placeholders to values.
     """
-    # Create the feed_dict for the placeholders filled with the next
-    # `batch size ` examples.
+    # Create the feed_dict for the placeholders filled with the next `batch size ` examples.
     images_feed, labels_feed = data_set.next_batch(FLAGS.batch_size, FLAGS.fake_data)
-    feed_dict = { images_pl: images_feed,
-                                labels_pl: labels_feed}
+    feed_dict = { images_pl: images_feed, labels_pl: labels_feed}
     return feed_dict
-
 
 def do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_set):
     """Runs one evaluation against the full epoch of data.
@@ -101,14 +103,16 @@ def do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_set
     steps_per_epoch = data_set.num_examples // FLAGS.batch_size
     num_examples = steps_per_epoch * FLAGS.batch_size
     for step in xrange(steps_per_epoch):
-        feed_dict = fill_feed_dict(data_set,
-                                                             images_placeholder,
-                                                             labels_placeholder)
+        feed_dict = fill_feed_dict(data_set, images_placeholder, labels_placeholder)
         true_count += sess.run(eval_correct, feed_dict=feed_dict)
     precision = true_count / num_examples
-    print('  Num examples: %d  Num correct: %d  Precision @ 1: %0.04f' %
-                (num_examples, true_count, precision))
+    print('  Num examples: %d  Num correct: %d  Precision @ 1: %0.04f' % (num_examples, true_count, precision))
 
+def loss_funct(logits, labels):
+    labels = tf.to_int64(labels)
+    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits( logits, labels, name='xentropy')
+    loss = tf.reduce_mean(cross_entropy, name='xentropy_mean')
+    return loss
 
 def run_training():
     """Train MNIST for a number of steps."""
@@ -122,16 +126,16 @@ def run_training():
         images_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size)
 
         # Build a Graph that computes predictions from the inference model.
-        logits = mnist.inference(images_placeholder, FLAGS.hidden1, FLAGS.hidden2)
+        logits = inference(images_placeholder, FLAGS.hidden1, FLAGS.hidden2)
 
         # Add to the Graph the Ops for loss calculation.
-        loss = mnist.loss(logits, labels_placeholder)
+        loss = loss_funct(logits, labels_placeholder)
 
         # Add to the Graph the Ops that calculate and apply gradients.
-        train_op = mnist.training(loss, FLAGS.learning_rate)
+        train_op = training(loss, FLAGS.learning_rate)
 
         # Add the Op to compare the logits to the labels during evaluation.
-        eval_correct = mnist.evaluation(logits, labels_placeholder)
+        eval_correct = evaluation(logits, labels_placeholder)
 
         # Build the summary operation based on the TF collection of Summaries.
         summary_op = tf.merge_all_summaries()
@@ -159,17 +163,14 @@ def run_training():
 
             # Fill a feed dictionary with the actual set of images and labels
             # for this particular training step.
-            feed_dict = fill_feed_dict(data_sets.train,
-                                                                 images_placeholder,
-                                                                 labels_placeholder)
+            feed_dict = fill_feed_dict(data_sets.train, images_placeholder, labels_placeholder)
 
             # Run one step of the model.  The return values are the activations
             # from the `train_op` (which is discarded) and the `loss` Op.  To
             # inspect the values of your Ops or variables, you may include them
             # in the list passed to sess.run() and the value tensors will be
             # returned in the tuple from the call.
-            _, loss_value = sess.run([train_op, loss],
-                                                             feed_dict=feed_dict)
+            _, loss_value = sess.run([train_op, loss], feed_dict=feed_dict)
 
             duration = time.time() - start_time
 
@@ -187,26 +188,71 @@ def run_training():
                 saver.save(sess, FLAGS.train_dir, global_step=step)
                 # Evaluate against the training set.
                 print('Training Data Eval:')
-                do_eval(sess,
-                                eval_correct,
-                                images_placeholder,
-                                labels_placeholder,
-                                data_sets.train)
+                do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_sets.train)
                 # Evaluate against the validation set.
                 print('Validation Data Eval:')
-                do_eval(sess,
-                                eval_correct,
-                                images_placeholder,
-                                labels_placeholder,
-                                data_sets.validation)
+                do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_sets.validation)
                 # Evaluate against the test set.
                 print('Test Data Eval:')
-                do_eval(sess,
-                                eval_correct,
-                                images_placeholder,
-                                labels_placeholder,
-                                data_sets.test)
+                do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_sets.test)
 
+
+def inference(images, hidden1_units, hidden2_units):
+    #Build the MNIST model up to where it may be used for inference.
+
+    # Hidden 1
+    with tf.name_scope('hidden1'):
+        weights = tf.Variable(tf.truncated_normal([IMAGE_PIXELS, hidden1_units], stddev=1.0 / math.sqrt(float(IMAGE_PIXELS))), name='weights')
+        biases = tf.Variable(tf.zeros([hidden1_units]), name='biases')
+        hidden1 = tf.nn.relu(tf.matmul(images, weights) + biases)
+    # Hidden 2
+    with tf.name_scope('hidden2'):
+        weights = tf.Variable(tf.truncated_normal([hidden1_units, hidden2_units], stddev=1.0 / math.sqrt(float(hidden1_units))), name='weights')
+        biases = tf.Variable(tf.zeros([hidden2_units]), name='biases')
+        hidden2 = tf.nn.relu(tf.matmul(hidden1, weights) + biases)
+    # Linear
+    with tf.name_scope('softmax_linear'):
+        weights = tf.Variable(tf.truncated_normal([hidden2_units, NUM_CLASSES], stddev=1.0 / math.sqrt(float(hidden2_units))), name='weights')
+        biases = tf.Variable(tf.zeros([NUM_CLASSES]), name='biases')
+        logits = tf.matmul(hidden2, weights) + biases
+    return logits
+
+
+
+def training(loss, learning_rate):
+    """Sets up the training Ops. Creates a summarizer to track the loss over time in TensorBoard. Creates an optimizer and applies the gradients 
+    to all trainable variables. The Op returned by this function is what must be passed to the`sess.run()` call to cause the model to train.
+    Args:
+        loss: Loss tensor, from loss().
+        learning_rate: The learning rate to use for gradient descent.
+    Returns:
+        train_op: The Op for training.
+    """
+    # Add a scalar summary for the snapshot loss.
+    tf.scalar_summary(loss.op.name, loss)
+    # Create the gradient descent optimizer with the given learning rate.
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+    # Create a variable to track the global step.
+    global_step = tf.Variable(0, name='global_step', trainable=False)
+    # Use the optimizer to apply the gradients that minimize the loss
+    # (and also increment the global step counter) as a single training step.
+    train_op = optimizer.minimize(loss, global_step=global_step)
+    return train_op
+
+def evaluation(logits, labels):
+    """Evaluate the quality of the logits at predicting the label.
+    Args:
+        logits: Logits tensor, float - [batch_size, NUM_CLASSES].
+        labels: Labels tensor, int32 - [batch_size], with values in the range [0, NUM_CLASSES).
+    Returns:
+        A scalar int32 tensor with the number of examples (out of batch_size)
+        that were predicted correctly.
+    """
+    # For a classifier model, we can use the in_top_k Op. It returns a bool tensor with shape [batch_size] that is true for
+    # the examples where the label is in the top k (here k=1) of all logits for that example.
+    correct = tf.nn.in_top_k(logits, labels, 1)
+    # Return the number of true entries.
+    return tf.reduce_sum(tf.cast(correct, tf.int32))
 
 def main(_):
     run_training()
