@@ -1,13 +1,13 @@
 from __future__ import print_function
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+
 import os, os.path
 import sys
 import tarfile
 from IPython.display import display, Image
 from scipy import ndimage
 from sklearn.linear_model import LogisticRegression
-from six.moves.urllib.request import urlretrieve
 from six.moves import cPickle as pickle
 #sms-tools stuff
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
@@ -24,27 +24,28 @@ def main():
     #this algorithm will use the same number of train, valid, and test patterns for each genre/class.
     s_iTrainSize  = 2*7 # 200000
     s_iValid_size = 7  # 10000
-    s_iTestSize   = 0  # 10000
+    s_iTestSize   = 7  # 10000
 
     #get a list of genres for training and testing
     #using test for now to test training
-    trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/test/') #listGenres('/media/kxstudio/LUSSIER/music/train/')
-    testGenreNames  = listGenres('/media/kxstudio/LUSSIER/music/test/')
+    trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/train_small/') #listGenres('/media/kxstudio/LUSSIER/music/train/')
+    testGenreNames, testGenrePaths  = listGenres('/media/kxstudio/LUSSIER/music/test/')
 
     allPickledTrainFilenames = maybe_pickle(trainGenrePaths)
-    # allPickledTestFilenames  = maybe_pickle(testGenreNames)
+    allPickledTestFilenames  = maybe_pickle(testGenrePaths)
 
     #call merge_dataset on data_sets and labels
     wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = merge_dataset(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
     _,                                _, wholeTestDataset,  wholeTestLabels  = merge_dataset(allPickledTestFilenames,  s_iTestSize)
 
+    print('Training:',   wholeTrainDataset.shape, wholeTrainLabels.shape)
+    print('Validation:', wholeValidDataset.shape, wholeValidLabels.shape)
+    print('Testing:',    wholeTestDataset.shape,  wholeTestLabels.shape)
+
+    print ('================== DONE ================')
     if False:
         #print shapes for data sets and their respective labels. data sets are 3d arrays with [image_id,x,y] and labels
         #are [image_ids]
-        print('Training:',   wholeTrainDataset.shape, wholeTrainLabels.shape)
-        print('Validation:', wholeValidDataset.shape, wholeValidLabels.shape)
-        print('Testing:',    wholeTestDataset.shape,  wholeTestLabels.shape)
-
 
         wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
         wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
@@ -164,7 +165,7 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
                 with open(strCurSetFilename, 'wb') as f:
                     pickle.dump(dataset_cur_genre, f, pickle.HIGHEST_PROTOCOL)
             except Exception as e:
-                print('Unable to save data to', set_filename, ':', e)
+                print('Unable to save data to', strCurSetFilename, ':', e)
     return dataset_all_genres
 
 
