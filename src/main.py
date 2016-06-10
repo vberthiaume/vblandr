@@ -9,6 +9,7 @@ from IPython.display import display, Image
 from scipy import ndimage
 from sklearn.linear_model import LogisticRegression
 from six.moves import cPickle as pickle
+
 #sms-tools stuff
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
 import utilFunctions as UF

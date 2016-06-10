@@ -10,6 +10,9 @@ notMNIST_large
 notMNIST_small
 *.pickle
 *.zip
+data-*
+data/
+checkpoint
 #C++ GITIGNORE
 # Compiled Object files
 *.slo
