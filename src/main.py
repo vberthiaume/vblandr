@@ -24,13 +24,11 @@ def main():
     s_iTestSize   = 10000
 
     #get a list of genres for training and testing
-    trainGenreNames = listGenres('/media/kxstudio/LUSSIER/music/train')
-    testGenreNames  = listGenres('/media/kxstudio/LUSSIER/music/test')
+    #using test for now to test training
+    trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/test/') #listGenres('/media/kxstudio/LUSSIER/music/train/')
+    testGenreNames  = listGenres('/media/kxstudio/LUSSIER/music/test/')
 
-    print ("trainGenreNames: ", trainGenreNames)
-    print ("testGenreNames: ", testGenreNames)
-
-    s_strListPickledTrainFilenames = maybe_pickle(trainGenreNames)
+    s_strListPickledTrainFilenames = maybe_pickle(trainGenrePaths, True)
     # s_strListPickledTestFilenames  = maybe_pickle(testGenreNames)
 
     if False:
@@ -141,7 +139,7 @@ def listGenres(music_dir):
         if not cur_dir.startswith('.') :
             allAudioGenrePaths.append(music_dir+cur_dir)
             allAudioGenres.append(cur_dir)
-    return allAudioGenres
+    return allAudioGenres, allAudioGenrePaths
 
 def maybe_pickle(p_strDataFolderNames, p_bForce=False):
     dataset_all_genres = []
@@ -217,6 +215,7 @@ def songFile2pcm(song_path):
             '-acodec', 'pcm_s16le',
             '-ar', '44100', # sms tools wavread can only read 44100 Hz
             '-ac', '1', # mono file
+            '-loglevel', 'quiet',
             '-']    #instead of having an output file, using '-' sends it in the pipe. not actually sure how this works.
     #run the command
     pipe = sp.Popen(command, stdout=sp.PIPE)
