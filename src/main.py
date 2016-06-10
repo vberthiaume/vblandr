@@ -15,42 +15,43 @@ import utilFunctions as UF
 #ffmpeg stuff
 import subprocess as sp
 
+s_sample_count = 10 * 44100   # first 10 secs of audio
+
 def main():
     np.random.seed(133)
     
     #---------------------------------- BUILD DATA SETS ----------------------------------
-    s_iTrainSize  = 200000
-    s_iValid_size = 10000
-    s_iTestSize   = 10000
+    s_iTrainSize  = 10 # 200000
+    s_iValid_size = 2  # 10000
+    s_iTestSize   = 0  # 10000
 
     #get a list of genres for training and testing
     #using test for now to test training
     trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/test/') #listGenres('/media/kxstudio/LUSSIER/music/train/')
     testGenreNames  = listGenres('/media/kxstudio/LUSSIER/music/test/')
 
-    s_strListPickledTrainFilenames = maybe_pickle(trainGenrePaths)
-    # s_strListPickledTestFilenames  = maybe_pickle(testGenreNames)
+    allPickledTrainFilenames = maybe_pickle(trainGenrePaths)
+    # allPickledTestFilenames  = maybe_pickle(testGenreNames)
+
+    #call merge_dataset on data_sets and labels
+    wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = merge_dataset(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
+    _,                                _, wholeTestDataset,  wholeTestLabels  = merge_dataset(allPickledTestFilenames,  s_iTestSize)
 
     if False:
-
-        #call merge_dataset_cur_genres on data_sets and labels
-        s_threeDValiddataset_cur_genre, s_vValidLabels, s_threeDTraindataset_cur_genre, s_vTrainLabels = merge_dataset_cur_genres(s_strListPickledTrainFilenames, s_iTrainSize, s_iValid_size)
-        _,                  _,            s_threeDTestdataset_cur_genre,  s_vTestLabels  = merge_dataset_cur_genres(s_strListPickledTestFilenames, s_iTestSize)
-
         #print shapes for data sets and their respective labels. data sets are 3d arrays with [image_id,x,y] and labels
         #are [image_ids]
-        print('Training:',   s_threeDTraindataset_cur_genre.shape, s_vTrainLabels.shape)
-        print('Validation:', s_threeDValiddataset_cur_genre.shape, s_vValidLabels.shape)
-        print('Testing:',    s_threeDTestdataset_cur_genre.shape,  s_vTestLabels.shape)
+        print('Training:',   wholeTrainDataset.shape, wholeTrainLabels.shape)
+        print('Validation:', wholeValidDataset.shape, wholeValidLabels.shape)
+        print('Testing:',    wholeTestDataset.shape,  wholeTestLabels.shape)
 
 
-        s_threeDTraindataset_cur_genre, s_vTrainLabels = randomize(s_threeDTraindataset_cur_genre, s_vTrainLabels)
-        s_threeDTestdataset_cur_genre,  s_vTestLabels  = randomize(s_threeDTestdataset_cur_genre,  s_vTestLabels)
-        s_threeDValiddataset_cur_genre, s_vValidLabels = randomize(s_threeDValiddataset_cur_genre, s_vValidLabels)
+        wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
+        wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
+        wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
 
-        print(s_threeDTraindataset_cur_genre.shape)
-        print(s_threeDTestdataset_cur_genre.shape)
-        print(s_threeDValiddataset_cur_genre.shape)
+        print(wholeTrainDataset.shape)
+        print(wholeTestDataset.shape)
+        print(wholeValidDataset.shape)
 
         # Finally, let's save the data for later reuse:
         pickle_file = 'notMNIST.pickle'
@@ -58,12 +59,12 @@ def main():
         try:
           f = open(pickle_file, 'wb')
           save = {
-            'train_dataset_cur_genre': s_threeDTraindataset_cur_genre,
-            'train_labels': s_vTrainLabels,
-            'valid_dataset_cur_genre': s_threeDValiddataset_cur_genre,
-            'valid_labels': s_vValidLabels,
-            'test_dataset_cur_genre': s_threeDTestdataset_cur_genre,
-            'test_labels': s_vTestLabels,
+            'whole_train_dataset': wholeTrainDataset,
+            'train_labels': wholeTrainLabels,
+            'whole_valid_dataset': wholeValidDataset,
+            'valid_labels': wholeValidLabels,
+            'test_dataset_cur_genre': wholeTestDataset,
+            'test_labels': wholeTestLabels,
             }
           pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
           f.close()
@@ -87,15 +88,15 @@ def main():
         test_samples = 50   #number of samples for test
 
         #training patterns. x is input pattern, y is target pattern or label
-        X_train = s_threeDTraindataset_cur_genre[:train_samples]
+        X_train = wholeTrainDataset[:train_samples]
         #fit function below expects to have a vector as the second dimension, not an array
         X_train = X_train.reshape([X_train.shape[0],X_train.shape[1]*X_train.shape[2]])
-        y_train = s_vTrainLabels[:train_samples]
+        y_train = wholeTrainLabels[:train_samples]
 
         #test patterns
-        X_test = s_threeDTestdataset_cur_genre[:test_samples]
+        X_test = wholeTestDataset[:test_samples]
         X_test = X_test.reshape([X_test.shape[0],X_test.shape[1]*X_test.shape[2]])
-        y_test = s_vTestLabels[:test_samples]
+        y_test = wholeTestLabels[:test_samples]
 
         # Create classifier
         lr = LogisticRegression()
@@ -129,7 +130,7 @@ def main():
         plt.tight_layout()
         plt.show()
 
-    #END MAIN
+    # END MAIN
         
 def listGenres(music_dir):
     dirs = os.listdir(music_dir)
@@ -179,8 +180,8 @@ def load_genre(genre_folder):
                 all_song_paths.append(path+"/"+file)
 
     #our dataset 2d ndarray will be len(all_song_paths) x sample_count
-    sample_count = 10 * 44100   # first 10 secs of audio
-    dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), sample_count), dtype=np.float32)
+
+    dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), s_sample_count), dtype=np.float32)
     
     songId = 0
     #for each song in the current genre
@@ -192,7 +193,7 @@ def load_genre(genre_folder):
             cur_song_pcm = songFile2pcm(cur_song_file)
 
             # only keep the first sample_count samples
-            cur_song_pcm = cur_song_pcm[0:sample_count]
+            cur_song_pcm = cur_song_pcm[0:s_sample_count]
 
             #and put it in the dataset_cur_genre
             dataset_cur_genre[songId, :] = cur_song_pcm
@@ -230,53 +231,50 @@ def songFile2pcm(song_path):
     #END SONGFILE2PCM
 
 
-# Merge and prune the training data as needed. Depending on your computer setup, you might not be able to fit it all in memory, and you can tune s_iTrainSize as needed. The labels will be stored into a separate array of integers 0 through 9.
 
 # Also create a validation dataset_cur_genre for hyperparameter tuning.
 #from p_iNb_rows and p_iImg_size: 
 #  return dataset_cur_genre:  an empty 3d array that is [p_iNb_rows, p_iImg_size, p_iImg_size]
 #  return labels: an empty vector that is [p_iNb_rows]
-def make_arrays(p_iNb_rows, p_iImg_size):
+def make_arrays(p_iNb_rows, p_iNb_cols):
     if p_iNb_rows:
-        dataset_cur_genre = np.ndarray((p_iNb_rows, p_iImg_size, p_iImg_size), dtype=np.float32)
+        dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.float32)
         labels = np.ndarray(p_iNb_rows, dtype=np.int32)
     else:
         dataset_cur_genre, labels = None, None
     return dataset_cur_genre, labels
 
-#p_strListPickle_files is an array containing the filenames of the pickled data
-def merge_dataset_cur_genres(p_strListPickledFilenames, p_iTrainSize, p_iValidSize=0):
-    iNum_classes = len(p_strListPickledFilenames)
+# Merge individual genre datasets. Tune s_iTrainSize as needed to be able to fit all data in memory.
+def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
+    iNum_classes = len(p_allPickledFilenames)
     #make empty arrays for validation and training sets and labels
-    valid_dataset_cur_genre, valid_labels = make_arrays(p_iValidSize, s_iImage_size)
-    train_dataset_cur_genre, train_labels = make_arrays(p_iTrainSize, s_iImage_size)
+    whole_valid_dataset, valid_labels = make_arrays(p_iValidSize, s_sample_count)
+    whole_train_dataset, train_labels = make_arrays(p_iTrainSize, s_sample_count)
     
     #number of items per class. // is an int division in python3, not sure in python2
     iNbrOfValidItemsPerClass = p_iValidSize // iNum_classes
-    iNbrOfTrainItemPerClass = p_iTrainSize // iNum_classes
+    iNbrOfTrainItemPerClass  = p_iTrainSize // iNum_classes
   
     #figure out useful indexes for the loop
     iStartValidId, iStartTrainId = 0, 0
     iEndValidId, iEndTrainId = iNbrOfValidItemsPerClass, iNbrOfTrainItemPerClass
     iEndListId = iNbrOfValidItemsPerClass+iNbrOfTrainItemPerClass
   
-    #for each file in p_strListPickledFilenames
-    for iPickleFileId, strPickleFilename in enumerate(p_strListPickledFilenames):    
+    #for each file in p_allPickledFilenames
+    for iPickleFileId, strPickleFilename in enumerate(p_allPickledFilenames):    
         try:
             #open the file
             with open(strPickleFilename, 'rb') as f:
                 print (strPickleFilename)
             #unpicke 3d array for current file
-            threeDCurLetterSet = pickle.load(f)
-            # let's shuffle the items to have random validation and training set. 
-            # np.random.shuffle suffles only first dimension
-            np.random.shuffle(threeDCurLetterSet)
+            cur_genre_dataset = pickle.load(f)
+            # let's shuffle the items to have random validation and training set. np.random.shuffle suffles only first dimension
+            np.random.shuffle(cur_genre_dataset)
         
-            #if we asked for a validation set
-            if valid_dataset_cur_genre is not None:
+            #if we asked for a validation set, use the first items for it
+            if whole_valid_dataset is not None:
                 #the first iNbrOfValidItemsPerClass items in letter_set are used for the validation set
-                threeDValidItems = threeDCurLetterSet[:iNbrOfValidItemsPerClass, :, :]
-                valid_dataset_cur_genre[iStartValidId:iEndValidId, :, :] = threeDValidItems
+                whole_valid_dataset[iStartValidId:iEndValidId, :] = cur_genre_dataset[:iNbrOfValidItemsPerClass, :]
                 #label all images with the current file id 
                 valid_labels[iStartValidId:iEndValidId] = iPickleFileId
                 #update ids for the train set
@@ -284,16 +282,15 @@ def merge_dataset_cur_genres(p_strListPickledFilenames, p_iTrainSize, p_iValidSi
                 iEndValidId   += iNbrOfValidItemsPerClass
                     
             #the rest of the items are used for the training set
-            threeDTrainItems = threeDCurLetterSet[iNbrOfValidItemsPerClass:iEndListId, :, :]
-            train_dataset_cur_genre[iStartTrainId:iEndTrainId, :, :] = threeDTrainItems
+            whole_train_dataset[iStartTrainId:iEndTrainId, :] = cur_genre_dataset[iNbrOfValidItemsPerClass:iEndListId, :]
             train_labels[iStartTrainId:iEndTrainId] = iPickleFileId
             iStartTrainId += iNbrOfTrainItemPerClass
-            iEndTrainId += iNbrOfTrainItemPerClass
+            iEndTrainId   += iNbrOfTrainItemPerClass
         except Exception as e:
             print('Unable to process data from', strPickleFilename, ':', e)
             raise 
-    return valid_dataset_cur_genre, valid_labels, train_dataset_cur_genre, train_labels
-    #END OF merge_dataset_cur_genres
+    return whole_valid_dataset, valid_labels, whole_train_dataset, train_labels
+    #END OF merge_dataset
 
 
 
