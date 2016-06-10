@@ -28,7 +28,7 @@ def main():
     trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/test/') #listGenres('/media/kxstudio/LUSSIER/music/train/')
     testGenreNames  = listGenres('/media/kxstudio/LUSSIER/music/test/')
 
-    s_strListPickledTrainFilenames = maybe_pickle(trainGenrePaths, True)
+    s_strListPickledTrainFilenames = maybe_pickle(trainGenrePaths)
     # s_strListPickledTestFilenames  = maybe_pickle(testGenreNames)
 
     if False:
@@ -179,7 +179,7 @@ def load_genre(genre_folder):
                 all_song_paths.append(path+"/"+file)
 
     #our dataset 2d ndarray will be len(all_song_paths) x sample_count
-    sample_count = 1000
+    sample_count = 10 * 44100   # first 10 secs of audio
     dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), sample_count), dtype=np.float32)
     
     songId = 0
