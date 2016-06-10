@@ -137,7 +137,7 @@ def listGenres(music_dir):
     allAudioGenrePaths = []
     allAudioGenres = []
     for cur_dir in dirs:
-        if not cur_dir.startswith('.') :
+        if not cur_dir.startswith('.') and not cur_dir.endswith('pickle') :
             allAudioGenrePaths.append(music_dir+cur_dir)
             allAudioGenres.append(cur_dir)
     return allAudioGenres, allAudioGenrePaths
@@ -227,24 +227,10 @@ def songFile2pcm(song_path):
     # import scikits.audiolab
     # scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=44100, enc='pcm16')
     return audio_array
-
     #END SONGFILE2PCM
 
-
-
-# Also create a validation dataset_cur_genre for hyperparameter tuning.
-#from p_iNb_rows and p_iImg_size: 
-#  return dataset_cur_genre:  an empty 3d array that is [p_iNb_rows, p_iImg_size, p_iImg_size]
-#  return labels: an empty vector that is [p_iNb_rows]
-def make_arrays(p_iNb_rows, p_iNb_cols):
-    if p_iNb_rows:
-        dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.float32)
-        labels = np.ndarray(p_iNb_rows, dtype=np.int32)
-    else:
-        dataset_cur_genre, labels = None, None
-    return dataset_cur_genre, labels
-
 # Merge individual genre datasets. Tune s_iTrainSize as needed to be able to fit all data in memory.
+# Also create a validation dataset_cur_genre for hyperparameter tuning.
 def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
     iNum_classes = len(p_allPickledFilenames)
     #make empty arrays for validation and training sets and labels
@@ -291,6 +277,14 @@ def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
             raise 
     return whole_valid_dataset, valid_labels, whole_train_dataset, train_labels
     #END OF merge_dataset
+
+def make_arrays(p_iNb_rows, p_iNb_cols):
+    if p_iNb_rows:
+        dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.float32)
+        labels = np.ndarray(p_iNb_rows, dtype=np.int32)
+    else:
+        dataset_cur_genre, labels = None, None
+    return dataset_cur_genre, labels
 
 
 
