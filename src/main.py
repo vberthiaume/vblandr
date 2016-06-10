@@ -16,13 +16,22 @@ import utilFunctions as UF
 #ffmpeg stuff
 import subprocess as sp
 
+
+#random init stuff
+np.random.seed(133)
 s_sample_count = 10 * 44100   # first 10 secs of audio
 
 def main():
-    np.random.seed(133)
-    
-    #---------------------------------- BUILD DATA SETS ----------------------------------
-    #this algorithm will use the same number of train, valid, and test patterns for each genre/class.
+        
+    #build train, valid and test datasets
+    buildDataSets()
+
+    # ---------------------------------- MAKE A GODDAMN NEURAL NETWORK ----------------------------------
+
+    # END MAIN
+      
+def buildDataSets():
+        #this algorithm will use the same number of train, valid, and test patterns for each genre/class.
     s_iTrainSize  = 2*7 # 200000
     s_iValid_size = 7  # 10000
     s_iTestSize   = 7  # 10000
@@ -73,65 +82,9 @@ def main():
     statinfo = os.stat(pickle_file)
     print('Compressed pickle size:', statinfo.st_size/1000000, "Mb")
 
-    print ('================== DONE ================')
-    if False:
+    print ('================== DATASETS BUILT ================')
+    # ENDOF BUILDDATASETS
 
-        # Problem 6
-        # Let's get an idea of what an off-the-shelf classifier can give you on this data. It's always good to check that there is something to learn, and that it's a problem that is not so trivial that a canned solution solves it.
-        # Train a simple model on this data using 50, 100, 1000 and 5000 training samples. Hint: you can use the LogisticRegression model from sklearn.linear_model.
-        # Optional question: train an off-the-shelf model on all the data!
-        ### taking inspiration from http://scikit-learn.org/stable/auto_examples/calibration/plot_compare_calibration.html#example-calibration-plot-compare-calibration-py
-        from sklearn import dataset_cur_genres
-        from sklearn.calibration import calibration_curve
-
-        train_samples = 100  # number of samples used for training
-        test_samples = 50   #number of samples for test
-
-        #training patterns. x is input pattern, y is target pattern or label
-        X_train = wholeTrainDataset[:train_samples]
-        #fit function below expects to have a vector as the second dimension, not an array
-        X_train = X_train.reshape([X_train.shape[0],X_train.shape[1]*X_train.shape[2]])
-        y_train = wholeTrainLabels[:train_samples]
-
-        #test patterns
-        X_test = wholeTestDataset[:test_samples]
-        X_test = X_test.reshape([X_test.shape[0],X_test.shape[1]*X_test.shape[2]])
-        y_test = wholeTestLabels[:test_samples]
-
-        # Create classifier
-        lr = LogisticRegression()
-
-        #create plots
-        plt.figure(figsize=(10, 10))
-        ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
-        ax2 = plt.subplot2grid((3, 1), (2, 0))
-        ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")   
-
-        #try to fit the training data
-        lr.fit(X_train, y_train)
-
-        #assess how confident (how probable it is correct) the model is at predicting test classifications
-        prob_pos = lr.predict_proba(X_test)[:, 1]
-            
-        #fraction_of_positives, mean_predicted_value = calibration_curve(y_test, prob_pos, n_bins=10)
-
-        #ax1.plot(mean_predicted_value, fraction_of_positives, "s-", label="%s" % (name, ))
-        ax2.hist(prob_pos, range=(0, 1), bins=10, label='Logistic', histtype="step", lw=2)
-
-        # ax1.set_ylabel("Fraction of positives")
-        # ax1.set_ylim([-0.05, 1.05])
-        # ax1.legend(loc="lower right")
-        # ax1.set_title('Calibration plots  (reliability curve)')
-
-        ax2.set_xlabel("Mean predicted value")
-        ax2.set_ylabel("Count")
-        ax2.legend(loc="upper center", ncol=2)
-
-        plt.tight_layout()
-        plt.show()
-
-    # END MAIN
-        
 def listGenres(music_dir):
     dirs = os.listdir(music_dir)
     allAudioGenrePaths = []

@@ -1,4 +1,4 @@
-# Assignment 1
+# =========================== Assignment 1 PICKLE ALL THE DATA AND TRY A LINEAR MODEL ON IT ==========================
 
 # The objective of this assignment is to learn about simple data curation practices, and familiarize you with some of the data we'll be reusing later.
 
