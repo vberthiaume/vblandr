@@ -21,8 +21,9 @@ def main():
     np.random.seed(133)
     
     #---------------------------------- BUILD DATA SETS ----------------------------------
-    s_iTrainSize  = 10 # 200000
-    s_iValid_size = 2  # 10000
+    #this algorithm will use the same number of train, valid, and test patterns for each genre/class.
+    s_iTrainSize  = 2*7 # 200000
+    s_iValid_size = 7  # 10000
     s_iTestSize   = 0  # 10000
 
     #get a list of genres for training and testing
@@ -252,26 +253,26 @@ def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
             #open the file
             with open(strPickleFilename, 'rb') as f:
                 print (strPickleFilename)
-            #unpicke 3d array for current file
-            cur_genre_dataset = pickle.load(f)
-            # let's shuffle the items to have random validation and training set. np.random.shuffle suffles only first dimension
-            np.random.shuffle(cur_genre_dataset)
+                #unpicke 3d array for current file
+                cur_genre_dataset = pickle.load(f)
+                # let's shuffle the items to have random validation and training set. np.random.shuffle suffles only first dimension
+                np.random.shuffle(cur_genre_dataset)
         
-            #if we asked for a validation set, use the first items for it
-            if whole_valid_dataset is not None:
-                #the first iNbrOfValidItemsPerClass items in letter_set are used for the validation set
-                whole_valid_dataset[iStartValidId:iEndValidId, :] = cur_genre_dataset[:iNbrOfValidItemsPerClass, :]
-                #label all images with the current file id 
-                valid_labels[iStartValidId:iEndValidId] = iPickleFileId
-                #update ids for the train set
-                iStartValidId += iNbrOfValidItemsPerClass
-                iEndValidId   += iNbrOfValidItemsPerClass
+                #if we asked for a validation set, use the first items for it
+                if whole_valid_dataset is not None:
+                    #the first iNbrOfValidItemsPerClass items in letter_set are used for the validation set
+                    whole_valid_dataset[iStartValidId:iEndValidId, :] = cur_genre_dataset[:iNbrOfValidItemsPerClass, :]
+                    #label all images with the current file id 
+                    valid_labels[iStartValidId:iEndValidId] = iPickleFileId
+                    #update ids for the train set
+                    iStartValidId += iNbrOfValidItemsPerClass
+                    iEndValidId   += iNbrOfValidItemsPerClass
                     
-            #the rest of the items are used for the training set
-            whole_train_dataset[iStartTrainId:iEndTrainId, :] = cur_genre_dataset[iNbrOfValidItemsPerClass:iEndListId, :]
-            train_labels[iStartTrainId:iEndTrainId] = iPickleFileId
-            iStartTrainId += iNbrOfTrainItemPerClass
-            iEndTrainId   += iNbrOfTrainItemPerClass
+                #the rest of the items are used for the training set
+                whole_train_dataset[iStartTrainId:iEndTrainId, :] = cur_genre_dataset[iNbrOfValidItemsPerClass:iEndListId, :]
+                train_labels[iStartTrainId:iEndTrainId] = iPickleFileId
+                iStartTrainId += iNbrOfTrainItemPerClass
+                iEndTrainId   += iNbrOfTrainItemPerClass
         except Exception as e:
             print('Unable to process data from', strPickleFilename, ':', e)
             raise 
