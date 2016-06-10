@@ -56,12 +56,12 @@ def main():
 
     try:
         f = open(pickle_file, 'wb')
-        save = {'wholeTrainDataset': wholeTrainDataset,
-                'wholeTrainLabels': wholeTrainLabels,
-                'wholeValidDataset': wholeValidDataset,
-                'wholeValidLabels': wholeValidLabels,
-                'wholeTestDataset': wholeTestDataset,
-                'wholeTestLabels': wholeTestLabels}
+        save = {'wholeTrainDataset':    wholeTrainDataset,
+                'wholeTrainLabels':     wholeTrainLabels,
+                'wholeValidDataset':    wholeValidDataset,
+                'wholeValidLabels':     wholeValidLabels,
+                'wholeTestDataset':     wholeTestDataset,
+                'wholeTestLabels':      wholeTestLabels}
         pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
         f.close()
     except Exception as e:
