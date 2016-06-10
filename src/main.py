@@ -42,41 +42,38 @@ def main():
     print('Validation:', wholeValidDataset.shape, wholeValidLabels.shape)
     print('Testing:',    wholeTestDataset.shape,  wholeTestLabels.shape)
 
-    print ('================== DONE ================')
-    if False:
-        #print shapes for data sets and their respective labels. data sets are 3d arrays with [image_id,x,y] and labels
-        #are [image_ids]
+    wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
+    wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
+    wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
 
-        wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
-        wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
-        wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
+    print(wholeTrainDataset.shape)
+    print(wholeTestDataset.shape)
+    print(wholeValidDataset.shape)
 
-        print(wholeTrainDataset.shape)
-        print(wholeTestDataset.shape)
-        print(wholeValidDataset.shape)
 
         # Finally, let's save the data for later reuse:
-        pickle_file = 'notMNIST.pickle'
+    pickle_file = '/media/kxstudio/LUSSIER/music/allData.pickle'
 
-        try:
-          f = open(pickle_file, 'wb')
-          save = {
-            'whole_train_dataset': wholeTrainDataset,
-            'train_labels': wholeTrainLabels,
-            'whole_valid_dataset': wholeValidDataset,
-            'valid_labels': wholeValidLabels,
-            'test_dataset_cur_genre': wholeTestDataset,
-            'test_labels': wholeTestLabels,
-            }
-          pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
-          f.close()
-        except Exception as e:
-          print('Unable to save data to', pickle_file, ':', e)
-          raise
+    try:
+        f = open(pickle_file, 'wb')
+        save = {'wholeTrainDataset': wholeTrainDataset,
+                'wholeTrainLabels': wholeTrainLabels,
+                'wholeValidDataset': wholeValidDataset,
+                'wholeValidLabels': wholeValidLabels,
+                'wholeTestDataset': wholeTestDataset,
+                'wholeTestLabels': wholeTestLabels}
+        pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
+        f.close()
+    except Exception as e:
+        print('Unable to save data to', pickle_file, ':', e)
+        raise
 
 
-        statinfo = os.stat(pickle_file)
-        print('Compressed pickle size:', statinfo.st_size)
+    statinfo = os.stat(pickle_file)
+    print('Compressed pickle size:', statinfo.st_size/1000000, "Mb")
+
+    print ('================== DONE ================')
+    if False:
 
         # Problem 6
         # Let's get an idea of what an off-the-shelf classifier can give you on this data. It's always good to check that there is something to learn, and that it's a problem that is not so trivial that a canned solution solves it.
@@ -253,7 +250,6 @@ def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
         try:
             #open the file
             with open(strPickleFilename, 'rb') as f:
-                print (strPickleFilename)
                 #unpicke 3d array for current file
                 cur_genre_dataset = pickle.load(f)
                 # let's shuffle the items to have random validation and training set. np.random.shuffle suffles only first dimension
@@ -294,7 +290,7 @@ def make_arrays(p_iNb_rows, p_iNb_cols):
 def randomize(p_3ddataset_cur_genre, p_vLabels):
     #with int x as parameter, np.random.permutation returns a random permutation of np.arange(x)
     vPermutation = np.random.permutation(p_vLabels.shape[0])
-    threeDShuffleddataset_cur_genre = p_3ddataset_cur_genre[vPermutation,:,:]
+    threeDShuffleddataset_cur_genre = p_3ddataset_cur_genre[vPermutation,:]
     threeDShuffledLabels  = p_vLabels  [vPermutation]
     return threeDShuffleddataset_cur_genre, threeDShuffledLabels
 
