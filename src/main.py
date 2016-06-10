@@ -24,20 +24,20 @@ s_sample_count = 10 * 44100   # first 10 secs of audio
 def main():
         
     #build train, valid and test datasets
-    buildDataSets()
+    pickle_file = buildDataSets()
 
     # ---------------------------------- MAKE A GODDAMN NEURAL NETWORK ----------------------------------
 
     # END MAIN
       
 def buildDataSets():
-        #this algorithm will use the same number of train, valid, and test patterns for each genre/class.
+    # this algorithm will use the same number of train, valid, and test patterns for each genre/class.
     s_iTrainSize  = 2*7 # 200000
     s_iValid_size = 7  # 10000
     s_iTestSize   = 7  # 10000
 
-    #get a list of genres for training and testing
-    #using test for now to test training
+    # get a list of genres for training and testing
+    # using test for now to test training
     trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/train_small/') #listGenres('/media/kxstudio/LUSSIER/music/train/')
     testGenreNames, testGenrePaths  = listGenres('/media/kxstudio/LUSSIER/music/test/')
 
@@ -83,6 +83,7 @@ def buildDataSets():
     print('Compressed pickle size:', statinfo.st_size/1000000, "Mb")
 
     print ('================== DATASETS BUILT ================')
+    return pickle_file
     # ENDOF BUILDDATASETS
 
 def listGenres(music_dir):
