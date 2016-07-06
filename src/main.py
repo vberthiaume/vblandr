@@ -27,7 +27,7 @@ def main():
     pickle_file = buildDataSets()
 
     # ---------------------------------- MAKE A GODDAMN NEURAL NETWORK ----------------------------------
-
+    # use stuff from mnist 
     # END MAIN
       
 def buildDataSets():
@@ -38,9 +38,13 @@ def buildDataSets():
 
     # get a list of genres for training and testing
     # using test for now to test training
-    trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/train_small/') #listGenres('/media/kxstudio/LUSSIER/music/train/')
-    testGenreNames, testGenrePaths  = listGenres('/media/kxstudio/LUSSIER/music/test/')
 
+    # trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/train_small/')
+    # testGenreNames, testGenrePaths  = listGenres('/media/kxstudio/LUSSIER/music/test/')
+    trainGenreNames, trainGenrePaths = listGenres('/Volumes/Untitled/music/train_small/')
+    testGenreNames,  testGenrePaths  = listGenres('/Volumes/Untitled/music/test_small/')
+
+    
     allPickledTrainFilenames = maybe_pickle(trainGenrePaths)
     allPickledTestFilenames  = maybe_pickle(testGenrePaths)
 
@@ -62,7 +66,8 @@ def buildDataSets():
 
 
         # Finally, let's save the data for later reuse:
-    pickle_file = '/media/kxstudio/LUSSIER/music/allData.pickle'
+    # pickle_file = '/media/kxstudio/LUSSIER/music/allData.pickle'
+    pickle_file = '/Volumes/Untitled/music/allData.pickle'
 
     try:
         f = open(pickle_file, 'wb')
@@ -177,6 +182,11 @@ def songFile2pcm(song_path):
     #read the output into a numpy array
     stdoutdata = pipe.stdout.read()
     audio_array = np.fromstring(stdoutdata, dtype="int16")
+
+    size = len(audio_array)
+    print ("size: ", size)
+
+
     #export this to a wav file, to test it
     # import scikits.audiolab
     # scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=44100, enc='pcm16')
