@@ -21,10 +21,16 @@ from __future__ import print_function
 
 import time
 import math
+from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
+from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
 
-from tensorflow.examples.tutorials.mnist import input_data
+import gzip
+import os
+import tempfile
+
+import numpy
 
 # Basic model parameters as external flags.
 flags = tf.app.flags
@@ -49,7 +55,7 @@ def run_training():
     """Train MNIST for a number of steps."""
     # Get the sets of images and labels for training, validation, and
     # test on MNIST.
-    data_sets = input_data.read_data_sets(FLAGS.train_dir, FLAGS.fake_data)
+    data_sets = read_data_sets(FLAGS.train_dir, FLAGS.fake_data)
 
     # Tell TensorFlow that the model will be built into the default Graph.
     with tf.Graph().as_default():
