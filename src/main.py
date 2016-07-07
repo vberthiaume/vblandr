@@ -2,17 +2,13 @@ from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
-import os, os.path
-import sys
-import tarfile
-from IPython.display import display, Image
-from scipy import ndimage
-from sklearn.linear_model import LogisticRegression
 from six.moves import cPickle as pickle
 
 #sms-tools stuff
+import sys, os, os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
 import utilFunctions as UF
+
 #ffmpeg stuff
 import subprocess as sp
 
