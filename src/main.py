@@ -39,11 +39,13 @@ def buildDataSets():
     # get a list of genres for training and testing
     # using test for now to test training
 
-    # trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/train_small/')
-    # testGenreNames, testGenrePaths  = listGenres('/media/kxstudio/LUSSIER/music/test/')
-    trainGenreNames, trainGenrePaths = listGenres('/Volumes/Untitled/music/train_small/')
-    testGenreNames,  testGenrePaths  = listGenres('/Volumes/Untitled/music/test_small/')
-
+    trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/train_small/')
+    testGenreNames, testGenrePaths  = listGenres('/media/kxstudio/LUSSIER/music/test/')
+    pickle_file = '/media/kxstudio/LUSSIER/music/allData.pickle'
+    
+    # trainGenreNames, trainGenrePaths = listGenres('/Volumes/Untitled/music/train_small/')
+    # testGenreNames,  testGenrePaths  = listGenres('/Volumes/Untitled/music/test_small/')
+    # pickle_file = '/Volumes/Untitled/music/allData.pickle'
     
     allPickledTrainFilenames = maybe_pickle(trainGenrePaths)
     allPickledTestFilenames  = maybe_pickle(testGenrePaths)
@@ -65,10 +67,7 @@ def buildDataSets():
     print(wholeValidDataset.shape)
 
 
-        # Finally, let's save the data for later reuse:
-    # pickle_file = '/media/kxstudio/LUSSIER/music/allData.pickle'
-    pickle_file = '/Volumes/Untitled/music/allData.pickle'
-
+    # Finally, let's save the data for later reuse: 
     try:
         f = open(pickle_file, 'wb')
         save = {'wholeTrainDataset':    wholeTrainDataset,
