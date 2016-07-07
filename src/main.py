@@ -12,7 +12,6 @@ import utilFunctions as UF
 #ffmpeg stuff
 import subprocess as sp
 
-
 #random init stuff
 np.random.seed(133)
 s_sample_count = 10 * 44100   # first 10 secs of audio

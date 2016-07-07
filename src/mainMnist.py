@@ -19,18 +19,26 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 import time
 import math
-import gzip
 import os
 import tempfile
-import numpy
 
 from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
+from six.moves import cPickle as pickle
+#tensorflow stuff
 import tensorflow as tf
-from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
-
+ from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
+#sms-tools stuff
+import sys, os, os.path
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
+import utilFunctions as UF
+#ffmpeg stuff
+import subprocess as sp
 
 # Basic model parameters as external flags.
 flags = tf.app.flags
@@ -47,8 +55,7 @@ flags.DEFINE_boolean('fake_data',     False,  'If true, uses fake data  for unit
 NUM_CLASSES = 10
 
 # The MNIST images are always 28x28 pixels.
-IMAGE_SIZE = 28
-IMAGE_PIXELS = IMAGE_SIZE * IMAGE_SIZE
+s_sample_count = 10 * 44100   # first 10 secs of audio
 
 def main(_):
     run_training()
