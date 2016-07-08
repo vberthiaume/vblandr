@@ -146,9 +146,9 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
         print('Validation set', valid_dataset.shape, valid_labels.shape)
         print('Test set', test_dataset.shape, test_labels.shape)
 
-    train       = DataSet(train_dataset, train_labels,      dtype=dtype)
-    validation  = DataSet(valid_dataset, validation_labels, dtype=dtype)
-    test        = DataSet(test_dataset,  test_labels,       dtype=dtype)
+    train       = DataSet(train_dataset, train_labels,  dtype=dtype)
+    validation  = DataSet(valid_dataset, valid_labels,  dtype=dtype)
+    test        = DataSet(test_dataset,  test_labels,   dtype=dtype)
 
     return base.Datasets(train=train, validation=validation, test=test)
 
@@ -510,17 +510,24 @@ class DataSet(object):
         dtype = dtypes.as_dtype(dtype).base_dtype
         if dtype not in (dtypes.uint8, dtypes.float32):
             raise TypeError('Invalid image dtype %r, expected uint8 or float32' % dtype)
-
+        #check that we have the same number of songs and labels
         assert songs.shape[0] == labels.shape[0], ('songs.shape: %s labels.shape: %s' % (songs.shape, labels.shape))
         self._num_examples = songs.shape[0]
 
         # Convert shape from [num examples, rows, columns, depth] to [num examples, rows*columns] (assuming depth == 1)
-        assert songs.shape[3] == 1
-        songs = songs.reshape(songs.shape[0], songs.shape[1] * songs.shape[2])
-        if dtype == dtypes.float32:
-            # Convert from [0, 255] -> [0.0, 1.0].
-            songs = songs.astype(numpy.float32)
-            songs = numpy.multiply(songs, 1.0 / 255.0)
+        # this is not necessary for songs now, because songs is already of the shape [num_song=14, num_samples=44100]
+        # assert songs.shape[3] == 1
+        # songs = songs.reshape(songs.shape[0], songs.shape[1] * songs.shape[2])
+        # if dtype == dtypes.float32:
+        #     # Convert from [0, 255] -> [0.0, 1.0].
+        #     songs = songs.astype(numpy.float32)
+        #     songs = numpy.multiply(songs, 1.0 / 255.0)
+        
+        #we do need to check if we need to normalize it though... or not? not sure. 
+        for cur_song, cur_song_samples in enumerate(songs):
+            print (cur_song, np.amax(cur_song_samples))
+            print (cur_song, np.amin(cur_song_samples))
+
         self._songs = songs
         self._labels = labels
         self._epochs_completed = 0
