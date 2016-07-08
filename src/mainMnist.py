@@ -146,9 +146,9 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
         print('Validation set', valid_dataset.shape, valid_labels.shape)
         print('Test set', test_dataset.shape, test_labels.shape)
 
-    train       = DataSet(train_images, train_labels, dtype=dtype)
-    validation  = DataSet(validation_images, validation_labels, dtype=dtype)
-    test        = DataSet(test_images, test_labels, dtype=dtype)
+    train       = DataSet(train_dataset, train_labels,      dtype=dtype)
+    validation  = DataSet(valid_dataset, validation_labels, dtype=dtype)
+    test        = DataSet(test_dataset,  test_labels,       dtype=dtype)
 
     return base.Datasets(train=train, validation=validation, test=test)
 
@@ -511,24 +511,24 @@ class DataSet(object):
         if dtype not in (dtypes.uint8, dtypes.float32):
             raise TypeError('Invalid image dtype %r, expected uint8 or float32' % dtype)
 
-        assert images.shape[0] == labels.shape[0], ('images.shape: %s labels.shape: %s' % (images.shape, labels.shape))
-        self._num_examples = images.shape[0]
+        assert songs.shape[0] == labels.shape[0], ('songs.shape: %s labels.shape: %s' % (songs.shape, labels.shape))
+        self._num_examples = songs.shape[0]
 
         # Convert shape from [num examples, rows, columns, depth] to [num examples, rows*columns] (assuming depth == 1)
-        assert images.shape[3] == 1
-        images = images.reshape(images.shape[0], images.shape[1] * images.shape[2])
+        assert songs.shape[3] == 1
+        songs = songs.reshape(songs.shape[0], songs.shape[1] * songs.shape[2])
         if dtype == dtypes.float32:
             # Convert from [0, 255] -> [0.0, 1.0].
-            images = images.astype(numpy.float32)
-            images = numpy.multiply(images, 1.0 / 255.0)
-        self._images = images
+            songs = songs.astype(numpy.float32)
+            songs = numpy.multiply(songs, 1.0 / 255.0)
+        self._songs = songs
         self._labels = labels
         self._epochs_completed = 0
         self._index_in_epoch = 0
 
     @property
-    def images(self):
-        return self._images
+    def songs(self):
+        return self._songs
 
     @property
     def labels(self):
@@ -552,14 +552,14 @@ class DataSet(object):
             # Shuffle the data
             perm = numpy.arange(self._num_examples)
             numpy.random.shuffle(perm)
-            self._images = self._images[perm]
+            self._songs = self._songs[perm]
             self._labels = self._labels[perm]
             # Start next epoch
             start = 0
             self._index_in_epoch = batch_size
             assert batch_size <= self._num_examples
         end = self._index_in_epoch
-        return self._images[start:end], self._labels[start:end]
+        return self._songs[start:end], self._labels[start:end]
     # ENDOF DataSet 
 
 if __name__ == '__main__':
