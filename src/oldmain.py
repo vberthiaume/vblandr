@@ -180,7 +180,6 @@ def songFile2pcm(song_path):
     size = len(audio_array)
     print ("size: ", size)
 
-
     #export this to a wav file, to test it
     # import scikits.audiolab
     # scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=44100, enc='pcm16')

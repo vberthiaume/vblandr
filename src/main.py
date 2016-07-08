@@ -40,6 +40,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..
 import utilFunctions as UF
 #ffmpeg stuff
 import subprocess as sp
+import scikits.audiolab
 
 # Basic model parameters as external flags.
 flags = tf.app.flags
@@ -52,11 +53,15 @@ flags.DEFINE_integer('batch_size',    100,    'Batch size. Must divide evenly in
 flags.DEFINE_string ('train_dir',     'data', 'Directory to put the training data.')
 flags.DEFINE_boolean('fake_data',     False,  'If true, uses fake data  for unit testing.')
 
-# The MNIST dataset has 10 classes, representing the digits 0 through 9.
-NUM_CLASSES = 10
+# we have 7 genres
+NUM_CLASSES = 7
 
-# The MNIST images are always 28x28 pixels.
+LIBRARY_PATH = '/media/kxstudio/LUSSIER/music/'
+# LIBRARY_PATH = '/Volumes/Untitled/music/'
+
 s_sample_count = 10 * 44100   # first 10 secs of audio
+
+# overall_song_id = 0
 
 def main(_):
     run_training()
@@ -142,9 +147,11 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
         test_dataset    = save['wholeTestDataset']
         test_labels     = save['wholeTestLabels']
         del save  # hint to help gc free up memory
-        print('Training set', train_dataset.shape, train_labels.shape)
+        print('Training set',   train_dataset.shape, train_labels.shape)
         print('Validation set', valid_dataset.shape, valid_labels.shape)
-        print('Test set', test_dataset.shape, test_labels.shape)
+        print('Test set',       test_dataset.shape,  test_labels.shape)
+
+        #TODO: train_dataset ETC MIGHT STILL BE PICKLED AT THAT POINT, EXPLAINING WHY AUDIO IS GARBLED? 
 
     train       = DataSet(train_dataset, train_labels,  dtype=dtype)
     validation  = DataSet(valid_dataset, valid_labels,  dtype=dtype)
@@ -152,23 +159,91 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
 
     return base.Datasets(train=train, validation=validation, test=test)
 
+def write_test_wav(cur_song_samples, str_id = ""):
+    scikits.audiolab.wavwrite(cur_song_samples, LIBRARY_PATH +'test'+ str_id +'.wav', fs=44100, enc='pcm16')
+
+class DataSet(object):
+    def __init__(self, songs, labels, dtype=dtypes.float32):
+        """Construct a DataSet. `dtype` can be either `uint8` to leave the input as `[0, 255]`, or `float32` to rescale into `[0, 1]`."""
+        dtype = dtypes.as_dtype(dtype).base_dtype
+        if dtype not in (dtypes.uint8, dtypes.float32):
+            raise TypeError('Invalid image dtype %r, expected uint8 or float32' % dtype)
+        #check that we have the same number of songs and labels
+        assert songs.shape[0] == labels.shape[0], ('songs.shape: %s labels.shape: %s' % (songs.shape, labels.shape))
+        self._num_examples = songs.shape[0]
+
+        # Convert shape from [num examples, rows, columns, depth] to [num examples, rows*columns] (assuming depth == 1)
+        # this is not necessary for songs now, because songs is already of the shape [num_song=14, num_samples=44100]
+        # assert songs.shape[3] == 1
+        # songs = songs.reshape(songs.shape[0], songs.shape[1] * songs.shape[2])
+        # if dtype == dtypes.float32:
+        #     # Convert from [0, 255] -> [0.0, 1.0].
+        #     songs = songs.astype(numpy.float32)
+        #     songs = numpy.multiply(songs, 1.0 / 255.0)
+        
+        #we do need to check if we need to normalize it though... or not? not sure. 
+        for cur_song, cur_song_samples in enumerate(songs):
+            print (cur_song, np.amax(cur_song_samples))
+            print (cur_song, np.amin(cur_song_samples))
+
+            #export this to a wav file, to test it
+            # if cur_song == 0:
+                # write_test_wav(cur_song_samples, str(cur_song))
+
+        self._songs             = songs
+        self._labels            = labels
+        self._epochs_completed  = 0
+        self._index_in_epoch    = 0
+
+    @property
+    def songs(self):
+        return self._songs
+
+    @property
+    def labels(self):
+        return self._labels
+
+    @property
+    def num_examples(self):
+        return self._num_examples
+
+    @property
+    def epochs_completed(self):
+        return self._epochs_completed
+
+    def next_batch(self, batch_size, fake_data=False):
+        """Return the next `batch_size` examples from this data set."""
+        start = self._index_in_epoch
+        self._index_in_epoch += batch_size
+        if self._index_in_epoch > self._num_examples:
+            # Finished epoch
+            self._epochs_completed += 1
+            # Shuffle the data
+            perm = numpy.arange(self._num_examples)
+            numpy.random.shuffle(perm)
+            self._songs = self._songs[perm]
+            self._labels = self._labels[perm]
+            # Start next epoch
+            start = 0
+            self._index_in_epoch = batch_size
+            assert batch_size <= self._num_examples
+        end = self._index_in_epoch
+        return self._songs[start:end], self._labels[start:end]
+    # ENDOF DataSet 
+
 def buildDataSets():
     # this algorithm will use the same number of train, valid, and test patterns for each genre/class.
-    s_iTrainSize  = 2*7 # 200000
-    s_iValid_size = 7  # 10000
-    s_iTestSize   = 7  # 10000
+    s_iTrainSize  = 2*NUM_CLASSES # 200000
+    s_iValid_size = NUM_CLASSES  # 10000
+    s_iTestSize   = NUM_CLASSES  # 10000
 
     # get a list of genres for training and testing
     # using test for now to test training
 
-    trainGenreNames, trainGenrePaths = listGenres('/media/kxstudio/LUSSIER/music/train_small/')
-    testGenreNames, testGenrePaths  = listGenres('/media/kxstudio/LUSSIER/music/test/')
-    pickle_file = '/media/kxstudio/LUSSIER/music/allData.pickle'
-    
-    # trainGenreNames, trainGenrePaths = listGenres('/Volumes/Untitled/music/train_small/')
-    # testGenreNames,  testGenrePaths  = listGenres('/Volumes/Untitled/music/test_small/')
-    # pickle_file = '/Volumes/Untitled/music/allData.pickle'
-    
+    trainGenreNames, trainGenrePaths = listGenres(LIBRARY_PATH + 'train_small/')
+    testGenreNames, testGenrePaths  = listGenres( LIBRARY_PATH + 'test_small/')
+    pickle_file =                                 LIBRARY_PATH + 'allData.pickle'
+        
     allPickledTrainFilenames = maybe_pickle(trainGenrePaths)
     allPickledTestFilenames  = maybe_pickle(testGenrePaths)
 
@@ -241,6 +316,7 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
             try:
                 #and try to pickle it
                 with open(strCurSetFilename, 'wb') as f:
+                    # TODO: WHEN IS THIS UNPICKLED^???
                     pickle.dump(dataset_cur_genre, f, pickle.HIGHEST_PROTOCOL)
             except Exception as e:
                 print('Unable to save data to', strCurSetFilename, ':', e)
@@ -251,6 +327,8 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
 def load_genre(genre_folder):
     """Load all song data for a single genre"""
     
+    # global overall_song_id
+
     #figure out the path to all the genre's song files, and how many songs we have
     all_song_paths = []
     for path, dirs, files in os.walk(genre_folder):
@@ -274,6 +352,10 @@ def load_genre(genre_folder):
 
             # only keep the first sample_count samples
             cur_song_pcm = cur_song_pcm[0:s_sample_count]
+
+            # test whether song is correctly extracted
+            # write_test_wav(cur_song_pcm, str(overall_song_id))
+            # overall_song_id += 1
 
             #and put it in the dataset_cur_genre
             dataset_cur_genre[songId, :] = cur_song_pcm
@@ -307,10 +389,8 @@ def songFile2pcm(song_path):
     size = len(audio_array)
     print ("size: ", size)
 
-
     #export this to a wav file, to test it
-    # import scikits.audiolab
-    # scikits.audiolab.wavwrite(audio_array, path+'test.wav', fs=44100, enc='pcm16')
+    # write_test_wav(audio_array)
     return audio_array
     #END SONGFILE2PCM
 
@@ -369,8 +449,6 @@ def make_arrays(p_iNb_rows, p_iNb_cols):
     else:
         dataset_cur_genre, labels = None, None
     return dataset_cur_genre, labels
-
-
 
 # Next, we'll randomize the data. It's important to have the labels well shuffled for the training and test distributions to match.
 def randomize(p_3ddataset_cur_genre, p_vLabels):
@@ -504,70 +582,7 @@ def evaluation(logits, labels):
     # Return the number of true entries.
     return tf.reduce_sum(tf.cast(correct, tf.int32))
 
-class DataSet(object):
-    def __init__(self, songs, labels, dtype=dtypes.float32):
-        """Construct a DataSet. `dtype` can be either `uint8` to leave the input as `[0, 255]`, or `float32` to rescale into `[0, 1]`."""
-        dtype = dtypes.as_dtype(dtype).base_dtype
-        if dtype not in (dtypes.uint8, dtypes.float32):
-            raise TypeError('Invalid image dtype %r, expected uint8 or float32' % dtype)
-        #check that we have the same number of songs and labels
-        assert songs.shape[0] == labels.shape[0], ('songs.shape: %s labels.shape: %s' % (songs.shape, labels.shape))
-        self._num_examples = songs.shape[0]
 
-        # Convert shape from [num examples, rows, columns, depth] to [num examples, rows*columns] (assuming depth == 1)
-        # this is not necessary for songs now, because songs is already of the shape [num_song=14, num_samples=44100]
-        # assert songs.shape[3] == 1
-        # songs = songs.reshape(songs.shape[0], songs.shape[1] * songs.shape[2])
-        # if dtype == dtypes.float32:
-        #     # Convert from [0, 255] -> [0.0, 1.0].
-        #     songs = songs.astype(numpy.float32)
-        #     songs = numpy.multiply(songs, 1.0 / 255.0)
-        
-        #we do need to check if we need to normalize it though... or not? not sure. 
-        for cur_song, cur_song_samples in enumerate(songs):
-            print (cur_song, np.amax(cur_song_samples))
-            print (cur_song, np.amin(cur_song_samples))
-
-        self._songs = songs
-        self._labels = labels
-        self._epochs_completed = 0
-        self._index_in_epoch = 0
-
-    @property
-    def songs(self):
-        return self._songs
-
-    @property
-    def labels(self):
-        return self._labels
-
-    @property
-    def num_examples(self):
-        return self._num_examples
-
-    @property
-    def epochs_completed(self):
-        return self._epochs_completed
-
-    def next_batch(self, batch_size, fake_data=False):
-        """Return the next `batch_size` examples from this data set."""
-        start = self._index_in_epoch
-        self._index_in_epoch += batch_size
-        if self._index_in_epoch > self._num_examples:
-            # Finished epoch
-            self._epochs_completed += 1
-            # Shuffle the data
-            perm = numpy.arange(self._num_examples)
-            numpy.random.shuffle(perm)
-            self._songs = self._songs[perm]
-            self._labels = self._labels[perm]
-            # Start next epoch
-            start = 0
-            self._index_in_epoch = batch_size
-            assert batch_size <= self._num_examples
-        end = self._index_in_epoch
-        return self._songs[start:end], self._labels[start:end]
-    # ENDOF DataSet 
 
 if __name__ == '__main__':
     tf.app.run()
