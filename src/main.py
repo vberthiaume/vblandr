@@ -61,7 +61,9 @@ LIBRARY_PATH = '/media/kxstudio/LUSSIER/music/'
 
 s_sample_count = 10 * 44100   # first 10 secs of audio
 
-# overall_song_id = 0
+FORCE_PICKLING = False
+
+overall_song_id = 0
 
 def main(_):
     run_training()
@@ -133,6 +135,8 @@ def run_training():
 def read_data_sets(train_dir, dtype=dtypes.float32):
 
     #build train, valid and test datasets
+    global overall_song_id
+    overall_song_id = 0
     pickle_file = buildDataSets()
 
     #train_images should be a 4D uint8 numpy array [index, y, x, depth]."""
@@ -147,9 +151,9 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
         test_dataset    = save['wholeTestDataset']
         test_labels     = save['wholeTestLabels']
         del save  # hint to help gc free up memory
-        print('Training set',   train_dataset.shape, train_labels.shape)
-        print('Validation set', valid_dataset.shape, valid_labels.shape)
-        print('Test set',       test_dataset.shape,  test_labels.shape)
+        print('after piclking, Training set',   train_dataset.shape, train_labels.shape)
+        print('after piclking, Validation set', valid_dataset.shape, valid_labels.shape)
+        print('after piclking, Test set',       test_dataset.shape,  test_labels.shape)
 
         #TODO: train_dataset ETC MIGHT STILL BE PICKLED AT THAT POINT, EXPLAINING WHY AUDIO IS GARBLED? 
 
@@ -160,10 +164,13 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
     return base.Datasets(train=train, validation=validation, test=test)
 
 def write_test_wav(cur_song_samples, str_id = ""):
-    scikits.audiolab.wavwrite(cur_song_samples, LIBRARY_PATH +'test'+ str_id +'.wav', fs=44100, enc='pcm16')
+    filename = LIBRARY_PATH +'test'+ str_id +'.wav'
+    print ("writing", filename)
+    scikits.audiolab.wavwrite(cur_song_samples, filename, fs=44100, enc='pcm16')
 
 class DataSet(object):
     def __init__(self, songs, labels, dtype=dtypes.float32):
+        global overall_song_id
         """Construct a DataSet. `dtype` can be either `uint8` to leave the input as `[0, 255]`, or `float32` to rescale into `[0, 1]`."""
         dtype = dtypes.as_dtype(dtype).base_dtype
         if dtype not in (dtypes.uint8, dtypes.float32):
@@ -183,12 +190,14 @@ class DataSet(object):
         
         #we do need to check if we need to normalize it though... or not? not sure. 
         for cur_song, cur_song_samples in enumerate(songs):
-            print (cur_song, np.amax(cur_song_samples))
-            print (cur_song, np.amin(cur_song_samples))
+            # print (cur_song, np.amax(cur_song_samples))
+            # print (cur_song, np.amin(cur_song_samples))
+            print (cur_song, np.mean(cur_song_samples))
 
             #export this to a wav file, to test it
             # if cur_song == 0:
-                # write_test_wav(cur_song_samples, str(cur_song))
+            write_test_wav(cur_song_samples, str(overall_song_id))
+            overall_song_id += 1
 
         self._songs             = songs
         self._labels            = labels
@@ -244,25 +253,16 @@ def buildDataSets():
     testGenreNames, testGenrePaths  = listGenres( LIBRARY_PATH + 'test_small/')
     pickle_file =                                 LIBRARY_PATH + 'allData.pickle'
         
-    allPickledTrainFilenames = maybe_pickle(trainGenrePaths)
-    allPickledTestFilenames  = maybe_pickle(testGenrePaths)
+    allPickledTrainFilenames = maybe_pickle(trainGenrePaths, FORCE_PICKLING)
+    allPickledTestFilenames  = maybe_pickle(testGenrePaths, FORCE_PICKLING)
 
     #call merge_dataset on data_sets and labels
     wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = merge_dataset(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
     _,                                _, wholeTestDataset,  wholeTestLabels  = merge_dataset(allPickledTestFilenames,  s_iTestSize)
 
-    print('Training:',   wholeTrainDataset.shape, wholeTrainLabels.shape)
-    print('Validation:', wholeValidDataset.shape, wholeValidLabels.shape)
-    print('Testing:',    wholeTestDataset.shape,  wholeTestLabels.shape)
-
     wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
     wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
     wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
-
-    print(wholeTrainDataset.shape)
-    print(wholeTestDataset.shape)
-    print(wholeValidDataset.shape)
-
 
     # Finally, let's save the data for later reuse: 
     try:
@@ -281,7 +281,7 @@ def buildDataSets():
 
 
     statinfo = os.stat(pickle_file)
-    print('Compressed pickle size:', statinfo.st_size/1000000, "Mb")
+    # print('Compressed pickle size:', statinfo.st_size/1000000, "Mb")
 
     print ('================== DATASETS BUILT ================')
     return pickle_file
@@ -327,7 +327,7 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
 def load_genre(genre_folder):
     """Load all song data for a single genre"""
     
-    # global overall_song_id
+    global overall_song_id
 
     #figure out the path to all the genre's song files, and how many songs we have
     all_song_paths = []
@@ -355,7 +355,10 @@ def load_genre(genre_folder):
 
             # test whether song is correctly extracted
             # write_test_wav(cur_song_pcm, str(overall_song_id))
-            # overall_song_id += 1
+
+            print ("song", overall_song_id, np.mean(cur_song_pcm))
+            overall_song_id += 1
+
 
             #and put it in the dataset_cur_genre
             dataset_cur_genre[songId, :] = cur_song_pcm
@@ -365,9 +368,9 @@ def load_genre(genre_folder):
     #in case we skipped some songs, only keep the first songId songs in dataset_cur_genre
     dataset_cur_genre = dataset_cur_genre[0:songId, :]
     
-    print('Full dataset_cur_genre tensor:', dataset_cur_genre.shape)
-    print('Mean:', np.mean(dataset_cur_genre))
-    print('Standard deviation:', np.std(dataset_cur_genre))
+    # print('Full dataset_cur_genre tensor:', dataset_cur_genre.shape)
+    # print('Mean:', np.mean(dataset_cur_genre))
+    # print('Standard deviation:', np.std(dataset_cur_genre))
     return dataset_cur_genre
     #END LOAD GENRE
 
@@ -386,8 +389,8 @@ def songFile2pcm(song_path):
     stdoutdata = pipe.stdout.read()
     audio_array = np.fromstring(stdoutdata, dtype="int16")
 
-    size = len(audio_array)
-    print ("size: ", size)
+    # size = len(audio_array)
+    # print ("size: ", size)
 
     #export this to a wav file, to test it
     # write_test_wav(audio_array)
