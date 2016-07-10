@@ -162,3 +162,18 @@ Step 0: loss = 3709.95 (3.590 sec)
 Step 100: loss = nan (0.538 sec)
 Step 200: loss = nan (0.686 sec)
 Step 300: loss = nan (0.519 sec)
+Step 400: loss = nan (0.672 sec)
+Step 500: loss = nan (0.604 sec)
+Step 600: loss = nan (0.624 sec)
+Step 700: loss = nan (0.604 sec)
+Step 800: loss = nan (0.497 sec)
+Step 900: loss = nan (0.630 sec)
+Training Data Eval:
+  Num examples: 14  Num correct: 0  Precision @ 1: 0.0000
+Validation Data Eval:
+  Num examples: 6  Num correct: 0  Precision @ 1: 0.0000
+Test Data Eval:
+  Num examples: 6  Num correct: 0  Precision @ 1: 0.0000
+Step 1000: loss = nan (0.675 sec)
+Step 1100: loss = nan (0.629 sec)
+[Cancelled]
