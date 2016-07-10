@@ -50,7 +50,8 @@ flags.DEFINE_float  ('learning_rate', 0.01,   'Initial learning rate.')
 flags.DEFINE_integer('max_steps',     2000,   'Number of steps to run trainer.')
 flags.DEFINE_integer('hidden1',       128,    'Number of units in hidden layer 1.')
 flags.DEFINE_integer('hidden2',       32,     'Number of units in hidden layer 2.')
-flags.DEFINE_integer('batch_size',    100,    'Batch size. Must divide evenly into the dataset sizes.')
+# flags.DEFINE_integer('batch_size',    100,    'Batch size. Must divide evenly into the dataset sizes.')
+flags.DEFINE_integer('batch_size',    2,      'Batch size. Must divide evenly into the dataset sizes.')
 flags.DEFINE_string ('train_dir',     'data', 'Directory to put the training data.')
 
 # we have 7 genres
@@ -63,7 +64,7 @@ SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
 
 TOTAL_INPUTS = SAMPLE_COUNT
 
-FORCE_PICKLING = False
+FORCE_PICKLING = True
 
 overall_song_id = 0
 
