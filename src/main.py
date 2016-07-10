@@ -26,6 +26,7 @@ import time
 import math
 import os
 import tempfile
+import collections
 
 from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
@@ -51,7 +52,6 @@ flags.DEFINE_integer('hidden1',       128,    'Number of units in hidden layer 1
 flags.DEFINE_integer('hidden2',       32,     'Number of units in hidden layer 2.')
 flags.DEFINE_integer('batch_size',    100,    'Batch size. Must divide evenly into the dataset sizes.')
 flags.DEFINE_string ('train_dir',     'data', 'Directory to put the training data.')
-flags.DEFINE_boolean('fake_data',     False,  'If true, uses fake data  for unit testing.')
 
 # we have 7 genres
 NUM_CLASSES = 7
@@ -59,7 +59,9 @@ NUM_CLASSES = 7
 LIBRARY_PATH = '/media/kxstudio/LUSSIER/music/'
 # LIBRARY_PATH = '/Volumes/Untitled/music/'
 
-s_sample_count = 10 * 44100   # first 10 secs of audio
+SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
+
+TOTAL_INPUTS = SAMPLE_COUNT
 
 FORCE_PICKLING = False
 
@@ -76,9 +78,9 @@ def run_training():
     # Tell TensorFlow that the model will be built into the default Graph.
     with tf.Graph().as_default():
         # Generate placeholders for the images and labels.
-        images_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size)
+        songs_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size)
         # Build a Graph that computes predictions from the inference model.
-        logits = inference(images_placeholder, FLAGS.hidden1, FLAGS.hidden2)
+        logits = inference(songs_placeholder, FLAGS.hidden1, FLAGS.hidden2)
         # Add to the Graph the Ops for loss calculation.
         loss = loss_funct(logits, labels_placeholder)
         # Add to the Graph the Ops that calculate and apply gradients.
@@ -102,7 +104,7 @@ def run_training():
             start_time = time.time()
             # Fill a feed dictionary with the actual set of images and labels
             # for this particular training step.
-            feed_dict = fill_feed_dict(data_sets.train, images_placeholder, labels_placeholder)
+            feed_dict = fill_feed_dict(data_sets.train, songs_placeholder, labels_placeholder)
             # Run one step of the model.  The return values are the activations
             # from the `train_op` (which is discarded) and the `loss` Op.  To
             # inspect the values of your Ops or variables, you may include them
@@ -124,13 +126,15 @@ def run_training():
                 saver.save(sess, FLAGS.train_dir, global_step=step)
                 # Evaluate against the training set.
                 print('Training Data Eval:')
-                do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_sets.train)
+                do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_sets.train)
                 # Evaluate against the validation set.
                 print('Validation Data Eval:')
-                do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_sets.validation)
+                do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_sets.validation)
                 # Evaluate against the test set.
                 print('Test Data Eval:')
-                do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_sets.test)
+                do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_sets.test)
+
+Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 
 def read_data_sets(train_dir, dtype=dtypes.float32):
 
@@ -161,7 +165,7 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
     validation  = DataSet(valid_dataset, valid_labels,  dtype=dtype)
     test        = DataSet(test_dataset,  test_labels,   dtype=dtype)
 
-    return base.Datasets(train=train, validation=validation, test=test)
+    return Datasets(train=train, validation=validation, test=test)
 
 def write_test_wav(cur_song_samples, str_id = ""):
     filename = LIBRARY_PATH +'test'+ str_id +'.wav'
@@ -187,17 +191,19 @@ class DataSet(object):
         #     # Convert from [0, 255] -> [0.0, 1.0].
         #     songs = songs.astype(numpy.float32)
         #     songs = numpy.multiply(songs, 1.0 / 255.0)
+
+        #TODO: NEED TO FIGURE OUT WHY UNPICKLED SOUNDS ARE SHIT OR EMPTY
         
         #we do need to check if we need to normalize it though... or not? not sure. 
-        for cur_song, cur_song_samples in enumerate(songs):
-            # print (cur_song, np.amax(cur_song_samples))
-            # print (cur_song, np.amin(cur_song_samples))
-            print (cur_song, np.mean(cur_song_samples))
+        # for cur_song, cur_song_samples in enumerate(songs):
+        #     # print (cur_song, np.amax(cur_song_samples))
+        #     # print (cur_song, np.amin(cur_song_samples))
+        #     print (cur_song, np.mean(cur_song_samples))
 
-            #export this to a wav file, to test it
-            # if cur_song == 0:
-            write_test_wav(cur_song_samples, str(overall_song_id))
-            overall_song_id += 1
+        #     #export this to a wav file, to test it
+        #     # if cur_song == 0:
+        #     write_test_wav(cur_song_samples, str(overall_song_id))
+        #     overall_song_id += 1
 
         self._songs             = songs
         self._labels            = labels
@@ -220,7 +226,7 @@ class DataSet(object):
     def epochs_completed(self):
         return self._epochs_completed
 
-    def next_batch(self, batch_size, fake_data=False):
+    def next_batch(self, batch_size):
         """Return the next `batch_size` examples from this data set."""
         start = self._index_in_epoch
         self._index_in_epoch += batch_size
@@ -228,8 +234,8 @@ class DataSet(object):
             # Finished epoch
             self._epochs_completed += 1
             # Shuffle the data
-            perm = numpy.arange(self._num_examples)
-            numpy.random.shuffle(perm)
+            perm = np.arange(self._num_examples)
+            np.random.shuffle(perm)
             self._songs = self._songs[perm]
             self._labels = self._labels[perm]
             # Start next epoch
@@ -339,7 +345,7 @@ def load_genre(genre_folder):
 
     #our dataset 2d ndarray will be len(all_song_paths) x sample_count
 
-    dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), s_sample_count), dtype=np.float32)
+    dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), TOTAL_INPUTS), dtype=np.float32)
     
     songId = 0
     #for each song in the current genre
@@ -351,7 +357,7 @@ def load_genre(genre_folder):
             cur_song_pcm = songFile2pcm(cur_song_file)
 
             # only keep the first sample_count samples
-            cur_song_pcm = cur_song_pcm[0:s_sample_count]
+            cur_song_pcm = cur_song_pcm[0:SAMPLE_COUNT]
 
             # test whether song is correctly extracted
             # write_test_wav(cur_song_pcm, str(overall_song_id))
@@ -402,8 +408,8 @@ def songFile2pcm(song_path):
 def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
     iNum_classes = len(p_allPickledFilenames)
     #make empty arrays for validation and training sets and labels
-    whole_valid_dataset, valid_labels = make_arrays(p_iValidSize, s_sample_count)
-    whole_train_dataset, train_labels = make_arrays(p_iTrainSize, s_sample_count)
+    whole_valid_dataset, valid_labels = make_arrays(p_iValidSize, TOTAL_INPUTS)
+    whole_train_dataset, train_labels = make_arrays(p_iTrainSize, TOTAL_INPUTS)
     
     #number of items per class. // is an int division in python3, not sure in python2
     iNbrOfValidItemsPerClass = p_iValidSize // iNum_classes
@@ -471,22 +477,22 @@ def placeholder_inputs(batch_size):
         batch_size: The batch size will be baked into both placeholders.
 
     Returns:
-        images_placeholder: Images placeholder.
+        songs_placeholder: Images placeholder.
         labels_placeholder: Labels placeholder.
     """
     # Note that the shapes of the placeholders match the shapes of the full
     # image and label tensors, except the first dimension is now batch_size
     # rather than the full size of the train or test data sets.
-    images_placeholder = tf.placeholder(tf.float32, shape=(batch_size, IMAGE_PIXELS))
-    labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size))
-    return images_placeholder, labels_placeholder
+    songs_placeholder = tf.placeholder(tf.float32, shape=(batch_size, TOTAL_INPUTS))
+    labels_placeholder = tf.placeholder(tf.int32,   shape=(batch_size))
+    return songs_placeholder, labels_placeholder
 
 def inference(images, hidden1_units, hidden2_units):
     #Build the MNIST model up to where it may be used for inference.
 
     # Hidden 1
     with tf.name_scope('hidden1'):
-        weights = tf.Variable(tf.truncated_normal([IMAGE_PIXELS, hidden1_units], stddev=1.0 / math.sqrt(float(IMAGE_PIXELS))), name='weights')
+        weights = tf.Variable(tf.truncated_normal([TOTAL_INPUTS, hidden1_units], stddev=1.0 / math.sqrt(float(TOTAL_INPUTS))), name='weights')
         biases = tf.Variable(tf.zeros([hidden1_units]), name='biases')
         hidden1 = tf.nn.relu(tf.matmul(images, weights) + biases)
     # Hidden 2
@@ -525,17 +531,17 @@ def fill_feed_dict(data_set, images_pl, labels_pl):
         feed_dict: The feed dictionary mapping from placeholders to values.
     """
     # Create the feed_dict for the placeholders filled with the next `batch size ` examples.
-    images_feed, labels_feed = data_set.next_batch(FLAGS.batch_size, FLAGS.fake_data)
+    images_feed, labels_feed = data_set.next_batch(FLAGS.batch_size)
     feed_dict = { images_pl: images_feed, labels_pl: labels_feed}
     return feed_dict
 
-def do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_set):
+def do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_set):
     """Runs one evaluation against the full epoch of data.
 
     Args:
         sess: The session in which the model has been trained.
         eval_correct: The Tensor that returns the number of correct predictions.
-        images_placeholder: The images placeholder.
+        songs_placeholder: The images placeholder.
         labels_placeholder: The labels placeholder.
         data_set: The set of images and labels to evaluate, from
             input_data.read_data_sets().
@@ -545,7 +551,7 @@ def do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_set
     steps_per_epoch = data_set.num_examples // FLAGS.batch_size
     num_examples = steps_per_epoch * FLAGS.batch_size
     for step in xrange(steps_per_epoch):
-        feed_dict = fill_feed_dict(data_set, images_placeholder, labels_placeholder)
+        feed_dict = fill_feed_dict(data_set, songs_placeholder, labels_placeholder)
         true_count += sess.run(eval_correct, feed_dict=feed_dict)
     precision = true_count / num_examples
     print('  Num examples: %d  Num correct: %d  Precision @ 1: %0.04f' % (num_examples, true_count, precision))
