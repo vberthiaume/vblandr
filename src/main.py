@@ -54,7 +54,11 @@ flags.DEFINE_integer('batch_size',    2,      'Batch size. Must divide evenly in
 flags.DEFINE_string ('train_dir',     'data', 'Directory to put the training data.')
 
 # we have 7 genres
-NUM_CLASSES = 7
+NUM_CLASSES     = 7
+s_iTrainSize    = 8 * NUM_CLASSES  # 200000
+s_iValid_size   = 6 * NUM_CLASSES  # 10000
+s_iTestSize     = 6 * NUM_CLASSES  # 10000
+
 
 LIBRARY_PATH = '/media/kxstudio/LUSSIER/music/'
 # LIBRARY_PATH = '/Volumes/Untitled/music/'
@@ -66,6 +70,8 @@ TOTAL_INPUTS = SAMPLE_COUNT
 FORCE_PICKLING = False
 
 overall_song_id = 0
+
+
 
 def main(_):
     """Train MNIST for a number of steps."""
@@ -152,9 +158,9 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
         test_dataset    = save['wholeTestDataset']
         test_labels     = save['wholeTestLabels']
         del save  # hint to help gc free up memory
-        print('after piclking, Training set',   train_dataset.shape, train_labels.shape)
-        print('after piclking, Validation set', valid_dataset.shape, valid_labels.shape)
-        print('after piclking, Test set',       test_dataset.shape,  test_labels.shape)
+        print('after pickling, Training set',   train_dataset.shape, train_labels.shape)
+        print('after pickling, Validation set', valid_dataset.shape, valid_labels.shape)
+        print('after pickling, Test set',       test_dataset.shape,  test_labels.shape)
 
         #TODO: train_dataset ETC MIGHT STILL BE PICKLED AT THAT POINT, EXPLAINING WHY AUDIO IS GARBLED? 
 
@@ -192,15 +198,15 @@ class DataSet(object):
         #TODO: NEED TO FIGURE OUT WHY UNPICKLED SOUNDS ARE SHIT OR EMPTY
         
         #we do need to check if we need to normalize it though... or not? not sure. 
-        # for cur_song, cur_song_samples in enumerate(songs):
-        #     # print (cur_song, np.amax(cur_song_samples))
-        #     # print (cur_song, np.amin(cur_song_samples))
-        #     print (cur_song, np.mean(cur_song_samples))
+        for cur_song, cur_song_samples in enumerate(songs):
+            # print (cur_song, np.amax(cur_song_samples))
+            # print (cur_song, np.amin(cur_song_samples))
+            # print (cur_song, np.mean(cur_song_samples))
 
-        #     #export this to a wav file, to test it
-        #     # if cur_song == 0:
-        #     write_test_wav(cur_song_samples, str(overall_song_id))
-        #     overall_song_id += 1
+            #export this to a wav file, to test it
+            if cur_song == 0:
+                write_test_wav(cur_song_samples, str(overall_song_id))
+                overall_song_id += 1
 
         self._songs             = songs
         self._labels            = labels
@@ -232,6 +238,7 @@ class DataSet(object):
             self._epochs_completed += 1
             # Shuffle the data
             perm = np.arange(self._num_examples)
+            #TODO: is this necessary, wasn't it done before?
             np.random.shuffle(perm)
             self._songs = self._songs[perm]
             self._labels = self._labels[perm]
@@ -244,13 +251,6 @@ class DataSet(object):
     # ENDOF DataSet 
 
 def buildDataSets():
-    # this algorithm will use the same number of train, valid, and test patterns for each genre/class.
-    s_iTrainSize  = 2*NUM_CLASSES # 200000
-    s_iValid_size = NUM_CLASSES  # 10000
-    s_iTestSize   = NUM_CLASSES  # 10000
-
-    # get a list of genres for training and testing
-    # using test for now to test training
 
     trainGenreNames, trainGenrePaths = listGenres(LIBRARY_PATH + 'train_small/')
     testGenreNames, testGenrePaths   = listGenres(LIBRARY_PATH + 'test_small/')
