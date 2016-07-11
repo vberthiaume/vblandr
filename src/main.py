@@ -33,7 +33,6 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 from six.moves import cPickle as pickle
 #tensorflow stuff
 import tensorflow as tf
-# from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
 from tensorflow.python.framework import dtypes
 #sms-tools stuff
 import sys, os, os.path
@@ -64,14 +63,11 @@ SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
 
 TOTAL_INPUTS = SAMPLE_COUNT
 
-FORCE_PICKLING = True
+FORCE_PICKLING = False
 
 overall_song_id = 0
 
 def main(_):
-    run_training()
-
-def run_training():
     """Train MNIST for a number of steps."""
     # Get the sets of images and labels for training, validation, and test on MNIST.
     data_sets = read_data_sets(FLAGS.train_dir)
@@ -257,7 +253,7 @@ def buildDataSets():
     # using test for now to test training
 
     trainGenreNames, trainGenrePaths = listGenres(LIBRARY_PATH + 'train_small/')
-    testGenreNames, testGenrePaths  = listGenres( LIBRARY_PATH + 'test_small/')
+    testGenreNames, testGenrePaths   = listGenres(LIBRARY_PATH + 'test_small/')
     pickle_file =                                 LIBRARY_PATH + 'allData.pickle'
         
     allPickledTrainFilenames = maybe_pickle(trainGenrePaths, FORCE_PICKLING)
@@ -305,29 +301,25 @@ def listGenres(music_dir):
     return allAudioGenres, allAudioGenrePaths
 
 def maybe_pickle(p_strDataFolderNames, p_bForce=False):
-    dataset_all_genres = []
-    #data_folders are either the train or test set. folders within those are A, B, etc
+    all_pickle_filenames = []
+    #data_folders are either the train or test set. 
     for strCurFolderName in p_strDataFolderNames:
-        #we will serialize those subfolders (A, B, etc), that's what pickling is
-        strCurSetFilename = strCurFolderName + '.pickle'
-        #add the name of the current pickled subfolder to the list
-        dataset_all_genres.append(strCurSetFilename)
-        #if the pickled folder already exists, skip
-        if os.path.exists(strCurSetFilename) and not p_bForce:
-            # You may override by setting force=True.
-            print('%s already present - Skipping pickling.' % strCurSetFilename)
+        #we will serialize those subfolders that's what pickling is
+        cur_pickle_filename = strCurFolderName + '.pickle'
+        all_pickle_filenames.append(cur_pickle_filename)
+        if os.path.exists(cur_pickle_filename) and not p_bForce:
+            print('%s already present - Skipping pickling.' % cur_pickle_filename)
         else:
-            #call the load_letter function def above 
-            print('Pickling %s.' % strCurSetFilename)
+            print('Pickling %s.' % cur_pickle_filename)
             dataset_cur_genre = load_genre(strCurFolderName)
             try:
                 #and try to pickle it
-                with open(strCurSetFilename, 'wb') as f:
+                with open(cur_pickle_filename, 'wb') as f:
                     # TODO: WHEN IS THIS UNPICKLED^???
                     pickle.dump(dataset_cur_genre, f, pickle.HIGHEST_PROTOCOL)
             except Exception as e:
-                print('Unable to save data to', strCurSetFilename, ':', e)
-    return dataset_all_genres
+                print('Unable to save data to', cur_pickle_filename, ':', e)
+    return all_pickle_filenames
 
 
 # load data for each genre
