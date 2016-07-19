@@ -18,35 +18,16 @@ import subprocess as sp
 import scikits.audiolab
 import numpy as np
 
+SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
+
+
 def main():
-    
-    SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
 
-    song1_filename = '/media/kxstudio/LUSSIER/music/train_small/metal/01-architects-early_grave.mp3'
-    pickle1_filename = song1_filename + '.pickle'
-    song1_pcm = songFile2pcm(song1_filename)
-    song1_pcm = song1_pcm[0:SAMPLE_COUNT] 
-    #maybe_pickle
-    with open(pickle1_filename, 'wb') as f1:
-        pickle.dump(song1_pcm, f1, pickle.HIGHEST_PROTOCOL)
+    pickle1_filename = pickle_song('/media/kxstudio/LUSSIER/music/train_small/metal/01-architects-early_grave.mp3')
+    pickle2_filename = pickle_song('/media/kxstudio/LUSSIER/music/train_small/metal/01. The Bitter End.mp3')
 
-    # with open(pickle1_filename, 'rb') as f3:
-    #     unpickled1_song_pcm = pickle.load(f3)       
-    # write_test_wav(unpickled1_song_pcm, song1_filename + '.wav')
-
-    song2_filename = '/media/kxstudio/LUSSIER/music/train_small/metal/01. The Bitter End.mp3'
-    pickle2_filename = song2_filename + '.pickle'
-    song2_pcm = songFile2pcm(song2_filename)
-    song2_pcm = song2_pcm[0:SAMPLE_COUNT] 
-    #maybe_pickle
-    with open(pickle2_filename, 'wb') as f2:
-        pickle.dump(song2_pcm, f2, pickle.HIGHEST_PROTOCOL)
-    
-
-
-    all_pickle_files = [pickle1_filename, pickle2_filename]
-    
-    all_pickle_filename = '/media/kxstudio/LUSSIER/music/train_small/metal/all.pickle'
+    all_pickle_files = [pickle1_filename, pickle2_filename]   
+    all_pickle_filename = '/media/kxstudio/LUSSIER/music/train_small/TEST.pickle'
     
     #builddatasets
     f = open(all_pickle_filename, 'wb')
@@ -60,7 +41,7 @@ def main():
 
         for id, cur_pickled_filename in enumerate (unpickled_all_pickle_files):
             cur_unpickled_song_pcm = pickle.load( open( cur_pickled_filename, "rb" ) )
-            write_test_wav(cur_unpickled_song_pcm, '/media/kxstudio/LUSSIER/music/train_small/metal/' + str(id) + '.wav')
+            write_test_wav(cur_unpickled_song_pcm, '/media/kxstudio/LUSSIER/music/train_small/TEST' + str(id) + '.wav')
 
 
 def pickle_song (song_filename):
@@ -69,8 +50,10 @@ def pickle_song (song_filename):
     song_pcm = song_pcm[0:SAMPLE_COUNT] 
     #maybe_pickle
     with open(pickle_filename, 'wb') as f:
-        pickle.dump(song1_pcm, f, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(song_pcm, f, pickle.HIGHEST_PROTOCOL)
     return pickle_filename
+
+
 
 def songFile2pcm(song_path):
     command = [ 'ffmpeg',
