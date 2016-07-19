@@ -63,7 +63,14 @@ def main():
             write_test_wav(cur_unpickled_song_pcm, '/media/kxstudio/LUSSIER/music/train_small/metal/' + str(id) + '.wav')
 
 
-
+def pickle_song (song_filename):
+    pickle_filename = song_filename + '.pickle'
+    song_pcm = songFile2pcm(song_filename)
+    song_pcm = song_pcm[0:SAMPLE_COUNT] 
+    #maybe_pickle
+    with open(pickle_filename, 'wb') as f:
+        pickle.dump(song1_pcm, f, pickle.HIGHEST_PROTOCOL)
+    return pickle_filename
 
 def songFile2pcm(song_path):
     command = [ 'ffmpeg',
