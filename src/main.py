@@ -67,7 +67,7 @@ SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
 
 TOTAL_INPUTS = SAMPLE_COUNT
 
-FORCE_PICKLING = False
+FORCE_PICKLING = True
 
 overall_song_id = 0
 
@@ -160,7 +160,6 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
         print('after pickling, Training set',   train_dataset.shape, train_labels.shape)
         print('after pickling, Validation set', valid_dataset.shape, valid_labels.shape)
         print('after pickling, Test set',       test_dataset.shape,  test_labels.shape)
-
 
     train       = DataSet(train_dataset, train_labels,  dtype=dtype)
     validation  = DataSet(valid_dataset, valid_labels,  dtype=dtype)
@@ -317,18 +316,17 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
             try:
                 #and try to pickle it
                 with open(cur_pickle_filename, 'wb') as f:
-                    # TODO: WHEN IS THIS UNPICKLED^???
                     pickle.dump(dataset_cur_genre, f, pickle.HIGHEST_PROTOCOL)
             except Exception as e:
                 print('Unable to save data to', cur_pickle_filename, ':', e)
     return all_pickle_filenames
+
 # def load_all_genres(p_strDataFolderNames, p_bForce=False):
 #     all_datasets = []
 #     #data_folders are either the train or test set. 
 #     for strCurFolderName in p_strDataFolderNames:
 #         dataset_cur_genre = load_genre(strCurFolderName)
 #         all_datasets.append(dataset_cur_genre)
-
 #     return all_datasets
 
 # load data for each genre
@@ -361,12 +359,10 @@ def load_genre(genre_folder):
             # only keep the first sample_count samples
             cur_song_pcm = cur_song_pcm[0:SAMPLE_COUNT]
 
-            # test whether song is correctly extracted
-            # write_test_wav(cur_song_pcm, str(overall_song_id))
+            print ("load genre loading song", songId, np.mean(cur_song_pcm))
 
-            print ("song", overall_song_id, np.mean(cur_song_pcm))
+            write_test_wav(cur_song_pcm, "loadGenre_original_song" + str(overall_song_id))
             overall_song_id += 1
-
 
             #and put it in the dataset_cur_genre
             dataset_cur_genre[songId, :] = cur_song_pcm
@@ -431,9 +427,9 @@ def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
             with open(strPickleFilename, 'rb') as f:
                 #unpicke 3d array for current file
                 cur_genre_dataset = pickle.load(f)
-                for song_data in cur_genre_dataset:
-                    write_test_wav(song_data, "mergeDataset" + str(overall_song_idfuck))
-                    overall_song_idfuck += 1
+                # for song_data in cur_genre_dataset:
+                #     write_test_wav(song_data, "mergeDataset" + str(overall_song_idfuck))
+                #     overall_song_idfuck += 1
                 
                 #PUT BACK RANDOM
                 # let's shuffle the items to have random validation and training set. np.random.shuffle suffles only first dimension
