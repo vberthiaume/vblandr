@@ -71,6 +71,8 @@ FORCE_PICKLING = False
 
 overall_song_id = 0
 
+overall_song_idfuck = 0
+
 
 
 def main(_):
@@ -258,6 +260,9 @@ def buildDataSets():
         
     allPickledTrainFilenames = maybe_pickle(trainGenrePaths, FORCE_PICKLING)
     allPickledTestFilenames  = maybe_pickle(testGenrePaths, FORCE_PICKLING)
+    # all_train_data_sets = load_all_genres(trainGenrePaths, FORCE_PICKLING)
+    # all_test_data_sets  = load_all_genres(testGenrePaths, FORCE_PICKLING)
+
 
     #call merge_dataset on data_sets and labels
     wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = merge_dataset(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
@@ -320,7 +325,14 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
             except Exception as e:
                 print('Unable to save data to', cur_pickle_filename, ':', e)
     return all_pickle_filenames
+# def load_all_genres(p_strDataFolderNames, p_bForce=False):
+#     all_datasets = []
+#     #data_folders are either the train or test set. 
+#     for strCurFolderName in p_strDataFolderNames:
+#         dataset_cur_genre = load_genre(strCurFolderName)
+#         all_datasets.append(dataset_cur_genre)
 
+#     return all_datasets
 
 # load data for each genre
 def load_genre(genre_folder):
@@ -399,6 +411,7 @@ def songFile2pcm(song_path):
 # Merge individual genre datasets. Tune s_iTrainSize as needed to be able to fit all data in memory.
 # Also create a validation dataset_cur_genre for hyperparameter tuning.
 def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
+    global overall_song_idfuck
     iNum_classes = len(p_allPickledFilenames)
     #make empty arrays for validation and training sets and labels
     whole_valid_dataset, valid_labels = make_arrays(p_iValidSize, TOTAL_INPUTS)
@@ -417,9 +430,14 @@ def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
     for iPickleFileId, strPickleFilename in enumerate(p_allPickledFilenames):    
         try:
             #open the file
+
             with open(strPickleFilename, 'rb') as f:
                 #unpicke 3d array for current file
                 cur_genre_dataset = pickle.load(f)
+                for song_data in cur_genre_dataset:
+                    write_test_wav(song_data, "mergeDataset" + str(overall_song_idfuck))
+                    overall_song_idfuck += 1
+
                 # let's shuffle the items to have random validation and training set. np.random.shuffle suffles only first dimension
                 np.random.shuffle(cur_genre_dataset)
         
