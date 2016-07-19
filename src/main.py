@@ -268,9 +268,10 @@ def buildDataSets():
     wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = merge_dataset(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
     _,                                _, wholeTestDataset,  wholeTestLabels  = merge_dataset(allPickledTestFilenames,  s_iTestSize)
 
-    wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
-    wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
-    wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
+    #PUT BACK RANDOM
+    # wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
+    # wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
+    # wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
 
     # Finally, let's save the data for later reuse: 
     try:
@@ -437,9 +438,10 @@ def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
                 for song_data in cur_genre_dataset:
                     write_test_wav(song_data, "mergeDataset" + str(overall_song_idfuck))
                     overall_song_idfuck += 1
-
+                
+                #PUT BACK RANDOM
                 # let's shuffle the items to have random validation and training set. np.random.shuffle suffles only first dimension
-                np.random.shuffle(cur_genre_dataset)
+                # np.random.shuffle(cur_genre_dataset)
         
                 #if we asked for a validation set, use the first items for it
                 if whole_valid_dataset is not None:
