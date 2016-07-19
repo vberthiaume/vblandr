@@ -312,7 +312,14 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
             print('%s already present - Skipping pickling.' % cur_pickle_filename)
         else:
             print('Pickling %s.' % cur_pickle_filename)
+            #IN HERE LOAD_GENRE, SONGS ARE OK
             dataset_cur_genre = load_genre(strCurFolderName)
+
+            #NOW HERE  dataset_cur_genre SHOULD BE [1, SONG_PCM], SO TRY TO WRITE FILE FROM HERE
+            
+            write_test_wav(dataset_cur_genre[0], "loadGenre_original_song" + str(overall_song_id))
+            overall_song_id += 1
+
             try:
                 #and try to pickle it
                 with open(cur_pickle_filename, 'wb') as f:
