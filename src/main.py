@@ -60,7 +60,8 @@ s_iValid_size   = 6 * NUM_CLASSES  # 10000
 s_iTestSize     = 6 * NUM_CLASSES  # 10000
 
 
-LIBRARY_PATH = '/media/kxstudio/LUSSIER/music/'
+# LIBRARY_PATH = '/media/kxstudio/LUSSIER/music/'
+LIBRARY_PATH = '/media/sf_stuff_for_virtual_machines/music/'
 # LIBRARY_PATH = '/Volumes/Untitled/music/'
 
 SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
