@@ -339,9 +339,7 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
 #     return all_datasets
 
 # load data for each genre
-def load_genre(genre_folder):
-    """Load all song data for a single genre"""
-    
+def load_genre(genre_folder):   
     global overall_song_id
 
     #figure out the path to all the genre's song files, and how many songs we have
@@ -354,7 +352,7 @@ def load_genre(genre_folder):
 
     #our dataset 2d ndarray will be len(all_song_paths) x sample_count
 
-    dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), TOTAL_INPUTS), dtype=np.float32)
+    dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), TOTAL_INPUTS), dtype=np.int16)
     
     songId = 0
     #for each song in the current genre
