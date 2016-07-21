@@ -303,6 +303,7 @@ def listGenres(music_dir):
     return allAudioGenres, allAudioGenrePaths
 
 def maybe_pickle(p_strDataFolderNames, p_bForce=False):
+    global overall_song_id
     all_pickle_filenames = []
     #data_folders are either the train or test set. 
     for strCurFolderName in p_strDataFolderNames:
@@ -318,7 +319,7 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
 
             #NOW HERE  dataset_cur_genre SHOULD BE [1, SONG_PCM], SO TRY TO WRITE FILE FROM HERE
             
-            write_test_wav(dataset_cur_genre[0], "loadGenre_original_song" + str(overall_song_id))
+            write_test_wav(dataset_cur_genre[0], "maybe_pickle_original_song" + str(overall_song_id))
             overall_song_id += 1
 
             try:
@@ -370,7 +371,6 @@ def load_genre(genre_folder):
             print ("load genre loading song", songId, np.mean(cur_song_pcm))
 
             write_test_wav(cur_song_pcm, "loadGenre_original_song" + str(overall_song_id))
-            overall_song_id += 1
 
             #and put it in the dataset_cur_genre
             dataset_cur_genre[songId, :] = cur_song_pcm
