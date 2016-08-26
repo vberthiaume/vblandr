@@ -96,6 +96,7 @@ def main(_):
         summary_writer = tf.train.SummaryWriter(FLAGS.train_dir, sess.graph)
         # Run the Op to initialize the variables.
         sess.run(init)
+
         # training loop.
         for step in xrange(FLAGS.max_steps):
             start_time = time.time()
