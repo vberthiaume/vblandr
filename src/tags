@@ -1,0 +1,61 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+DataSet	main.py	/^class DataSet(object):$/;"	c
+Datasets	main.py	/^Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])$/;"	v
+FLAGS	main.py	/^FLAGS = flags.FLAGS$/;"	v
+FORCE_PICKLING	main.py	/^FORCE_PICKLING = True$/;"	v
+LIBRARY_PATH	main.py	/^LIBRARY_PATH = '\/media\/sf_stuff_for_virtual_machines\/music\/'$/;"	v
+NUM_CLASSES	main.py	/^NUM_CLASSES     = 7$/;"	v
+SAMPLE_COUNT	main.py	/^SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio$/;"	v
+SAMPLE_COUNT	tests.py	/^SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio$/;"	v
+TOTAL_INPUTS	main.py	/^TOTAL_INPUTS = SAMPLE_COUNT$/;"	v
+__init__	main.py	/^    def __init__(self, songs, labels, dtype=dtypes.float32):$/;"	m	class:DataSet
+audio_array	ffmpegTest.py	/^audio_array = np.fromstring(stdoutdata, dtype="int16")$/;"	v
+buildDataSets	main.py	/^def buildDataSets():$/;"	f
+command	ffmpegTest.py	/^command = [ 'ffmpeg',$/;"	v
+dataset_for_one_genre	count_audio_files.py	/^dataset_for_one_genre = np.ndarray(shape=(len(song_count), sample_count), dtype=np.float32)$/;"	v
+do_eval	main.py	/^def do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_set):$/;"	f
+epochs_completed	main.py	/^    def epochs_completed(self):$/;"	m	class:DataSet
+evaluation	main.py	/^def evaluation(logits, labels):$/;"	f
+fill_feed_dict	main.py	/^def fill_feed_dict(data_set, images_pl, labels_pl):$/;"	f
+find_audio_genres_and_files	count_audio_files.py	/^def find_audio_genres_and_files(dir):$/;"	f
+flags	main.py	/^flags = tf.app.flags$/;"	v
+folder	count_audio_files.py	/^folder = "folder path" $/;"	v
+inference	main.py	/^def inference(images, hidden1_units, hidden2_units):$/;"	f
+labels	main.py	/^    def labels(self):$/;"	m	class:DataSet
+length	ffmpegTest.py	/^length = len(audio_array)$/;"	v
+listGenres	main.py	/^def listGenres(music_dir):$/;"	f
+load_genre	main.py	/^def load_genre(genre_folder):   $/;"	f
+loss_funct	main.py	/^def loss_funct(logits, labels):$/;"	f
+main	main.py	/^def main(_):$/;"	f
+main	tests.py	/^def main():$/;"	f
+make_arrays	main.py	/^def make_arrays(p_iNb_rows, p_iNb_cols):$/;"	f
+maybe_pickle	main.py	/^def maybe_pickle(p_strDataFolderNames, p_bForce=False):$/;"	f
+merge_dataset	main.py	/^def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):$/;"	f
+music_dir	count_audio_files.py	/^music_dir = '\/media\/kxstudio\/LUSSIER\/music\/audiobooks'$/;"	v
+next_batch	main.py	/^    def next_batch(self, batch_size):$/;"	m	class:DataSet
+num_examples	main.py	/^    def num_examples(self):$/;"	m	class:DataSet
+overall_song_id	main.py	/^overall_song_id = 0$/;"	v
+overall_song_idfuck	main.py	/^overall_song_idfuck = 0$/;"	v
+pickle_song	tests.py	/^def pickle_song (song_filename):$/;"	f
+pipe	ffmpegTest.py	/^pipe = sp.Popen(command, stdout=sp.PIPE)$/;"	v
+placeholder_inputs	main.py	/^def placeholder_inputs(batch_size):$/;"	f
+randomize	main.py	/^def randomize(p_3ddataset_cur_genre, p_vLabels):$/;"	f
+read_data_sets	main.py	/^def read_data_sets(train_dir, dtype=dtypes.float32):$/;"	f
+s_iTestSize	main.py	/^s_iTestSize     = 6 * NUM_CLASSES  # 10000$/;"	v
+s_iTrainSize	main.py	/^s_iTrainSize    = 8 * NUM_CLASSES  # 200000$/;"	v
+s_iValid_size	main.py	/^s_iValid_size   = 6 * NUM_CLASSES  # 10000$/;"	v
+sample_count	count_audio_files.py	/^sample_count = 1000$/;"	v
+songFile2pcm	main.py	/^def songFile2pcm(song_path):$/;"	f
+songFile2pcm	tests.py	/^def songFile2pcm(song_path):$/;"	f
+song_count	count_audio_files.py	/^song_count = os.listdir(folder)$/;"	v
+song_path	ffmpegTest.py	/^song_path = "\/Volumes\/Untitled\/music\/train_small\/audiobook\/Blaise_Pascal_-_Discours_sur_les_passions_de_l_amour.mp3"$/;"	v
+songs	main.py	/^    def songs(self):$/;"	m	class:DataSet
+stdoutdata	ffmpegTest.py	/^stdoutdata = pipe.stdout.read()$/;"	v
+training	main.py	/^def training(loss, learning_rate):$/;"	f
+write_test_wav	main.py	/^def write_test_wav(cur_song_samples, str_id = ""):$/;"	f
+write_test_wav	tests.py	/^def write_test_wav(cur_song_samples, filename):$/;"	f

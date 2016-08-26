@@ -34,11 +34,6 @@ dataset_for_one_genre = np.ndarray(shape=(len(song_count), sample_count), dtype=
 
 
 
-
-
-
-
-
 def find_audio_genres_and_files(dir):
     "return the path of all audio files (wav and mp3) in dir and its subfolders"
     #os.walk will go through each folder in dir (including dir), and for each folder will

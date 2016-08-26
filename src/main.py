@@ -13,7 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Trains and Evaluates the MNIST network using a feed dictionary."""
 # pylint: disable=missing-docstring
 from __future__ import absolute_import
 from __future__ import division
@@ -71,7 +70,6 @@ overall_song_id = 0
 overall_song_idfuck = 0
 
 def main(_):
-    """Train MNIST for a number of steps."""
     # Get the sets of images and labels for training, validation, and test on MNIST.
     data_sets = read_data_sets(FLAGS.train_dir)
 
@@ -185,8 +183,6 @@ class DataSet(object):
         #     songs = songs.astype(numpy.float32)
         #     songs = numpy.multiply(songs, 1.0 / 255.0)
 
-        #TODO: NEED TO FIGURE OUT WHY UNPICKLED SOUNDS ARE SHIT OR EMPTY
-        
         #we do need to check if we need to normalize it though... or not? not sure. 
         for cur_song, cur_song_samples in enumerate(songs):
             # print (cur_song, np.amax(cur_song_samples))
@@ -194,9 +190,9 @@ class DataSet(object):
             # print (cur_song, np.mean(cur_song_samples))
 
             #export this to a wav file, to test it
-            if cur_song == 0:
-                write_test_wav(cur_song_samples, str(overall_song_id))
-                overall_song_id += 1
+            #if cur_song == 0:
+            #    write_test_wav(cur_song_samples, str(overall_song_id))
+            #    overall_song_id += 1
 
         self._songs             = songs
         self._labels            = labels
@@ -228,7 +224,6 @@ class DataSet(object):
             self._epochs_completed += 1
             # Shuffle the data
             perm = np.arange(self._num_examples)
-            #TODO: is this necessary, wasn't it done before?
             np.random.shuffle(perm)
             self._songs = self._songs[perm]
             self._labels = self._labels[perm]
