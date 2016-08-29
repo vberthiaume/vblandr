@@ -63,11 +63,6 @@ def getAllDataSets(train_dir, dtype=dtypes.float32):
 
     return Datasets(train=train, validation=validation, test=test)
 
-#def write_test_wav(cur_song_samples, str_id = ""):
-#    filename = LIBRARY_PATH +'test'+ str_id +'.wav'
-#    print ("writing", filename)
-#    scikits.audiolab.wavwrite(cur_song_samples, filename, fs=44100, enc='pcm16')
-
 class DataSet(object):
     def __init__(self, songs, labels, dtype=dtypes.float32):
         global overall_song_id
@@ -81,24 +76,27 @@ class DataSet(object):
         assert songs.shape[0] == labels.shape[0], ('songs.shape: %s labels.shape: %s' % (songs.shape, labels.shape))
         self._num_examples = songs.shape[0]
 
-        # Convert shape from [num examples, rows, columns, depth] to [num examples, rows*columns] (assuming depth == 1)
-        # this is not necessary for songs now, because songs is already of the shape [num_song=14, num_samples=44100]
-        # assert songs.shape[3] == 1
-        # songs = songs.reshape(songs.shape[0], songs.shape[1] * songs.shape[2])
-        # if dtype == dtypes.float32:
-        #     # Convert from [0, 255] -> [0.0, 1.0].
-        #     songs = songs.astype(numpy.float32)
-        #     songs = numpy.multiply(songs, 1.0 / 255.0)
+        #the original range for int16 is [-32768, 32767]
+        if dtype == dtypes.float32:  
+            songs = songs.astype(np.float32)            #cast the array into float32
+            
+            songs = np.multiply(songs, 1.0 / 32767)     #convert int16 range into [-1.0,1.0]
+            
+            #songs = np.multiply(songs, 1.0 / 65536)     #convert int16 range into [-.5, .5]
+            #songs = np.add(songs, .5)                   #convert int16 [-.5, .5] range into [0,1.0]
+            
+            # Convert from [0, 255] -> [0.0, 1.0].
+            #songs = np.multiply(songs, 1.0 / 255.0) 
 
-        #we do need to check if we need to normalize it though... or not? not sure. 
-        #for cur_song, cur_song_samples in enumerate(songs):
-        #    print (cur_song, np.amax(cur_song_samples))
-        #    print (cur_song, np.amin(cur_song_samples))
-        #    print (cur_song, np.mean(cur_song_samples))
-        #    #export this to a wav file, to test it
-        #    #if cur_song == 0:
-        #    write_test_wav(cur_song_samples, str(overall_song_id))
-        #    overall_song_id += 1
+
+        for cur_song, cur_song_samples in enumerate(songs):
+            if cur_song == 0:
+                print (cur_song, np.amax(cur_song_samples))
+                print (cur_song, np.amin(cur_song_samples))
+                print (cur_song, np.mean(cur_song_samples))
+                #export this to a wav file, to test it
+                write_test_wav(cur_song_samples, str(overall_song_id))
+                overall_song_id += 1
 
         self._songs             = songs
         self._labels            = labels
@@ -217,7 +215,7 @@ def getDataForGenre(genre_folder):
             if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
                 all_song_paths.append(path+"/"+file)
 
-    #data for cur genre will have shapre all_song_paths x TOTAL_INPUTS
+    #data for cur genre will have shape all_song_paths x TOTAL_INPUTS
     dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), TOTAL_INPUTS), dtype=np.int16)
     
     songId = 0
