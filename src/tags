@@ -7,15 +7,14 @@
 DataSet	main.py	/^class DataSet(object):$/;"	c
 Datasets	main.py	/^Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])$/;"	v
 FLAGS	main.py	/^FLAGS = flags.FLAGS$/;"	v
-FORCE_PICKLING	main.py	/^FORCE_PICKLING = True$/;"	v
-LIBRARY_PATH	main.py	/^LIBRARY_PATH = '\/media\/sf_stuff_for_virtual_machines\/music\/'$/;"	v
+FORCE_PICKLING	main.py	/^FORCE_PICKLING = False$/;"	v
+LIBRARY_PATH	main.py	/^LIBRARY_PATH = '\/home\/gris\/Music\/vblandr\/'$/;"	v
 NUM_CLASSES	main.py	/^NUM_CLASSES     = 7$/;"	v
 SAMPLE_COUNT	main.py	/^SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio$/;"	v
 SAMPLE_COUNT	tests.py	/^SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio$/;"	v
 TOTAL_INPUTS	main.py	/^TOTAL_INPUTS = SAMPLE_COUNT$/;"	v
 __init__	main.py	/^    def __init__(self, songs, labels, dtype=dtypes.float32):$/;"	m	class:DataSet
 audio_array	ffmpegTest.py	/^audio_array = np.fromstring(stdoutdata, dtype="int16")$/;"	v
-buildDataSets	main.py	/^def buildDataSets():$/;"	f
 command	ffmpegTest.py	/^command = [ 'ffmpeg',$/;"	v
 dataset_for_one_genre	count_audio_files.py	/^dataset_for_one_genre = np.ndarray(shape=(len(song_count), sample_count), dtype=np.float32)$/;"	v
 do_eval	main.py	/^def do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_set):$/;"	f
@@ -25,17 +24,18 @@ fill_feed_dict	main.py	/^def fill_feed_dict(data_set, images_pl, labels_pl):$/;"
 find_audio_genres_and_files	count_audio_files.py	/^def find_audio_genres_and_files(dir):$/;"	f
 flags	main.py	/^flags = tf.app.flags$/;"	v
 folder	count_audio_files.py	/^folder = "folder path" $/;"	v
+getAllDataPickle	main.py	/^def getAllDataPickle():$/;"	f
+getAllGenrePaths	main.py	/^def getAllGenrePaths(music_dir):$/;"	f
+getIndividualGenrePickles	main.py	/^def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):$/;"	f
+getWholeDataFromIndividualGenrePickles	main.py	/^def getWholeDataFromIndividualGenrePickles(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):$/;"	f
 inference	main.py	/^def inference(images, hidden1_units, hidden2_units):$/;"	f
 labels	main.py	/^    def labels(self):$/;"	m	class:DataSet
 length	ffmpegTest.py	/^length = len(audio_array)$/;"	v
-listGenres	main.py	/^def listGenres(music_dir):$/;"	f
 load_genre	main.py	/^def load_genre(genre_folder):   $/;"	f
 loss_funct	main.py	/^def loss_funct(logits, labels):$/;"	f
 main	main.py	/^def main(_):$/;"	f
 main	tests.py	/^def main():$/;"	f
 make_arrays	main.py	/^def make_arrays(p_iNb_rows, p_iNb_cols):$/;"	f
-maybe_pickle	main.py	/^def maybe_pickle(p_strDataFolderNames, p_bForce=False):$/;"	f
-merge_dataset	main.py	/^def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):$/;"	f
 music_dir	count_audio_files.py	/^music_dir = '\/media\/kxstudio\/LUSSIER\/music\/audiobooks'$/;"	v
 next_batch	main.py	/^    def next_batch(self, batch_size):$/;"	m	class:DataSet
 num_examples	main.py	/^    def num_examples(self):$/;"	m	class:DataSet

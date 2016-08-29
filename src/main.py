@@ -141,7 +141,7 @@ Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 
 def read_data_sets(train_dir, dtype=dtypes.float32):
 
-    pickle_file = buildDataSets()
+    pickle_file = getAllDataPickle()
 
     with open(pickle_file, 'rb') as f:
         save = pickle.load(f)
@@ -240,19 +240,19 @@ class DataSet(object):
         return self._songs[start:end], self._labels[start:end]
     # ENDOF DataSet 
 
-def buildDataSets():
+def getAllDataPickle():
     #get relevant paths
-    trainGenreNames, trainGenrePaths = listGenres(LIBRARY_PATH + 'train_small/')
-    testGenreNames, testGenrePaths   = listGenres(LIBRARY_PATH + 'test_small/')
-    pickle_file =                                 LIBRARY_PATH + 'allData.pickle'
+    trainGenreNames, trainGenrePaths = getAllGenrePaths(LIBRARY_PATH + 'train_small/')
+    testGenreNames, testGenrePaths   = getAllGenrePaths(LIBRARY_PATH + 'test_small/')
+    pickle_file =                                       LIBRARY_PATH + 'allData.pickle'
     
     #obtain data for each genre in their individual pickle file
-    allPickledTrainFilenames = maybe_pickle(trainGenrePaths, FORCE_PICKLING)
-    allPickledTestFilenames  = maybe_pickle(testGenrePaths, FORCE_PICKLING)
+    allPickledTrainFilenames = getIndividualGenrePickles(trainGenrePaths, FORCE_PICKLING)
+    allPickledTestFilenames  = getIndividualGenrePickles(testGenrePaths, FORCE_PICKLING)
 
     #merge and randomize data from all genres into wholedatasets for training, validation, and test
-    wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = merge_dataset(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
-    _,                                _, wholeTestDataset,  wholeTestLabels  = merge_dataset(allPickledTestFilenames,  s_iTestSize)
+    wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = getWholeDataFromIndividualGenrePickles(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
+    _,                                _, wholeTestDataset,  wholeTestLabels  = getWholeDataFromIndividualGenrePickles(allPickledTestFilenames,  s_iTestSize)
     wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
     wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
     wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
@@ -276,7 +276,7 @@ def buildDataSets():
     return pickle_file
     # ENDOF BUILDDATASETS
 
-def listGenres(music_dir):
+def getAllGenrePaths(music_dir):
     """return a list of all music genres, e.g., 'audiobook',  and their complete path"""
     dirs = os.listdir(music_dir)
     allAudioGenrePaths = []
@@ -287,7 +287,7 @@ def listGenres(music_dir):
             allAudioGenres.append(cur_dir)
     return allAudioGenres, allAudioGenrePaths
 
-def maybe_pickle(p_strDataFolderNames, p_bForce=False):
+def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
     """serialize list of data folders in their own pickle files, and return list of pickle filenames"""
     all_pickle_filenames = []
     for strCurFolderName in p_strDataFolderNames:
@@ -369,7 +369,7 @@ def songFile2pcm(song_path):
 
 # Merge individual genre datasets. Tune s_iTrainSize as needed to be able to fit all data in memory.
 # Also create a validation dataset_cur_genre for hyperparameter tuning.
-def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
+def getWholeDataFromIndividualGenrePickles(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
     iNum_classes = len(p_allPickledFilenames)
     #make empty arrays for validation and training sets and labels
     whole_valid_dataset, valid_labels = make_arrays(p_iValidSize, TOTAL_INPUTS)
@@ -412,7 +412,7 @@ def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
             print('Unable to process data from', strPickleFilename, ':', e)
             raise 
     return whole_valid_dataset, valid_labels, whole_train_dataset, train_labels
-    #END OF merge_dataset
+    #END OF getWholeDataFromIndividualGenrePickles
 
 def make_arrays(p_iNb_rows, p_iNb_cols):
     if p_iNb_rows:
