@@ -59,12 +59,13 @@ s_iValid_size   = 6 * NUM_CLASSES  # 10000
 s_iTestSize     = 6 * NUM_CLASSES  # 10000
 
 # LIBRARY_PATH = '/media/kxstudio/LUSSIER/music/'
-LIBRARY_PATH = '/media/sf_stuff_for_virtual_machines/music/'
+# LIBRARY_PATH = '/media/sf_stuff_for_virtual_machines/music/'
 # LIBRARY_PATH = '/Volumes/Untitled/music/'
+LIBRARY_PATH = '/home/gris/Music/vblandr/'
 
 SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
 TOTAL_INPUTS = SAMPLE_COUNT
-FORCE_PICKLING = True
+FORCE_PICKLING = False
 overall_song_id = 0
 overall_song_idfuck = 0
 
@@ -165,11 +166,13 @@ def write_test_wav(cur_song_samples, str_id = ""):
 
 class DataSet(object):
     def __init__(self, songs, labels, dtype=dtypes.float32):
-        global overall_song_id
+        #global overall_song_id
+       
         """Construct a DataSet. `dtype` can be either `uint8` to leave the input as `[0, 255]`, or `float32` to rescale into `[0, 1]`."""
         dtype = dtypes.as_dtype(dtype).base_dtype
         if dtype not in (dtypes.uint8, dtypes.float32):
             raise TypeError('Invalid image dtype %r, expected uint8 or float32' % dtype)
+        
         #check that we have the same number of songs and labels
         assert songs.shape[0] == labels.shape[0], ('songs.shape: %s labels.shape: %s' % (songs.shape, labels.shape))
         self._num_examples = songs.shape[0]
@@ -184,7 +187,7 @@ class DataSet(object):
         #     songs = numpy.multiply(songs, 1.0 / 255.0)
 
         #we do need to check if we need to normalize it though... or not? not sure. 
-        for cur_song, cur_song_samples in enumerate(songs):
+        #for cur_song, cur_song_samples in enumerate(songs):
             # print (cur_song, np.amax(cur_song_samples))
             # print (cur_song, np.amin(cur_song_samples))
             # print (cur_song, np.mean(cur_song_samples))
@@ -369,6 +372,7 @@ def load_genre(genre_folder):
     #END LOAD GENRE
 
 def songFile2pcm(song_path):
+    song_path2 = song_path + '.wav'
     command = [ 'ffmpeg',
             '-i', song_path,
             '-f', 's16le',
@@ -378,6 +382,7 @@ def songFile2pcm(song_path):
             '-loglevel', 'quiet',
             '-']    #instead of having an output file, using '-' sends it in the pipe. not actually sure how this works.
     #run the command
+    print(song_path)
     pipe = sp.Popen(command, stdout=sp.PIPE)
     #read the output into a numpy array
     stdoutdata = pipe.stdout.read()
