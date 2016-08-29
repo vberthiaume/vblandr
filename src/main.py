@@ -72,35 +72,26 @@ LIBRARY_PATH = '/home/gris/Music/vblandr/'
 SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
 TOTAL_INPUTS = SAMPLE_COUNT
 FORCE_PICKLING = False
+Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 overall_song_id = 0
-overall_song_idfuck = 0
 
 ######################################## ACTUAL CODE ##########################################
 def main(_):
     
-    data_sets = read_data_sets(FLAGS.train_dir)
+    data_sets = getAllDataSets(FLAGS.train_dir)
 
     with tf.Graph().as_default():                                                       #using default graph
         songs_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size)    # Generate placeholders for the images and labels.
-        logits = inference(songs_placeholder, FLAGS.hidden1, FLAGS.hidden2)             # Build a Graph that computes predictions from the inference model.
-        # Add to the Graph the Ops for loss calculation.
-        loss = loss_funct(logits, labels_placeholder)
-        # Add to the Graph the Ops that calculate and apply gradients.
-        train_op = training(loss, FLAGS.learning_rate)
-        # Add the Op to compare the logits to the labels during evaluation.
-        eval_correct = evaluation(logits, labels_placeholder)
-        # Build the summary operation based on the TF collection of Summaries.
-        summary_op = tf.merge_all_summaries()
-        # Add the variable initializer Op.
-        init = tf.initialize_all_variables()
-        # Create a saver for writing training checkpoints.
-        saver = tf.train.Saver()
-        # Create a session for running Ops on the Graph.
-        sess = tf.Session()
-        # Instantiate a SummaryWriter to output summaries and the Graph.
-        summary_writer = tf.train.SummaryWriter(FLAGS.train_dir, sess.graph)
-        # Run the Op to initialize the variables.
-        sess.run(init)
+        logits          = inference(songs_placeholder, FLAGS.hidden1, FLAGS.hidden2)    # Build a Graph that computes predictions from the inference model.
+        loss            = loss_funct(logits, labels_placeholder)                        # Add to the Graph the Ops for loss calculation.
+        train_op        = training(loss, FLAGS.learning_rate)                           # Add to the Graph the Ops that calculate and apply gradients.
+        eval_correct    = evaluation(logits, labels_placeholder)                        # Add the Op to compare the logits to the labels during evaluation.
+        summary_op      = tf.merge_all_summaries()                                      # Build the summary operation based on the TF collection of Summaries.
+        init            = tf.initialize_all_variables()                                 # Add the variable initializer Op.
+        saver           = tf.train.Saver()                                              # Create a saver for writing training checkpoints.
+        sess            = tf.Session()                                                  # Create a session for running Ops on the Graph.
+        summary_writer  = tf.train.SummaryWriter(FLAGS.train_dir, sess.graph)           # Instantiate a SummaryWriter to output summaries and the Graph.
+        sess.run(init)                                                                  # Run the Op to initialize the variables.
 
         # training loop.
         for step in xrange(FLAGS.max_steps):
@@ -137,9 +128,8 @@ def main(_):
                 print('Test Data Eval:')
                 do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_sets.test)
 
-Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 
-def read_data_sets(train_dir, dtype=dtypes.float32):
+def getAllDataSets(train_dir, dtype=dtypes.float32):
 
     pickle_file = getAllDataPickle()
 
@@ -297,7 +287,7 @@ def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
             print('%s already present - Skipping pickling.' % cur_pickle_filename)
         else:
             print('Pickling %s.' % cur_pickle_filename)
-            dataset_cur_genre = load_genre(strCurFolderName)
+            dataset_cur_genre = getDataForGenre(strCurFolderName)
             try:
                 #and try to pickle it
                 with open(cur_pickle_filename, 'wb') as f:
@@ -307,8 +297,7 @@ def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
     return all_pickle_filenames
 
 # load data for each genre
-def load_genre(genre_folder):   
-
+def getDataForGenre(genre_folder):   
     #figure out the path to all the genre's song files, and how many songs we have
     all_song_paths = []
     for path, dirs, files in os.walk(genre_folder):
@@ -486,7 +475,7 @@ def fill_feed_dict(data_set, images_pl, labels_pl):
     }
 
     Args:
-        data_set: The set of images and labels, from input_data.read_data_sets()
+        data_set: The set of images and labels, from input_data.getAllDataSets()
         images_pl: The images placeholder, from placeholder_inputs().
         labels_pl: The labels placeholder, from placeholder_inputs().
 
@@ -507,7 +496,7 @@ def do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_set)
         songs_placeholder: The images placeholder.
         labels_placeholder: The labels placeholder.
         data_set: The set of images and labels to evaluate, from
-            input_data.read_data_sets().
+            input_data.getAllDataSets().
     """
     # And run one epoch of eval.
     true_count = 0  # Counts the number of correct predictions.
