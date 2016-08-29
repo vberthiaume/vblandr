@@ -14,6 +14,7 @@
 # limitations under the License.
 # ==============================================================================
 
+######################################## IMPORTS ##########################################
 # pylint: disable=missing-docstring
 from __future__ import absolute_import
 from __future__ import division
@@ -31,17 +32,21 @@ import collections
 from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from six.moves import cPickle as pickle
+
 #tensorflow stuff
 import tensorflow as tf
 from tensorflow.python.framework import dtypes
+
 #sms-tools stuff
 import sys, os, os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
 import utilFunctions as UF
+
 #ffmpeg stuff
 import subprocess as sp
 import scikits.audiolab
 
+######################################## GLOBAL VARIABLES ##########################################
 # Basic model parameters as external flags.
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -53,7 +58,7 @@ flags.DEFINE_integer('hidden2',       32,     'Number of units in hidden layer 2
 flags.DEFINE_integer('batch_size',    2,      'Batch size. Must divide evenly into the dataset sizes.')
 flags.DEFINE_string ('train_dir',     'data', 'Directory to put the training data.')
 
-# we have 7 genres
+# we have 7 music genres
 NUM_CLASSES     = 7
 s_iTrainSize    = 8 * NUM_CLASSES  # 200000
 s_iValid_size   = 6 * NUM_CLASSES  # 10000
@@ -70,16 +75,14 @@ FORCE_PICKLING = False
 overall_song_id = 0
 overall_song_idfuck = 0
 
+######################################## ACTUAL CODE ##########################################
 def main(_):
-    # Get the sets of images and labels for training, validation, and test on MNIST.
+    
     data_sets = read_data_sets(FLAGS.train_dir)
 
-    # Tell TensorFlow that the model will be built into the default Graph.
-    with tf.Graph().as_default():
-        # Generate placeholders for the images and labels.
-        songs_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size)
-        # Build a Graph that computes predictions from the inference model.
-        logits = inference(songs_placeholder, FLAGS.hidden1, FLAGS.hidden2)
+    with tf.Graph().as_default():                                                       #using default graph
+        songs_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size)    # Generate placeholders for the images and labels.
+        logits = inference(songs_placeholder, FLAGS.hidden1, FLAGS.hidden2)             # Build a Graph that computes predictions from the inference model.
         # Add to the Graph the Ops for loss calculation.
         loss = loss_funct(logits, labels_placeholder)
         # Add to the Graph the Ops that calculate and apply gradients.
@@ -138,10 +141,7 @@ Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 
 def read_data_sets(train_dir, dtype=dtypes.float32):
 
-    #build train, valid and test datasets
     pickle_file = buildDataSets()
-
-    print("buildDataSets done")
 
     with open(pickle_file, 'rb') as f:
         save = pickle.load(f)
@@ -243,7 +243,7 @@ class DataSet(object):
 
 def buildDataSets():
 
-    trainGenreNames, trainGenrePaths = listGenres(LIBRARY_PATH + 'train_very_small/')#'train_small/')
+    trainGenreNames, trainGenrePaths = listGenres(LIBRARY_PATH + 'train_small/')
     testGenreNames, testGenrePaths   = listGenres(LIBRARY_PATH + 'test_small/')
     pickle_file =                                 LIBRARY_PATH + 'allData.pickle'
         
@@ -254,12 +254,12 @@ def buildDataSets():
 
 
     #call merge_dataset on data_sets and labels
-    wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = merge_dataset(allPickledTrainFilenames, s_iTrainSize, 0)#s_iValid_size)
+    wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = merge_dataset(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
     _,                                _, wholeTestDataset,  wholeTestLabels  = merge_dataset(allPickledTestFilenames,  s_iTestSize)
 
     wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
     wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
-    #wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
+    wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
 
     # Finally, let's save the data for later reuse: 
     try:
@@ -285,6 +285,7 @@ def buildDataSets():
     # ENDOF BUILDDATASETS
 
 def listGenres(music_dir):
+    """return a list of all music genres, e.g., 'audiobook',  and their complete path"""
     dirs = os.listdir(music_dir)
     allAudioGenrePaths = []
     allAudioGenres = []
@@ -295,25 +296,16 @@ def listGenres(music_dir):
     return allAudioGenres, allAudioGenrePaths
 
 def maybe_pickle(p_strDataFolderNames, p_bForce=False):
-    # global overall_song_id
+    """serialize list of data folders in their own pickle files, and return list of pickle filenames"""
     all_pickle_filenames = []
-    #data_folders are either the train or test set. 
     for strCurFolderName in p_strDataFolderNames:
-        #we will serialize those subfolders that's what pickling is
         cur_pickle_filename = strCurFolderName + '.pickle'
         all_pickle_filenames.append(cur_pickle_filename)
         if os.path.exists(cur_pickle_filename) and not p_bForce:
             print('%s already present - Skipping pickling.' % cur_pickle_filename)
         else:
             print('Pickling %s.' % cur_pickle_filename)
-            #IN HERE LOAD_GENRE, SONGS ARE OK
             dataset_cur_genre = load_genre(strCurFolderName)
-
-            #NOW HERE  dataset_cur_genre SHOULD BE [1, SONG_PCM], SO TRY TO WRITE FILE FROM HERE
-            
-            # write_test_wav(dataset_cur_genre[0], "maybe_pickle_original_song" + str(overall_song_id))
-            # overall_song_id += 1
-
             try:
                 #and try to pickle it
                 with open(cur_pickle_filename, 'wb') as f:
@@ -322,17 +314,8 @@ def maybe_pickle(p_strDataFolderNames, p_bForce=False):
                 print('Unable to save data to', cur_pickle_filename, ':', e)
     return all_pickle_filenames
 
-# def load_all_genres(p_strDataFolderNames, p_bForce=False):
-#     all_datasets = []
-#     #data_folders are either the train or test set. 
-#     for strCurFolderName in p_strDataFolderNames:
-#         dataset_cur_genre = load_genre(strCurFolderName)
-#         all_datasets.append(dataset_cur_genre)
-#     return all_datasets
-
 # load data for each genre
 def load_genre(genre_folder):   
-    global overall_song_id
 
     #figure out the path to all the genre's song files, and how many songs we have
     all_song_paths = []
@@ -342,8 +325,7 @@ def load_genre(genre_folder):
             if not file.startswith('.') and (file.endswith('.wav') or file.endswith('.mp3')):
                 all_song_paths.append(path+"/"+file)
 
-    #our dataset 2d ndarray will be len(all_song_paths) x sample_count
-
+    #data for cur genre will have shapre all_song_paths x TOTAL_INPUTS
     dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), TOTAL_INPUTS), dtype=np.int16)
     
     songId = 0
@@ -351,15 +333,9 @@ def load_genre(genre_folder):
     for cur_song_file in all_song_paths:
         try:
             # convert current song to numpy array. when using images we were normalizing using pixel depth... should we do something different? Or pcmm is already [0,1]?
-            # genre_path = '/media/kxstudio/LUSSIER/music/audiobooks/Alice_In_Wonderland_complete/'
-            # song_path = genre_path +'Alice_In_Wonderland_ch_01.mp3'
             cur_song_pcm = songFile2pcm(cur_song_file)
-
             # only keep the first sample_count samples
             cur_song_pcm = cur_song_pcm[0:SAMPLE_COUNT]
-            # print ("load genre loading song", songId, np.mean(cur_song_pcm))
-            # write_test_wav(cur_song_pcm, "loadGenre_original_song" + str(overall_song_id))
-
             #and put it in the dataset_cur_genre
             dataset_cur_genre[songId, :] = cur_song_pcm
             songId += 1
@@ -402,7 +378,6 @@ def songFile2pcm(song_path):
 # Merge individual genre datasets. Tune s_iTrainSize as needed to be able to fit all data in memory.
 # Also create a validation dataset_cur_genre for hyperparameter tuning.
 def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
-    global overall_song_idfuck
     iNum_classes = len(p_allPickledFilenames)
     #make empty arrays for validation and training sets and labels
     whole_valid_dataset, valid_labels = make_arrays(p_iValidSize, TOTAL_INPUTS)
@@ -420,14 +395,8 @@ def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
     #for each file in p_allPickledFilenames
     for iPickleFileId, strPickleFilename in enumerate(p_allPickledFilenames):    
         try:
-            #open the file
-
             with open(strPickleFilename, 'rb') as f:
-                #unpicke 3d array for current file
                 cur_genre_dataset = pickle.load(f)
-                # for song_data in cur_genre_dataset:
-                #     write_test_wav(song_data, "mergeDataset" + str(overall_song_idfuck))
-                #     overall_song_idfuck += 1
                 
                 # let's shuffle the items to have random validation and training set. np.random.shuffle suffles only first dimension
                 np.random.shuffle(cur_genre_dataset)
