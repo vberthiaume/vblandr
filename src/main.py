@@ -20,17 +20,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-
-
+#tensorflow stuff
 import time
 import math
-import tempfile
-
-
 from six.moves import xrange  # pylint: disable=redefined-builtin
-
-
-#tensorflow stuff
 import tensorflow as tf
 
 #all functions related to datasets
@@ -47,7 +40,6 @@ flags.DEFINE_integer('hidden2',       32,     'Number of units in hidden layer 2
 # flags.DEFINE_integer('batch_size',    100,    'Batch size. Must divide evenly into the dataset sizes.')
 flags.DEFINE_integer('batch_size',    2,      'Batch size. Must divide evenly into the dataset sizes.')
 flags.DEFINE_string ('train_dir',     'data', 'Directory to put the training data.')
-
 
 
 ######################################## ACTUAL CODE ##########################################
