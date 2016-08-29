@@ -140,6 +140,8 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
     #build train, valid and test datasets
     pickle_file = buildDataSets()
 
+    print("buildDataSets done")
+
     with open(pickle_file, 'rb') as f:
         save = pickle.load(f)
         train_dataset   = save['wholeTrainDataset']
@@ -150,8 +152,8 @@ def read_data_sets(train_dir, dtype=dtypes.float32):
         test_labels     = save['wholeTestLabels']
         del save  # hint to help gc free up memory
         print('after pickling, Training set',   train_dataset.shape, train_labels.shape)
-        print('after pickling, Validation set', valid_dataset.shape, valid_labels.shape)
-        print('after pickling, Test set',       test_dataset.shape,  test_labels.shape)
+        #print('after pickling, Validation set', valid_dataset.shape, valid_labels.shape)
+        #print('after pickling, Test set',       test_dataset.shape,  test_labels.shape)
 
     train       = DataSet(train_dataset, train_labels,  dtype=dtype)
     validation  = DataSet(valid_dataset, valid_labels,  dtype=dtype)
@@ -166,7 +168,7 @@ def write_test_wav(cur_song_samples, str_id = ""):
 
 class DataSet(object):
     def __init__(self, songs, labels, dtype=dtypes.float32):
-        #global overall_song_id
+        global overall_song_id
        
         """Construct a DataSet. `dtype` can be either `uint8` to leave the input as `[0, 255]`, or `float32` to rescale into `[0, 1]`."""
         dtype = dtypes.as_dtype(dtype).base_dtype
@@ -187,15 +189,15 @@ class DataSet(object):
         #     songs = numpy.multiply(songs, 1.0 / 255.0)
 
         #we do need to check if we need to normalize it though... or not? not sure. 
-        #for cur_song, cur_song_samples in enumerate(songs):
-            # print (cur_song, np.amax(cur_song_samples))
-            # print (cur_song, np.amin(cur_song_samples))
-            # print (cur_song, np.mean(cur_song_samples))
+        for cur_song, cur_song_samples in enumerate(songs):
+            print (cur_song, np.amax(cur_song_samples))
+            print (cur_song, np.amin(cur_song_samples))
+            print (cur_song, np.mean(cur_song_samples))
 
             #export this to a wav file, to test it
             #if cur_song == 0:
-            #    write_test_wav(cur_song_samples, str(overall_song_id))
-            #    overall_song_id += 1
+            write_test_wav(cur_song_samples, str(overall_song_id))
+            overall_song_id += 1
 
         self._songs             = songs
         self._labels            = labels
@@ -241,22 +243,22 @@ class DataSet(object):
 def buildDataSets():
 
     trainGenreNames, trainGenrePaths = listGenres(LIBRARY_PATH + 'train_very_small/')#'train_small/')
-    # testGenreNames, testGenrePaths   = listGenres(LIBRARY_PATH + 'test_small/')
+    testGenreNames, testGenrePaths   = listGenres(LIBRARY_PATH + 'test_small/')
     pickle_file =                                 LIBRARY_PATH + 'allData.pickle'
         
     allPickledTrainFilenames = maybe_pickle(trainGenrePaths, FORCE_PICKLING)
-    # allPickledTestFilenames  = maybe_pickle(testGenrePaths, FORCE_PICKLING)
+    allPickledTestFilenames  = maybe_pickle(testGenrePaths, FORCE_PICKLING)
     # all_train_data_sets = load_all_genres(trainGenrePaths, FORCE_PICKLING)
     # all_test_data_sets  = load_all_genres(testGenrePaths, FORCE_PICKLING)
 
 
     #call merge_dataset on data_sets and labels
     wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = merge_dataset(allPickledTrainFilenames, s_iTrainSize, 0)#s_iValid_size)
-    # _,                                _, wholeTestDataset,  wholeTestLabels  = merge_dataset(allPickledTestFilenames,  s_iTestSize)
+    _,                                _, wholeTestDataset,  wholeTestLabels  = merge_dataset(allPickledTestFilenames,  s_iTestSize)
 
     wholeTrainDataset, wholeTrainLabels = randomize(wholeTrainDataset, wholeTrainLabels)
-    # wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
-    # wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
+    wholeTestDataset,  wholeTestLabels  = randomize(wholeTestDataset,  wholeTestLabels)
+    #wholeValidDataset, wholeValidLabels = randomize(wholeValidDataset, wholeValidLabels)
 
     # Finally, let's save the data for later reuse: 
     try:
@@ -452,7 +454,7 @@ def merge_dataset(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
 
 def make_arrays(p_iNb_rows, p_iNb_cols):
     if p_iNb_rows:
-        dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.float32)
+        dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.int16)
         labels = np.ndarray(p_iNb_rows, dtype=np.int32)
     else:
         dataset_cur_genre, labels = None, None
