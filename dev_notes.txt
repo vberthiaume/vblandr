@@ -1,0 +1,8 @@
+2016-09-09
+so I can now train the thing, and it learns something bogus like all .5.
+
+what is the regular range of labels?
+when is training supposed to stop?
+
+apparently i still have the old mnist code in vblandr/mnist, it still runs. Which is good because i can't find where I originally got this, the current tensorflow code is different.
+    

@@ -1,4 +1,5 @@
 # All edits to original document Copyright 2016 Vincent Berthiaume. 
+#
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -108,7 +109,7 @@ def placeholder_inputs(batch_size):
     # Note that the shapes of the placeholders match the shapes of the full image and label tensors, except the first dimension is now batch_size
     # rather than the full size of the train or test data sets.
     songs_placeholder  = tf.placeholder(tf.float32, shape=(batch_size, dataSet.TOTAL_INPUTS))
-    labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size))
+    labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size, dataSet.NUM_CLASSES))
     return songs_placeholder, labels_placeholder
 
 def inference(images, hidden1_units, hidden2_units):

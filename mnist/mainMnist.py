@@ -243,6 +243,5 @@ def evaluation(logits, labels):
 def main(_):
     run_training()
 
-
 if __name__ == '__main__':
     tf.app.run()
