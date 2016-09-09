@@ -35,8 +35,8 @@ overall_song_id = 0
 # LIBRARY_PATH = '/media/sf_stuff_for_virtual_machines/music/'
 # LIBRARY_PATH = '/Volumes/Untitled/music/'
 #LIBRARY_PATH = '/home/gris/Music/vblandr/'
-LIBRARY_PATH = '/mnt/c/Users/barth/Documents/vblandr/'
-#LIBRARY_PATH = '/home/gris/Music/vblandr/'
+#LIBRARY_PATH = '/mnt/c/Users/barth/Documents/vblandr/'
+LIBRARY_PATH = '/home/gris/Music/vblandr/'
 
 
 def write_test_wav(cur_song_samples, str_id = ""):
