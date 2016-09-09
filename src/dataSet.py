@@ -109,7 +109,8 @@ class DataSet(object):
         #        overall_song_id += 1
 
         #check labels
-        labels = dense_to_one_hot(labels, NUM_CLASSES)
+        #use this for issue #3
+        #labels = dense_to_one_hot(labels, NUM_CLASSES)
 
         self._songs             = songs
         self._labels            = labels
