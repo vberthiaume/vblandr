@@ -109,7 +109,11 @@ def placeholder_inputs(batch_size):
     # Note that the shapes of the placeholders match the shapes of the full image and label tensors, except the first dimension is now batch_size
     # rather than the full size of the train or test data sets.
     songs_placeholder  = tf.placeholder(tf.float32, shape=(batch_size, dataSet.TOTAL_INPUTS))
-    labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size, dataSet.NUM_CLASSES))
+    one_hot = False
+    if one_hot:
+        labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size, dataSet.NUM_CLASSES))
+    else:
+        labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size))
     return songs_placeholder, labels_placeholder
 
 def inference(images, hidden1_units, hidden2_units):

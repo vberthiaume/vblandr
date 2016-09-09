@@ -327,10 +327,13 @@ def getWholeDataFromIndividualGenrePickles(p_allPickledFilenames, p_iTrainSize, 
     #END OF getWholeDataFromIndividualGenrePickles
 
 
-def make_arrays(p_iNb_rows, p_iNb_cols):
+def make_arrays(p_iNb_rows, p_iNb_cols, one_hot=False):
     if p_iNb_rows:
         dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.int16)
-        labels = np.ndarray(p_iNb_rows, dtype=np.int32)
+        if one_hot:
+            labels = np.ndarray((p_iNb_rows, NUM_CLASSES), dtype=np.int32)
+        else:
+            labels = np.ndarray(p_iNb_rows, dtype=np.int32)
     else:
         dataset_cur_genre, labels = None, None
     return dataset_cur_genre, labels
