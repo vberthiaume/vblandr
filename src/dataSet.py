@@ -67,6 +67,15 @@ def getAllDataSets(train_dir, dtype=dtypes.float32):
 
     return Datasets(train=train, validation=validation, test=test)
 
+def dense_to_one_hot(labels_dense, num_classes):
+    """Convert class labels from scalars to one-hot vectors."""
+    num_labels = labels_dense.shape[0]
+    index_offset = numpy.arange(num_labels) * num_classes
+    labels_one_hot = numpy.zeros((num_labels, num_classes))
+    labels_one_hot.flat[index_offset + labels_dense.ravel()] = 1
+    return labels_one_hot
+
+
 class DataSet(object):
     def __init__(self, songs, labels, dtype=dtypes.float32):
         global overall_song_id
@@ -98,6 +107,9 @@ class DataSet(object):
         #        #export this to a wav file, to test it
         #        write_test_wav(cur_song_samples, str(overall_song_id))
         #        overall_song_id += 1
+
+        #check labels
+        labels = dense_to_one_hot(labels, NUM_CLASSES)
 
         self._songs             = songs
         self._labels            = labels

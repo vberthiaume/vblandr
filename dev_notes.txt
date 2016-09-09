@@ -5,4 +5,7 @@ what is the regular range of labels?
 when is training supposed to stop?
 
 apparently i still have the old mnist code in vblandr/mnist, it still runs. Which is good because i can't find where I originally got this, the current tensorflow code is different.
+
+tensorflow.examples.tutorials.mnist.input_data.read_data_sets
+tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
     
