@@ -83,24 +83,21 @@ class DataSet(object):
         #the original range for int16 is [-32768, 32767]
         if dtype == dtypes.float32:  
             songs = songs.astype(np.float32)            #cast the array into float32
+            songs = np.multiply(songs, 1.0 / 65536)     #convert int16 range into [-.5, .5]
+            songs = np.add(songs, .5)                   #convert int16 [-.5, .5] range into [0,1.0]
             
-            songs = np.multiply(songs, 1.0 / 32767)     #convert int16 range into [-1.0,1.0]
-            
-            #songs = np.multiply(songs, 1.0 / 65536)     #convert int16 range into [-.5, .5]
-            #songs = np.add(songs, .5)                   #convert int16 [-.5, .5] range into [0,1.0]
-            
-            # Convert from [0, 255] -> [0.0, 1.0].
+            # original code for pixels; #Convert from [0, 255] -> [0.0, 1.0].
             #songs = np.multiply(songs, 1.0 / 255.0) 
 
-
-        for cur_song, cur_song_samples in enumerate(songs):
-            if cur_song == 0:
-                print (cur_song, np.amax(cur_song_samples))
-                print (cur_song, np.amin(cur_song_samples))
-                print (cur_song, np.mean(cur_song_samples))
-                #export this to a wav file, to test it
-                write_test_wav(cur_song_samples, str(overall_song_id))
-                overall_song_id += 1
+        #check that song files are valid 
+        #for cur_song, cur_song_samples in enumerate(songs):
+        #    if cur_song == 0:
+        #        print (cur_song, np.amax(cur_song_samples))
+        #        print (cur_song, np.amin(cur_song_samples))
+        #        print (cur_song, np.mean(cur_song_samples))
+        #        #export this to a wav file, to test it
+        #        write_test_wav(cur_song_samples, str(overall_song_id))
+        #        overall_song_id += 1
 
         self._songs             = songs
         self._labels            = labels
