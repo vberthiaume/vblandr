@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 
 from six.moves import cPickle as pickle
 
+import os
 # we have 7 music genres
 NUM_CLASSES     = 7
 s_iTrainSize    = 8 * NUM_CLASSES  # 200000
@@ -34,6 +35,11 @@ overall_song_id = 0
 # LIBRARY_PATH = '/media/sf_stuff_for_virtual_machines/music/'
 # LIBRARY_PATH = '/Volumes/Untitled/music/'
 LIBRARY_PATH = '/home/gris/Music/vblandr/'
+if os.name == 'nt':
+    pass # Windows
+else:
+    pass # other (unix)
+
 
 def write_test_wav(cur_song_samples, str_id = ""):
     filename = LIBRARY_PATH +'test'+ str_id +'.wav'
