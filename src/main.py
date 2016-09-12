@@ -49,11 +49,13 @@ def main(_):
     data_sets = dataSet.getAllDataSets(FLAGS.train_dir)
 
     with tf.Graph().as_default():                                                       #using default graph
-        songs_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size)    # Generate placeholders for the images and labels.
+        #MEMBER FUNCTIONS 
+        songs_placeholder, labels_placeholder = placeholder_inputs(FLAGS.batch_size)    # Generate placeholders for the songs and labels.
         logits          = inference(songs_placeholder, FLAGS.hidden1, FLAGS.hidden2)    # Build a Graph that computes predictions from the inference model.
         loss            = loss_funct(logits, labels_placeholder)                        # Add to the Graph the Ops for loss calculation.
         train_op        = training(loss, FLAGS.learning_rate)                           # Add to the Graph the Ops that calculate and apply gradients.
         eval_correct    = evaluation(logits, labels_placeholder)                        # Add the Op to compare the logits to the labels during evaluation.
+        #TF FUNCTION
         summary_op      = tf.merge_all_summaries()                                      # Build the summary operation based on the TF collection of Summaries.
         init            = tf.initialize_all_variables()                                 # Add the variable initializer Op.
         saver           = tf.train.Saver()                                              # Create a saver for writing training checkpoints.
