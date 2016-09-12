@@ -58,7 +58,7 @@ def main(_):
         #TF FUNCTION
         summary_op      = tf.merge_all_summaries()                                      # Build the summary operation based on the TF collection of Summaries.
         init            = tf.initialize_all_variables()                                 # Add the variable initializer Op.
-        saver           = tf.train.Saver()                                              # Create a saver for writing training checkpoints.
+        #saver           = tf.train.Saver()                                              # Create a saver for writing training checkpoints.
         sess            = tf.Session()                                                  # Create a session for running Ops on the Graph.
         summary_writer  = tf.train.SummaryWriter(FLAGS.train_dir, sess.graph)           # Instantiate a SummaryWriter to output summaries and the Graph.
         sess.run(init)                                                                  # Run the Op to initialize the variables.
@@ -83,7 +83,7 @@ def main(_):
 
             # Save a checkpoint and evaluate the model periodically.
             if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
-                saver.save(sess, FLAGS.train_dir, global_step=step)
+                #saver.save(sess, FLAGS.train_dir, global_step=step)
                 # Evaluate against the training set.
                 print('Training Data Eval:')
                 do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_sets.train)
@@ -96,23 +96,8 @@ def main(_):
     #ENDOF MAIN()
 
 def placeholder_inputs(batch_size):
-    """Generate placeholder variables to represent the input tensors.
-
-    These placeholders are used as inputs by the rest of the model building
-    code and will be fed from the downloaded data in the .run() loop, below.
-
-    Args:
-        batch_size: The batch size will be baked into both placeholders.
-
-    Returns:
-        songs_placeholder: Images placeholder.
-        labels_placeholder: Labels placeholder.
-    """
-    # Note that the shapes of the placeholders match the shapes of the full image and label tensors, except the first dimension is now batch_size
-    # rather than the full size of the train or test data sets.
     songs_placeholder  = tf.placeholder(tf.float32, shape=(batch_size, dataSet.TOTAL_INPUTS))
-    one_hot = False
-    if one_hot:
+    if dataSet.ONE_HOT:
         labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size, dataSet.NUM_CLASSES))
     else:
         labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size))
@@ -145,44 +130,26 @@ def loss_funct(logits, labels):
     return loss
 
 def fill_feed_dict(data_set, images_pl, labels_pl):
-    """Fills the feed_dict for training the given step.
-
-    A feed_dict takes the form of:
-    feed_dict = {
-            <placeholder>: <tensor of values to be passed for placeholder>,
-            ....
-    }
-
-    Args:
-        data_set: The set of images and labels, from input_data.getAllDataSets()
-        images_pl: The images placeholder, from placeholder_inputs().
-        labels_pl: The labels placeholder, from placeholder_inputs().
-
-    Returns:
-        feed_dict: The feed dictionary mapping from placeholders to values.
-    """
-    # Create the feed_dict for the placeholders filled with the next `batch size ` examples.
-    images_feed, labels_feed = data_set.next_batch(FLAGS.batch_size)
-    feed_dict = { images_pl: images_feed, labels_pl: labels_feed}
+    """Create the feed_dict for the placeholders filled with the next `batch size` examples."""
+    images_feed, labels_feed    = data_set.next_batch(FLAGS.batch_size)
+    feed_dict                   = { images_pl: images_feed, labels_pl: labels_feed}
     return feed_dict
 
 def do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_set):
     """Runs one evaluation against the full epoch of data.
-
     Args:
         sess: The session in which the model has been trained.
         eval_correct: The Tensor that returns the number of correct predictions.
         songs_placeholder: The images placeholder.
         labels_placeholder: The labels placeholder.
-        data_set: The set of images and labels to evaluate, from
-            input_data.getAllDataSets().
+        data_set: The set of images and labels to evaluate, from getAllDataSets().
     """
     # And run one epoch of eval.
-    true_count = 0  # Counts the number of correct predictions.
+    true_count      = 0  # Counts the number of correct predictions.
     steps_per_epoch = data_set.num_examples // FLAGS.batch_size
-    num_examples = steps_per_epoch * FLAGS.batch_size
+    num_examples    = steps_per_epoch * FLAGS.batch_size
     for step in xrange(steps_per_epoch):
-        feed_dict = fill_feed_dict(data_set, songs_placeholder, labels_placeholder)
+        feed_dict   = fill_feed_dict(data_set, songs_placeholder, labels_placeholder)
         true_count += sess.run(eval_correct, feed_dict=feed_dict)
     precision = true_count / num_examples
     print('  Num examples: %d  Num correct: %d  Precision @ 1: %0.04f' % (num_examples, true_count, precision))

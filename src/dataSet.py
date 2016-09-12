@@ -30,6 +30,8 @@ TOTAL_INPUTS = SAMPLE_COUNT
 FORCE_PICKLING = False
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 overall_song_id = 0
+ONE_HOT = False
+
 
 # LIBRARY_PATH = '/media/kxstudio/LUSSIER/music/'
 # LIBRARY_PATH = '/media/sf_stuff_for_virtual_machines/music/'
@@ -284,8 +286,8 @@ def songFile2pcm(song_path):
 def getWholeDataFromIndividualGenrePickles(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):
     iNum_classes = len(p_allPickledFilenames)
     #make empty arrays for validation and training sets and labels
-    whole_valid_dataset, valid_labels = make_arrays(p_iValidSize, TOTAL_INPUTS)
-    whole_train_dataset, train_labels = make_arrays(p_iTrainSize, TOTAL_INPUTS)
+    whole_valid_dataset, valid_labels = make_arrays(p_iValidSize, TOTAL_INPUTS, ONE_HOT)
+    whole_train_dataset, train_labels = make_arrays(p_iTrainSize, TOTAL_INPUTS, ONE_HOT)
     
     #number of items per class. // is an int division in python3, not sure in python2
     iNbrOfValidItemsPerClass = p_iValidSize // iNum_classes
@@ -327,7 +329,7 @@ def getWholeDataFromIndividualGenrePickles(p_allPickledFilenames, p_iTrainSize, 
     #END OF getWholeDataFromIndividualGenrePickles
 
 
-def make_arrays(p_iNb_rows, p_iNb_cols, one_hot=False):
+def make_arrays(p_iNb_rows, p_iNb_cols, one_hot):
     if p_iNb_rows:
         dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.int16)
         if one_hot:
