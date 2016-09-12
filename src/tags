@@ -1,0 +1,43 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+DataSet	dataSet.py	/^class DataSet(object):$/;"	c
+Datasets	dataSet.py	/^Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])$/;"	v
+FLAGS	main.py	/^FLAGS = flags.FLAGS$/;"	v
+FORCE_PICKLING	dataSet.py	/^FORCE_PICKLING = False$/;"	v
+LIBRARY_PATH	dataSet.py	/^LIBRARY_PATH = '\/home\/gris\/Music\/vblandr\/'$/;"	v
+NUM_CLASSES	dataSet.py	/^NUM_CLASSES     = 7$/;"	v
+SAMPLE_COUNT	dataSet.py	/^SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio$/;"	v
+TOTAL_INPUTS	dataSet.py	/^TOTAL_INPUTS = SAMPLE_COUNT$/;"	v
+__init__	dataSet.py	/^    def __init__(self, songs, labels, dtype=dtypes.float32):$/;"	m	class:DataSet
+do_eval	main.py	/^def do_eval(sess, eval_correct, songs_placeholder, labels_placeholder, data_set):$/;"	f
+epochs_completed	dataSet.py	/^    def epochs_completed(self):$/;"	m	class:DataSet
+evaluation	main.py	/^def evaluation(logits, labels):$/;"	f
+fill_feed_dict	main.py	/^def fill_feed_dict(data_set, images_pl, labels_pl):$/;"	f
+flags	main.py	/^flags = tf.app.flags$/;"	v
+getAllDataPickle	dataSet.py	/^def getAllDataPickle():$/;"	f
+getAllDataSets	dataSet.py	/^def getAllDataSets(train_dir, dtype=dtypes.float32):$/;"	f
+getAllGenrePaths	dataSet.py	/^def getAllGenrePaths(music_dir):$/;"	f
+getDataForGenre	dataSet.py	/^def getDataForGenre(genre_folder):   $/;"	f
+getIndividualGenrePickles	dataSet.py	/^def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):$/;"	f
+getWholeDataFromIndividualGenrePickles	dataSet.py	/^def getWholeDataFromIndividualGenrePickles(p_allPickledFilenames, p_iTrainSize, p_iValidSize=0):$/;"	f
+inference	main.py	/^def inference(images, hidden1_units, hidden2_units):$/;"	f
+labels	dataSet.py	/^    def labels(self):$/;"	m	class:DataSet
+loss_funct	main.py	/^def loss_funct(logits, labels):$/;"	f
+main	main.py	/^def main(_):$/;"	f
+make_arrays	dataSet.py	/^def make_arrays(p_iNb_rows, p_iNb_cols):$/;"	f
+next_batch	dataSet.py	/^    def next_batch(self, batch_size):$/;"	m	class:DataSet
+num_examples	dataSet.py	/^    def num_examples(self):$/;"	m	class:DataSet
+overall_song_id	dataSet.py	/^overall_song_id = 0$/;"	v
+placeholder_inputs	main.py	/^def placeholder_inputs(batch_size):$/;"	f
+randomize	dataSet.py	/^def randomize(p_3ddataset_cur_genre, p_vLabels):$/;"	f
+s_iTestSize	dataSet.py	/^s_iTestSize     = 6 * NUM_CLASSES  # 10000$/;"	v
+s_iTrainSize	dataSet.py	/^s_iTrainSize    = 8 * NUM_CLASSES  # 200000$/;"	v
+s_iValid_size	dataSet.py	/^s_iValid_size   = 6 * NUM_CLASSES  # 10000$/;"	v
+songFile2pcm	dataSet.py	/^def songFile2pcm(song_path):$/;"	f
+songs	dataSet.py	/^    def songs(self):$/;"	m	class:DataSet
+training	main.py	/^def training(loss, learning_rate):$/;"	f
+write_test_wav	dataSet.py	/^def write_test_wav(cur_song_samples, str_id = ""):$/;"	f

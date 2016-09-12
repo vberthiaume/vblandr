@@ -1,0 +1,20 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+FLAGS	mainMnist.py	/^FLAGS = flags.FLAGS$/;"	v
+IMAGE_PIXELS	mainMnist.py	/^IMAGE_PIXELS = IMAGE_SIZE * IMAGE_SIZE$/;"	v
+IMAGE_SIZE	mainMnist.py	/^IMAGE_SIZE = 28$/;"	v
+NUM_CLASSES	mainMnist.py	/^NUM_CLASSES = 10$/;"	v
+do_eval	mainMnist.py	/^def do_eval(sess, eval_correct, images_placeholder, labels_placeholder, data_set):$/;"	f
+evaluation	mainMnist.py	/^def evaluation(logits, labels):$/;"	f
+fill_feed_dict	mainMnist.py	/^def fill_feed_dict(data_set, images_pl, labels_pl):$/;"	f
+flags	mainMnist.py	/^flags = tf.app.flags$/;"	v
+inference	mainMnist.py	/^def inference(images, hidden1_units, hidden2_units):$/;"	f
+loss_funct	mainMnist.py	/^def loss_funct(logits, labels):$/;"	f
+main	mainMnist.py	/^def main(_):$/;"	f
+placeholder_inputs	mainMnist.py	/^def placeholder_inputs(batch_size):$/;"	f
+run_training	mainMnist.py	/^def run_training():$/;"	f
+training	mainMnist.py	/^def training(loss, learning_rate):$/;"	f

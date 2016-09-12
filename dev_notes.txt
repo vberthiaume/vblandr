@@ -1,0 +1,17 @@
+2016-09-09
+so I can now train the thing, and it learns something bogus like all .5.
+
+what is the regular range of labels?
+when is training supposed to stop?
+
+apparently i still have the old mnist code in vblandr/mnist, it still runs. Which is good because i can't find where I originally got this, the current tensorflow code is different.
+
+tensorflow.examples.tutorials.mnist.input_data.read_data_sets
+tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
+
+
+LABELS FUCKNG BULLSHIT
+ok. i want to know where my labels are set, and how to get them into one-hot encoding (#3). 
+the array for labels is built in dataSet.py::make_arrays line 330
+    in there, dataset_cur_genre uses int16... at somepoint should probably be storing float32(#2)
+    
