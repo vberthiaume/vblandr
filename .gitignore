@@ -110,3 +110,5 @@ target/
 
 # dotenv
 .env
+
+.DS_Store
