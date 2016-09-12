@@ -109,18 +109,18 @@ def inference(images, hidden1_units, hidden2_units):
     # Hidden 1
     with tf.name_scope('hidden1'):
         weights = tf.Variable(tf.truncated_normal([dataSet.TOTAL_INPUTS, hidden1_units], stddev=1.0 / math.sqrt(float(dataSet.TOTAL_INPUTS))), name='weights')
-        biases = tf.Variable(tf.zeros([hidden1_units]), name='biases')
+        biases  = tf.Variable(tf.zeros([hidden1_units]), name='biases')
         hidden1 = tf.nn.relu(tf.matmul(images, weights) + biases)
     # Hidden 2
     with tf.name_scope('hidden2'):
         weights = tf.Variable(tf.truncated_normal([hidden1_units, hidden2_units], stddev=1.0 / math.sqrt(float(hidden1_units))), name='weights')
-        biases = tf.Variable(tf.zeros([hidden2_units]), name='biases')
+        biases  = tf.Variable(tf.zeros([hidden2_units]), name='biases')
         hidden2 = tf.nn.relu(tf.matmul(hidden1, weights) + biases)
     # Linear
     with tf.name_scope('softmax_linear'):
         weights = tf.Variable(tf.truncated_normal([hidden2_units, dataSet.NUM_CLASSES], stddev=1.0 / math.sqrt(float(hidden2_units))), name='weights')
-        biases = tf.Variable(tf.zeros([dataSet.NUM_CLASSES]), name='biases')
-        logits = tf.matmul(hidden2, weights) + biases
+        biases  = tf.Variable(tf.zeros([dataSet.NUM_CLASSES]), name='biases')
+        logits  = tf.matmul(hidden2, weights) + biases
     return logits
 
 def loss_funct(logits, labels):
