@@ -17,4 +17,13 @@ the array for labels is built in dataSet.py::make_arrays line 330
     
 -------------------------- 2016-09-19 -----------------------
 ok. so let's get started with audio stuff. First thing I need to figure out is out to change the number of outputs.
-I think main.py is pretty much independent of the number of inputs and outputs. 
+
+main.py uses dataSet.TOTAL_INPUTS. I don't seem to have a similar variable for outputs, other than ONE_HOT. i should probably make that work...? 
+
+i can change the number of inputs simply by changing TOTAL_INPUTS and forcing repickling. the number of inputs seems to only be used by 
+
+WHAT IS SUPPOSED TO BE THE FUCKING TYPE OF INPUTS AND OUTPUTS????
+right now, make arrays has np.int16 for inputs and np.int32 for outputs. this seems to be wrong.
+
+ffmpeg returns int16, so inputs have to be int16
+
