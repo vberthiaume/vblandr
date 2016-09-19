@@ -34,4 +34,16 @@ main.py placeholder
 main.py evaluation (evaluates the quality of the logits at predicting the label)
     logit tensor: float
     lable tensor: int32 in the range [0, dataSet.NUM_CLASSES]. So this is not expecting a one-hot encoding.
+
+trying to use stftanal in main.py BUT
+original call to mX, pX = STFT.stftAnal(x, fs, w, N, H) failed because the one version of the stftanal function that I found only takes 4 arguments. 
+
+this is even though the original fucking file howework A4part3.py uses this very fucking same fucking call. Ok, well apparently xavier just deleted that call
+
+https://github.com/MTG/sms-tools/commit/2adf5fd4e13ceaa882db00614b183a3ffe991118
+
+so I can just ignore it, i guess. yeah, that seems to work. 
+
+NOW HERE:
+so next I need to analyse one of my songs instead of this flute thing, and understand what of this to feed the network. 
     

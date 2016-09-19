@@ -26,6 +26,7 @@ import sys, os, os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
 import utilFunctions as UF
 import stft as STFT
+from scipy.signal import get_window
 
 #ffmpeg stuff
 import subprocess as sp
@@ -46,7 +47,7 @@ s_iTestSize     = 6 * NUM_CLASSES  # 10000
 
 SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 TOTAL_INPUTS = SAMPLE_COUNT
-FORCE_PICKLING = True
+FORCE_PICKLING = False
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 overall_song_id = 0
 ONE_HOT = False
@@ -134,19 +135,16 @@ class DataSet(object):
         #use this for issue #3
         #labels = dense_to_one_hot(labels, NUM_CLASSES)
 
-        inputFile = '../../sounds/flute-A4.wav'
+        inputFile = '/home/gris/Documents/git/sms-tools/sounds/flute-A4.wav'
         window = 'hamming'
         M = 801
         N = 1024
         H = 400
-
         (fs, x) = UF.wavread(inputFile)
- 
         w = get_window(window, M)
- 
         #here, mx is mx[bin][spectrum]
-        mX, pX = STFT.stftAnal(x, fs, w, N, H)
-
+        mX, pX = STFT.stftAnal(x, w, N, H)
+        print ("mX: ", mX)
 
 #================================================================================
 
