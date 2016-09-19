@@ -25,17 +25,18 @@ import collections
 import sys, os, os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../sms-tools/software/models/'))
 import utilFunctions as UF
+import stft as STFT
 
 #ffmpeg stuff
 import subprocess as sp
 import scikits.audiolab
 
+#general stuff?
 import numpy as np
 import matplotlib.pyplot as plt
-
 from six.moves import cPickle as pickle
+        
 
-import os
 # we have 7 music genres
 NUM_CLASSES     = 7
 s_iTrainSize    = 8 * NUM_CLASSES  # 200000
@@ -43,7 +44,7 @@ s_iValid_size   = 6 * NUM_CLASSES  # 10000
 s_iTestSize     = 6 * NUM_CLASSES  # 10000
 
 
-SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
+SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 TOTAL_INPUTS = SAMPLE_COUNT
 FORCE_PICKLING = True
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
@@ -64,7 +65,7 @@ def write_test_wav(cur_song_samples, str_id = ""):
     print ("writing", filename)
     scikits.audiolab.wavwrite(cur_song_samples, filename, fs=44100, enc='pcm16')
 
-def getAllDataSets(train_dir, dtype=dtypes.float32):
+def getAllDataSets(train_dir, dtype=np.float32):
 
     pickle_file = getAllDataPickle()
 
@@ -97,7 +98,7 @@ def dense_to_one_hot(labels_dense, num_classes):
 
 
 class DataSet(object):
-    def __init__(self, songs, labels, dtype=dtypes.float32):
+    def __init__(self, songs, labels, dtype=np.float32):
         global overall_song_id
        
         """Construct a DataSet. `dtype` can be either `uint8` to leave the input as `[0, 255]`, or `float32` to rescale into `[0, 1]`."""
@@ -109,6 +110,7 @@ class DataSet(object):
         assert songs.shape[0] == labels.shape[0], ('songs.shape: %s labels.shape: %s' % (songs.shape, labels.shape))
         self._num_examples = songs.shape[0]
 
+#======================= DATA CONVERSION AND SHIT ===============================
         #the original range for int16 is [-32768, 32767]
         if dtype == dtypes.float32:  
             songs = songs.astype(np.float32)            #cast the array into float32
@@ -131,6 +133,22 @@ class DataSet(object):
         #check labels
         #use this for issue #3
         #labels = dense_to_one_hot(labels, NUM_CLASSES)
+
+        inputFile = '../../sounds/flute-A4.wav'
+        window = 'hamming'
+        M = 801
+        N = 1024
+        H = 400
+
+        (fs, x) = UF.wavread(inputFile)
+ 
+        w = get_window(window, M)
+ 
+        #here, mx is mx[bin][spectrum]
+        mX, pX = STFT.stftAnal(x, fs, w, N, H)
+
+
+#================================================================================
 
         self._songs             = songs
         self._labels            = labels

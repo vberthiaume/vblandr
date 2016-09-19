@@ -27,3 +27,11 @@ right now, make arrays has np.int16 for inputs and np.int32 for outputs. this se
 
 ffmpeg returns int16, so inputs have to be int16
 
+main.py placeholder
+    input:  tf.float32
+    output: tf.int32 (one hot or not)
+
+main.py evaluation (evaluates the quality of the logits at predicting the label)
+    logit tensor: float
+    lable tensor: int32 in the range [0, dataSet.NUM_CLASSES]. So this is not expecting a one-hot encoding.
+    
