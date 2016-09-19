@@ -15,3 +15,6 @@ ok. i want to know where my labels are set, and how to get them into one-hot enc
 the array for labels is built in dataSet.py::make_arrays line 330
     in there, dataset_cur_genre uses int16... at somepoint should probably be storing float32(#2)
     
+-------------------------- 2016-09-19 -----------------------
+ok. so let's get started with audio stuff. First thing I need to figure out is out to change the number of outputs.
+I think main.py is pretty much independent of the number of inputs and outputs. 

@@ -58,24 +58,25 @@ def main(_):
         #TF FUNCTION
         summary_op      = tf.merge_all_summaries()                                      # Build the summary operation based on the TF collection of Summaries.
         init            = tf.initialize_all_variables()                                 # Add the variable initializer Op.
-        #saver           = tf.train.Saver()                                              # Create a saver for writing training checkpoints.
+        #saver           = tf.train.Saver()                                              # Create a saver for writing training checkpoints.the saver creates a bunch of files, so commented for now.
         sess            = tf.Session()                                                  # Create a session for running Ops on the Graph.
         summary_writer  = tf.train.SummaryWriter(FLAGS.train_dir, sess.graph)           # Instantiate a SummaryWriter to output summaries and the Graph.
         sess.run(init)                                                                  # Run the Op to initialize the variables.
 
+         
+        start_time = time.time()
         # training loop.
         for step in xrange(FLAGS.max_steps):
-            start_time = time.time()
             # Fill a feed dictionary with the  data for this particular training step.
             feed_dict = fill_feed_dict(data_sets.train, songs_placeholder, labels_placeholder)
             # Run one step of the model.  The return values are the activations from the `train_op` (which is discarded) and the `loss` Op.  To
-            # inspect the values of your Ops or variables, you may include them in the list passed to sess.run() and the value tensors will be
-            # returned in the tuple from the call.
+            # inspect the values of your Ops or variables, you may include them in the list passed to sess.run() and the value tensors will be returned in the tuple from the call.
             _, loss_value   = sess.run([train_op, loss], feed_dict=feed_dict)
-            duration        = time.time() - start_time
             
             if step % 100 == 0:
+                duration = time.time() - start_time
                 print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration))
+                start_time = time.time()
                 # Update the events file.
                 summary_str = sess.run(summary_op, feed_dict=feed_dict)
                 summary_writer.add_summary(summary_str, step)
