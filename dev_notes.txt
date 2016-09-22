@@ -46,4 +46,7 @@ so I can just ignore it, i guess. yeah, that seems to work.
 
 NOW HERE:
 so next I need to analyse one of my songs instead of this flute thing, and understand what of this to feed the network. 
-    
+right, so in fact I need to first understand what the stft gives me, then do this before picking the data, along with making sure data is floats between [0,1]  
+
+I think i need to use just the normal dft, because the stft is only for a short window, and I don't care about that. Short windows would be useful if I was doing this live... I think. 
+Let's do the dft for the whole 10 secs
