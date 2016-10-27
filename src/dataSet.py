@@ -282,10 +282,16 @@ def getDataForGenre(genre_folder):
             # only keep the first sample_count samples
             cur_song_pcm = cur_song_pcm[0:TOTAL_INPUTS]
             #do the dft, X is complex numbers, same len as x, ie cur_song_pcm
-            X = fft(cur_song_pcm)
+            fft_buffer = np.zeros(TOTAL_INPUTS)
+            #this reverses the beggining and end of the sample, not sure if this is useful... 
+            fft_buffer[:TOTAL_INPUTS/2] = cur_song_pcm[TOTAL_INPUTS/2:]
+            fft_buffer[TOTAL_INPUTS/2:] = cur_song_pcm[:TOTAL_INPUTS/2]
+            X = fft(fft_buffer)
             #only keep the real numbers, ie the magnitude
             mX = abs(X)
-
+            if songId == 0:
+                plt.plot(mX)
+                plt.show()
             #window = 'hamming'
             #M = 801
             #N = 1024
