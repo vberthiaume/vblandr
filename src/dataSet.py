@@ -197,7 +197,7 @@ def getAllDataPickle():
     
     #obtain data for each genre in their individual pickle file
     allPickledTrainFilenames = getIndividualGenrePickles(trainGenrePaths, FORCE_PICKLING)
-    allPickledTestFilenames  = getIndividualGenrePickles(testGenrePaths, FORCE_PICKLING)
+    allPickledTestFilenames  = getIndividualGenrePickles(testGenrePaths,  FORCE_PICKLING)
 
     #merge and randomize data from all genres into wholedatasets for training, validation, and test
     wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = getWholeDataFromIndividualGenrePickles(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
@@ -257,7 +257,7 @@ def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
 
 # load data for each genre
 def getDataForGenre(genre_folder):   
-    #figure out the path to all the genre's song files, and how many songs we have
+    """figure out the path to all the genre's song files, and how many songs we have"""
     all_song_paths = []
     for path, dirs, files in os.walk(genre_folder):
         #insert file in correct label id
@@ -297,9 +297,9 @@ def songFile2pcm(song_path):
             '-f', 's16le',
             '-acodec', 'pcm_s16le',
             '-ar', '44100', # sms tools wavread can only read 44100 Hz
-            '-ac', '1', # mono file
+            '-ac', '1',     # mono file
             '-loglevel', 'quiet',
-            '-']    #instead of having an output file, using '-' sends it in the pipe. not actually sure how this works.
+            '-']            #instead of having an output file, using '-' sends it in the pipe. not actually sure how this works.
     #run the command
     print(song_path)
     pipe = sp.Popen(command, stdout=sp.PIPE)
@@ -360,7 +360,7 @@ def getWholeDataFromIndividualGenrePickles(p_allPickledFilenames, p_iTrainSize, 
             print('Unable to process data from', strPickleFilename, ':', e)
             raise 
     return whole_valid_dataset, valid_labels, whole_train_dataset, train_labels
-    #END OF getWholeDataFromIndividualGenrePickles
+#END OF getWholeDataFromIndividualGenrePickles
 
 
 def make_arrays(p_iNb_rows, p_iNb_cols, one_hot):
