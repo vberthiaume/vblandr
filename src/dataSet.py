@@ -37,7 +37,7 @@ import scikits.audiolab
 import numpy as np
 import matplotlib.pyplot as plt
 from six.moves import cPickle as pickle
-        
+import math
 
 # we have 7 music genres
 NUM_CLASSES     = 7
@@ -47,7 +47,13 @@ s_iTestSize     = 6 * NUM_CLASSES  # 10000
 
 
 SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
-TOTAL_INPUTS = SAMPLE_COUNT
+exponent = math.log(SAMPLE_COUNT, 2)+1
+TOTAL_INPUTS = 2 ** int(exponent)
+
+print (SAMPLE_COUNT)
+print(exponent)
+print(TOTAL_INPUTS)
+
 FORCE_PICKLING = True
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 overall_song_id = 0
@@ -267,14 +273,14 @@ def getDataForGenre(genre_folder):
             
             #OLD WAY, USING SAMPLES
             ## only keep the first sample_count samples
-            #cur_song_pcm = cur_song_pcm[0:SAMPLE_COUNT]
+            #cur_song_pcm = cur_song_pcm[0:TOTAL_INPUTS]
             ##and put it in the dataset_cur_genre
             #dataset_cur_genre[songId, :] = cur_song_pcm
             
             
             #NEW WAY, USING DFT
             # only keep the first sample_count samples
-            cur_song_pcm = cur_song_pcm[0:SAMPLE_COUNT]
+            cur_song_pcm = cur_song_pcm[0:TOTAL_INPUTS]
             #do the dft, X is complex numbers, same len as x, ie cur_song_pcm
             X = fft(cur_song_pcm)
             #only keep the real numbers, ie the magnitude
