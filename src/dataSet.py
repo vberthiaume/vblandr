@@ -27,6 +27,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..
 import utilFunctions as UF
 import stft as STFT
 from scipy.signal import get_window
+from scipy.fftpack import fft
 
 #ffmpeg stuff
 import subprocess as sp
@@ -47,7 +48,7 @@ s_iTestSize     = 6 * NUM_CLASSES  # 10000
 
 SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 TOTAL_INPUTS = SAMPLE_COUNT
-FORCE_PICKLING = False
+FORCE_PICKLING = True
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 overall_song_id = 0
 ONE_HOT = False
@@ -265,25 +266,32 @@ def getDataForGenre(genre_folder):
             cur_song_pcm = songFile2pcm(cur_song_file)
             
             #OLD WAY, USING SAMPLES
-            # only keep the first sample_count samples
-            cur_song_pcm = cur_song_pcm[0:SAMPLE_COUNT]
-            #and put it in the dataset_cur_genre
-            dataset_cur_genre[songId, :] = cur_song_pcm
+            ## only keep the first sample_count samples
+            #cur_song_pcm = cur_song_pcm[0:SAMPLE_COUNT]
+            ##and put it in the dataset_cur_genre
+            #dataset_cur_genre[songId, :] = cur_song_pcm
+            
             
             #NEW WAY, USING DFT
+            # only keep the first sample_count samples
+            cur_song_pcm = cur_song_pcm[0:SAMPLE_COUNT]
+            #do the dft, X is complex numbers, same len as x, ie cur_song_pcm
+            X = fft(cur_song_pcm)
+            #only keep the real numbers, ie the magnitude
+            mX = abs(X)
 
-            inputFile = '/home/gris/Documents/git/sms-tools/sounds/flute-A4.wav'
-            window = 'hamming'
-            M = 801
-            N = 1024
-            H = 400
-            (fs, x) = UF.wavread(inputFile)
-            w = get_window(window, M)
-            #here, mx is mx[bin][spectrum]
-            mX, pX = STFT.stftAnal(x, w, N, H)
-            print ("mX: ", mX)
+            #window = 'hamming'
+            #M = 801
+            #N = 1024
+            #H = 400
+            #w = get_window(window, M)
+            ##here, mx is mx[bin][spectrum]
+            #mX, pX = STFT.stftAnal(x, w, N, H)
+            #print ("mX: ", mX)
 
 
+            #and put it in the dataset_cur_genre
+            dataset_cur_genre[songId, :] = mX
 
 
                         
