@@ -120,10 +120,10 @@ class DataSet(object):
 
 #======================= DATA CONVERSION AND SHIT ===============================
         #the original range for int16 is [-32768, 32767]
-        if dtype == dtypes.float32:  
-            songs = songs.astype(np.float32)            #cast the array into float32
-            songs = np.multiply(songs, 1.0 / 65536)     #convert int16 range into [-.5, .5]
-            songs = np.add(songs, .5)                   #convert int16 [-.5, .5] range into [0,1.0]
+        #if dtype == dtypes.float32:  
+        #    songs = songs.astype(np.float32)            #cast the array into float32
+        #    songs = np.multiply(songs, 1.0 / 65536)     #convert int16 range into [-.5, .5]
+        #    songs = np.add(songs, .5)                   #convert int16 [-.5, .5] range into [0,1.0]
             
             # original code for pixels; #Convert from [0, 255] -> [0.0, 1.0].
             #songs = np.multiply(songs, 1.0 / 255.0) 
@@ -289,17 +289,14 @@ def getDataForGenre(genre_folder):
             X = fft(fft_buffer)
             #only keep the real numbers, ie the magnitude
             mX = abs(X)
-            if songId == 0:
-                plt.plot(mX)
-                plt.show()
-            #window = 'hamming'
-            #M = 801
-            #N = 1024
-            #H = 400
-            #w = get_window(window, M)
-            ##here, mx is mx[bin][spectrum]
-            #mX, pX = STFT.stftAnal(x, w, N, H)
-            #print ("mX: ", mX)
+            #if songId == 0:
+            #    plt.plot(mX)
+            #    plt.show()
+           
+            mX = mX.astype(np.float32)            #cast the array into float32
+            mX = np.multiply(mX, 1.0 / 65536)     #convert int16 range into [-.5, .5]
+            mX = np.add(mX, .5)                   #convert int16 [-.5, .5] range into [0,1.0]
+            
 
 
             #and put it in the dataset_cur_genre
