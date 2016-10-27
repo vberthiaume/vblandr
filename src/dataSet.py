@@ -135,17 +135,6 @@ class DataSet(object):
         #use this for issue #3
         #labels = dense_to_one_hot(labels, NUM_CLASSES)
 
-        inputFile = '/home/gris/Documents/git/sms-tools/sounds/flute-A4.wav'
-        window = 'hamming'
-        M = 801
-        N = 1024
-        H = 400
-        (fs, x) = UF.wavread(inputFile)
-        w = get_window(window, M)
-        #here, mx is mx[bin][spectrum]
-        mX, pX = STFT.stftAnal(x, w, N, H)
-        print ("mX: ", mX)
-
 #================================================================================
 
         self._songs             = songs
@@ -274,10 +263,31 @@ def getDataForGenre(genre_folder):
         try:
             # convert current song to numpy array. when using images we were normalizing using pixel depth... should we do something different? Or pcmm is already [0,1]?
             cur_song_pcm = songFile2pcm(cur_song_file)
+            
+            #OLD WAY, USING SAMPLES
             # only keep the first sample_count samples
             cur_song_pcm = cur_song_pcm[0:SAMPLE_COUNT]
             #and put it in the dataset_cur_genre
             dataset_cur_genre[songId, :] = cur_song_pcm
+            
+            #NEW WAY, USING DFT
+
+            inputFile = '/home/gris/Documents/git/sms-tools/sounds/flute-A4.wav'
+            window = 'hamming'
+            M = 801
+            N = 1024
+            H = 400
+            (fs, x) = UF.wavread(inputFile)
+            w = get_window(window, M)
+            #here, mx is mx[bin][spectrum]
+            mX, pX = STFT.stftAnal(x, w, N, H)
+            print ("mX: ", mX)
+
+
+
+
+                        
+            
             songId += 1
         except IOError as e:
             print('skipping ', cur_song_file, ':', e)
