@@ -27,7 +27,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..
 import utilFunctions as UF
 import stft as STFT
 from scipy.signal import get_window
-from scipy.fftpack import fft
+from scipy.fftpack import fft, ifft
 
 #ffmpeg stuff
 import subprocess as sp
@@ -49,10 +49,6 @@ s_iTestSize     = 6 * NUM_CLASSES  # 10000
 SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 exponent = math.log(SAMPLE_COUNT, 2)+1
 TOTAL_INPUTS = 2 ** int(exponent)
-
-print (SAMPLE_COUNT)
-print(exponent)
-print(TOTAL_INPUTS)
 
 FORCE_PICKLING = True
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
@@ -86,9 +82,9 @@ def getAllDataSets(train_dir, dtype=np.float32):
         test_dataset    = save['wholeTestDataset']
         test_labels     = save['wholeTestLabels']
         del save  # hint to help gc free up memory
-        print('after pickling, Training set',   train_dataset.shape, train_labels.shape)
-        print('after pickling, Validation set', valid_dataset.shape, valid_labels.shape)
-        print('after pickling, Test set',       test_dataset.shape,  test_labels.shape)
+        #print('after pickling, Training set',   train_dataset.shape, train_labels.shape)
+        #print('after pickling, Validation set', valid_dataset.shape, valid_labels.shape)
+        #print('after pickling, Test set',       test_dataset.shape,  test_labels.shape)
 
     train       = DataSet(train_dataset, train_labels,  dtype=dtype)
     validation  = DataSet(valid_dataset, valid_labels,  dtype=dtype)
@@ -129,14 +125,16 @@ class DataSet(object):
             #songs = np.multiply(songs, 1.0 / 255.0) 
 
         #check that song files are valid 
-        #for cur_song, cur_song_samples in enumerate(songs):
-        #    if cur_song == 0:
-        #        print (cur_song, np.amax(cur_song_samples))
-        #        print (cur_song, np.amin(cur_song_samples))
-        #        print (cur_song, np.mean(cur_song_samples))
-        #        #export this to a wav file, to test it
-        #        write_test_wav(cur_song_samples, str(overall_song_id))
-        #        overall_song_id += 1
+        for cur_song, cur_song_samples in enumerate(songs):
+            cur_song_samples = abs(ifft(cur_song_samples))
+            if cur_song == 0:
+                print ("-----DATASET CONSTRUCTOR--------")
+                print ("max: ",  np.amax(cur_song_samples))
+                print ("min: ",  np.amin(cur_song_samples))
+                print ("mean: ", np.mean(cur_song_samples))
+                #export this to a wav file, to test it
+                write_test_wav(cur_song_samples, str(overall_song_id))
+                overall_song_id += 1
 
         #check labels
         #use this for issue #3
@@ -241,7 +239,8 @@ def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
         if os.path.exists(cur_pickle_filename) and not p_bForce:
             print('%s already present - Skipping pickling.' % cur_pickle_filename)
         else:
-            print('Pickling %s.' % cur_pickle_filename)
+            #print('Pickling %s.' % cur_pickle_filename)
+            print(".", end='')
             dataset_cur_genre = getDataForGenre(strCurFolderName)
             try:
                 #and try to pickle it
@@ -282,20 +281,21 @@ def getDataForGenre(genre_folder):
             # only keep the first sample_count samples
             cur_song_pcm = cur_song_pcm[0:TOTAL_INPUTS]
             #do the dft, X is complex numbers, same len as x, ie cur_song_pcm
-            fft_buffer = np.zeros(TOTAL_INPUTS)
-            #this reverses the beggining and end of the sample, not sure if this is useful... 
-            fft_buffer[:TOTAL_INPUTS/2] = cur_song_pcm[TOTAL_INPUTS/2:]
-            fft_buffer[TOTAL_INPUTS/2:] = cur_song_pcm[:TOTAL_INPUTS/2]
-            X = fft(fft_buffer)
+            X = fft(cur_song_pcm)
             #only keep the real numbers, ie the magnitude
             mX = abs(X)
+            
+            #to have a nice plot, reverse the beginning and end of amplitude
+            #fft_buffer = np.zeros(TOTAL_INPUTS)
+            #fft_buffer[:TOTAL_INPUTS/2] = mX[TOTAL_INPUTS/2:]
+            #fft_buffer[TOTAL_INPUTS/2:] = mX[:TOTAL_INPUTS/2]
             #if songId == 0:
-            #    plt.plot(mX)
+            #    plt.plot(fft_buffer)
             #    plt.show()
            
-            mX = mX.astype(np.float32)            #cast the array into float32
-            mX = np.multiply(mX, 1.0 / 65536)     #convert int16 range into [-.5, .5]
-            mX = np.add(mX, .5)                   #convert int16 [-.5, .5] range into [0,1.0]
+            #mX = mX.astype(np.float32)            #cast the array into float32
+            #mX = np.multiply(mX, 1.0 / 65536)     #convert int16 range into [-.5, .5]
+            #mX = np.add(mX, .5)                   #convert int16 [-.5, .5] range into [0,1.0]
             
 
 

@@ -26,7 +26,7 @@ NUMBER OF OUTPUTS
 * i can change the number of inputs simply by changing TOTAL_INPUTS and forcing repickling.
 
 ==== WHAT IS SUPPOSED TO BE THE FUCKING TYPE OF INPUTS AND OUTPUTS???? ====
-* ffmpeg returns int16, so INPUTS HAVE TO BE INT16
+* ffmpeg returns int16, currently this data is stored as is in pickles
 * right now, dataSet.make_arrays has: 
     * inputs:   np.int16 
     * outputs:  np.int32
