@@ -270,18 +270,20 @@ def getDataForGenre(genre_folder):
         try:
             # convert current song to np.int16 array. 
             cur_song_pcm = songFile2pcm(cur_song_file)
-            # only keep the first TOTAL_INPUTS samples
-            cur_song_pcm = cur_song_pcm[0:TOTAL_INPUTS]
+            # only keep the first 2x TOTAL_INPUTS samples. since the fft is symetrical, we can use that to store more stuff
+            cur_song_pcm = cur_song_pcm[0:2*TOTAL_INPUTS]
             #do the fft, keeping only the real numbers, ie the magnitude. mX has same len as cur_song_pcm, but is np.float64
             mX = fft(cur_song_pcm).real
+            #only keep the first half since symmetrical
+            mX = mX[:len(mX)/2]
             
-            #to have a nice plot, reverse the beginning and end of amplitude
-            #fft_buffer = np.zeros(TOTAL_INPUTS)
-            #fft_buffer[:TOTAL_INPUTS/2] = mX[TOTAL_INPUTS/2:]
-            #fft_buffer[TOTAL_INPUTS/2:] = mX[:TOTAL_INPUTS/2]
-            #if songId == 0:
-            #    plt.plot(fft_buffer)
-            #    plt.show()
+            #PLOT THE THING
+            if songId == 0:
+                fft_buffer = np.insert(mX, np.zeros(len(mX)), 0)
+                for i in np.arange (len(fft_buffer)/2):
+                    fft_buffer[i] = fft_buffer[len(fft_buffer)-i-1]
+                plt.plot(fft_buffer)
+                plt.show()
            
             #need to convert to range 0,1 for tensorflow learning. 
             max = np.amax(mX)
