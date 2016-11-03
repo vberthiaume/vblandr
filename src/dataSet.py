@@ -49,7 +49,7 @@ SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 exponent = math.log(SAMPLE_COUNT, 2)+1
 TOTAL_INPUTS = 2 ** int(exponent)
 
-FORCE_PICKLING = True
+FORCE_PICKLING = False
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 overall_song_id = 0
 ONE_HOT = False
@@ -125,8 +125,11 @@ class DataSet(object):
 
         #check that song files are valid 
         for cur_song, cur_song_samples in enumerate(songs):
-            cur_song_samples = abs(ifft(cur_song_samples))
             if cur_song == 0:
+                #need to convert cur_song_samples from float[0,1] to int16[0, maxInt16]
+                cur_song_samples = cur_song_samples.astype(int)
+                cur_song_samples *= np.iinfo(np.int16).max
+                cur_song_samples = ifft(cur_song_samples).real
                 print ("-----DATASET CONSTRUCTOR--------")
                 print ("max: ",  np.amax(cur_song_samples))
                 print ("min: ",  np.amin(cur_song_samples))
@@ -270,7 +273,7 @@ def getDataForGenre(genre_folder):
             # convert current song to np.int16 array. 
             cur_song_pcm = songFile2pcm(cur_song_file)
             # only keep the first 2x TOTAL_INPUTS samples. since the fft is symetrical, we can use that to store more stuff
-            cur_song_pcm = cur_song_pcm[0:2*TOTAL_INPUTS]
+            cur_song_pcm = cur_song_pcm[:2*TOTAL_INPUTS]
             #do the fft, keeping only the real numbers, ie the magnitude. mX has same len as cur_song_pcm, but is np.float64
             mX = fft(cur_song_pcm).real
             #only keep the first half since symmetrical
