@@ -292,17 +292,6 @@ def getDataForGenre(genre_folder):
 
             #and put it in the dataset_cur_genre
             dataset_cur_genre[songId, :] = mX
-
-
-
-
-            #OLD WAY, USING SAMPLES
-            ## only keep the first sample_count samples
-            #cur_song_pcm = cur_song_pcm[0:TOTAL_INPUTS]
-            ##and put it in the dataset_cur_genre
-            #dataset_cur_genre[songId, :] = cur_song_pcm
-            
-           
             
             songId += 1
         except IOError as e:
