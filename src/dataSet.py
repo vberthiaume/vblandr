@@ -18,7 +18,6 @@
 
 import tensorflow as tf
 from tensorflow.python.framework import dtypes
-
 import collections
 
 #sms-tools stuff
@@ -239,8 +238,8 @@ def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
         if os.path.exists(cur_pickle_filename) and not p_bForce:
             print('%s already present - Skipping pickling.' % cur_pickle_filename)
         else:
-            #print('Pickling %s.' % cur_pickle_filename)
-            print ".", 
+            print '\nPickling',
+            print cur_pickle_filename,
             dataset_cur_genre = getDataForGenre(strCurFolderName)
             try:
                 #and try to pickle it
@@ -278,12 +277,12 @@ def getDataForGenre(genre_folder):
             mX = mX[:len(mX)/2]
             
             #PLOT THE THING
-            if songId == 0:
-                fft_buffer = np.insert(mX, np.zeros(len(mX)), 0)
-                for i in np.arange (len(fft_buffer)/2):
-                    fft_buffer[i] = fft_buffer[len(fft_buffer)-i-1]
-                plt.plot(fft_buffer)
-                plt.show()
+            #if songId == 0:
+            #    fft_buffer = np.insert(mX, np.zeros(len(mX)), 0)
+            #    for i in np.arange (len(fft_buffer)/2):
+            #        fft_buffer[i] = fft_buffer[len(fft_buffer)-i-1]
+            #    plt.plot(fft_buffer)
+            #    plt.show()
            
             #need to convert to range 0,1 for tensorflow learning. 
             max = np.amax(mX)
@@ -318,7 +317,9 @@ def songFile2pcm(song_path):
             '-loglevel', 'quiet',
             '-']            #instead of having an output file, using '-' sends it in the pipe. not actually sure how this works.
     #run the command
-    print(song_path)
+    #print(song_path)
+    print ".", 
+    sys.stdout.flush()
     pipe = sp.Popen(command, stdout=sp.PIPE)
     #read the output into a numpy array
     stdoutdata = pipe.stdout.read()
