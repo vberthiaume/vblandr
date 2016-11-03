@@ -30,7 +30,7 @@ audio_array = audio_array[:2**16]
 fft_output  = fft (audio_array).real
 ifft_output = ifft(fft_output).real
 
-print (type(fft_output[0]))
+print (fft_output)
 
 #SAVE WAVE AS NEW FILE
 filename = song_path = '/home/gris/Music/vblandr/test_small/punk/07 Alkaline Trio - Only Love.wav'

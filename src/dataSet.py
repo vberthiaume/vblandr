@@ -240,7 +240,7 @@ def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
             print('%s already present - Skipping pickling.' % cur_pickle_filename)
         else:
             #print('Pickling %s.' % cur_pickle_filename)
-            print(".", end='')
+            print ".", 
             dataset_cur_genre = getDataForGenre(strCurFolderName)
             try:
                 #and try to pickle it
@@ -261,29 +261,19 @@ def getDataForGenre(genre_folder):
                 all_song_paths.append(path+"/"+file)
 
     #data for cur genre will have shape all_song_paths x TOTAL_INPUTS
-    dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), TOTAL_INPUTS), dtype=np.int16)
+    #dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), TOTAL_INPUTS), dtype=np.int16)
+    dataset_cur_genre = np.ndarray(shape=(len(all_song_paths), TOTAL_INPUTS), dtype=np.float32)
     
     songId = 0
     #for each song in the current genre
     for cur_song_file in all_song_paths:
         try:
-            # convert current song to numpy array. when using images we were normalizing using pixel depth... should we do something different? Or pcmm is already [0,1]?
+            # convert current song to np.int16 array. 
             cur_song_pcm = songFile2pcm(cur_song_file)
-            
-            #OLD WAY, USING SAMPLES
-            ## only keep the first sample_count samples
-            #cur_song_pcm = cur_song_pcm[0:TOTAL_INPUTS]
-            ##and put it in the dataset_cur_genre
-            #dataset_cur_genre[songId, :] = cur_song_pcm
-            
-            
-            #NEW WAY, USING DFT
-            # only keep the first sample_count samples
+            # only keep the first TOTAL_INPUTS samples
             cur_song_pcm = cur_song_pcm[0:TOTAL_INPUTS]
-            #do the dft, X is complex numbers, same len as x, ie cur_song_pcm
-            X = fft(cur_song_pcm)
-            #only keep the real numbers, ie the magnitude
-            mX = abs(X)
+            #do the fft, keeping only the real numbers, ie the magnitude. mX has same len as cur_song_pcm, but is np.float64
+            mX = fft(cur_song_pcm).real
             
             #to have a nice plot, reverse the beginning and end of amplitude
             #fft_buffer = np.zeros(TOTAL_INPUTS)
@@ -293,17 +283,26 @@ def getDataForGenre(genre_folder):
             #    plt.plot(fft_buffer)
             #    plt.show()
            
-            #mX = mX.astype(np.float32)            #cast the array into float32
-            #mX = np.multiply(mX, 1.0 / 65536)     #convert int16 range into [-.5, .5]
-            #mX = np.add(mX, .5)                   #convert int16 [-.5, .5] range into [0,1.0]
-            
-
+            #need to convert to range 0,1 for tensorflow learning. 
+            max = np.amax(mX)
+            min = np.amin(mX)
+            range = max - min
+            mX = mX - min
+            mX = mX/range
 
             #and put it in the dataset_cur_genre
             dataset_cur_genre[songId, :] = mX
 
 
-                        
+
+
+            #OLD WAY, USING SAMPLES
+            ## only keep the first sample_count samples
+            #cur_song_pcm = cur_song_pcm[0:TOTAL_INPUTS]
+            ##and put it in the dataset_cur_genre
+            #dataset_cur_genre[songId, :] = cur_song_pcm
+            
+           
             
             songId += 1
         except IOError as e:
@@ -392,7 +391,8 @@ def getWholeDataFromIndividualGenrePickles(p_allPickledFilenames, p_iTrainSize, 
 
 def make_arrays(p_iNb_rows, p_iNb_cols, one_hot):
     if p_iNb_rows:
-        dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.int16)
+        #dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.int16)
+        dataset_cur_genre = np.ndarray((p_iNb_rows, p_iNb_cols), dtype=np.float32)
         if one_hot:
             labels = np.ndarray((p_iNb_rows, NUM_CLASSES), dtype=np.int32)
         else:
