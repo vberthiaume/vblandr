@@ -51,7 +51,7 @@ TOTAL_INPUTS = 2 ** int(exponent)
 
 FORCE_PICKLING = False
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
-overall_song_id = 0
+#overall_song_id = 0
 ONE_HOT = False
 
 
@@ -102,7 +102,7 @@ def dense_to_one_hot(labels_dense, num_classes):
 
 class DataSet(object):
     def __init__(self, songs, labels, dtype=np.float32):
-        global overall_song_id
+        #global overall_song_id
        
         """Construct a DataSet. `dtype` can be either `uint8` to leave the input as `[0, 255]`, or `float32` to rescale into `[0, 1]`."""
         dtype = dtypes.as_dtype(dtype).base_dtype
@@ -124,19 +124,13 @@ class DataSet(object):
             #songs = np.multiply(songs, 1.0 / 255.0) 
 
         #check that song files are valid 
-        for cur_song, cur_song_samples in enumerate(songs):
+        for cur_song, cur_song_dft in enumerate(songs):
             if cur_song == 0:
-                #need to convert cur_song_samples from float[0,1] to int16[0, maxInt16]
-                cur_song_samples = cur_song_samples.astype(int)
-                cur_song_samples *= np.iinfo(np.int16).max
-                cur_song_samples = ifft(cur_song_samples).real
                 print ("-----DATASET CONSTRUCTOR--------")
-                print ("max: ",  np.amax(cur_song_samples))
-                print ("min: ",  np.amin(cur_song_samples))
-                print ("mean: ", np.mean(cur_song_samples))
-                #export this to a wav file, to test it
-                write_test_wav(cur_song_samples, str(overall_song_id))
-                overall_song_id += 1
+                print ("max: ",  np.amax(cur_song_dft))
+                print ("min: ",  np.amin(cur_song_dft))
+                print ("mean: ", np.mean(cur_song_dft))
+                #overall_song_id += 1
 
         #check labels
         #use this for issue #3
@@ -276,7 +270,7 @@ def getDataForGenre(genre_folder):
             cur_song_pcm = cur_song_pcm[:2*TOTAL_INPUTS]
             #do the fft, keeping only the real numbers, ie the magnitude. mX has same len as cur_song_pcm, but is np.float64
             mX = fft(cur_song_pcm).real
-            #only keep the first half since symmetrical
+            #only keep the first half since symmetrical, and we know len(mX) is multiple of 2
             mX = mX[:len(mX)/2]
             
             #PLOT THE THING
