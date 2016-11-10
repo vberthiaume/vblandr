@@ -2,7 +2,7 @@ import subprocess as sp
 import scikits.audiolab
 import numpy as np
 from scipy.fftpack import fft, ifft
-
+from scipy.io import wavfile
 
 
 #--CONVERT MP3 TO WAV------------------------------------------
@@ -26,12 +26,17 @@ audio_array = np.fromstring(stdoutdata, dtype=np.int16)
 
 
 audio_array = audio_array[:2**16]
+#
+#fft_output  = fft (audio_array)
+#ifft_output = ifft(fft_output)
+#
+##print (fft_output)
+#
+##SAVE WAVE AS NEW FILE
+#filename = song_path = '/home/gris/Music/vblandr/testIfft.wav'
+#scikits.audiolab.wavwrite(ifft_output, filename, fs=44100, enc='pcm16')
 
-fft_output  = fft (audio_array).real
-ifft_output = ifft(fft_output).real
-
-print (fft_output)
-
-#SAVE WAVE AS NEW FILE
-filename = song_path = '/home/gris/Music/vblandr/test_small/punk/07 Alkaline Trio - Only Love.wav'
-scikits.audiolab.wavwrite(audio_array, filename, fs=44100, enc='pcm16')
+fft_output  = np.fft.rfft (audio_array,  axis=0)
+ifft_output = np.fft.irfft(fft_output, axis=0)
+ifft_output = np.round(ifft_output).astype('int16')
+wavfile.write('/home/gris/Music/vblandr/testIfft.wav', 44100, ifft_output)
