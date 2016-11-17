@@ -246,6 +246,10 @@ def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
                 print('Unable to save data to', cur_pickle_filename, ':', e)
     return all_pickle_filenames
 
+
+def removeInitialSilence(cur_song_pcm)
+    return cur_song_pcm
+
 # load data for each genre
 def getDataForGenre(genre_folder):   
     """figure out the path to all the genre's song files, and how many songs we have"""
@@ -266,6 +270,9 @@ def getDataForGenre(genre_folder):
         try:
             # convert current song to np.int16 array. 
             cur_song_pcm = songFile2pcm(cur_song_file)
+
+            cur_song_pcm = removeInitialSilence(cur_song_pcm)
+            
             # only keep the first 2x TOTAL_INPUTS samples. since the fft is symetrical, we can use that to store more stuff
             cur_song_pcm = cur_song_pcm[:2*TOTAL_INPUTS]
             #do the fft, keeping only the real numbers, ie the magnitude. mX has same len as cur_song_pcm, but is np.float64
