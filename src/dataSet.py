@@ -45,7 +45,7 @@ s_iValid_size   = 6 * NUM_CLASSES  # 10000
 s_iTestSize     = 6 * NUM_CLASSES  # 10000
 
 
-SAMPLE_COUNT = 10 * 44100   # first 10 secs of audio
+SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 exponent = math.log(SAMPLE_COUNT, 2)+1
 TOTAL_INPUTS = 2 ** int(exponent)
 
