@@ -247,8 +247,17 @@ def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
     return all_pickle_filenames
 
 
-def removeInitialSilence(cur_song_pcm)
-    return cur_song_pcm
+def removeInitialSilence(cur_song_pcm):
+    #using absolute value
+    env = abs(cur_song_pcm)
+    #convolving as a way to do a fast moving average
+    N = 10
+    env = np.convolve(env, np.ones((N,))/N)[(N-1):]
+    #detect first non-silent sample
+    threshold = .1
+    endOfSilence = next(x[0] for x in enumerate(L) if x[1] > threshold)
+    
+    return cur_song_pcm[endOfSilence:]
 
 # load data for each genre
 def getDataForGenre(genre_folder):   
