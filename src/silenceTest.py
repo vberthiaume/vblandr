@@ -3,7 +3,8 @@ import scikits.audiolab
 import numpy as np
 from scipy.fftpack import fft, ifft
 from scipy.io import wavfile
-
+import bisect
+import matplotlib.pyplot as plt
 
 #--CONVERT MP3 TO WAV------------------------------------------
 
@@ -22,18 +23,35 @@ pipe = sp.Popen(command, stdout=sp.PIPE)
 #read the output into a numpy array
 stdoutdata = pipe.stdout.read() 
 audio_array = np.fromstring(stdoutdata, dtype=np.int16)
-audio_array = audio_array[:2**16]
+#audio_array = audio_array[:2**16]
 #--------------------------------------------------------------
 
 def removeInitialSilence(cur_song_pcm):
     #using absolute value
     env = abs(cur_song_pcm)
     #convolving as a way to do a fast moving average
-    N = 10
+    N = 100
     env = np.convolve(env, np.ones((N,))/N)[(N-1):]
+    
+    #first 44100 samples are silent. what is their max amplitude?
+    #print np.max(env[:44100])
+    
+    #at 1.5s, we're clearly into audio, what is the max amplitude?
+    print "before 1.5s, max: ", np.max(env[:66150])
+    
+    #here we're still in noise part
+    print "in noise part, max: ", np.max(env[:45467])
+    
+    #these don't work on hesse
+    #plt.plot(env)
+    #plt.show()
+
     #detect first non-silent sample
-    threshold = .1
-    endOfSilence = next(x[0] for x in enumerate(env) if x[1] > threshold)
+    threshold = 1500#(2**16)/10
+    
+    endOfSilence = bisect.bisect(env,threshold)
+    
+    print "end of silence: ", endOfSilence
     return cur_song_pcm[endOfSilence:]
 
 #---- REMOVE SILENCE --------------------
@@ -55,5 +73,12 @@ ifft_output = removeInitialSilence(audio_array)
 
 #--SAVE WAVE AS NEW FILE ----------------
 ifft_output = np.round(ifft_output).astype('int16')
-wavfile.write('/home/gris/Music/vblandr/testIfft.wav', 44100, ifft_output)
+#wavfile.write('/home/gris/Music/vblandr/testIfft.wav', 44100, ifft_output)
+wavfile.write('/mnt/c/Users/barth/Documents/vblandr/silenceTest.wav', 44100, ifft_output)
+
+
 #scikits.audiolab.wavwrite(ifft_output, '/home/gris/Music/vblandr/testIfft.wav', fs=44100, enc='pcm16')
+
+
+
+
