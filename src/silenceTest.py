@@ -51,7 +51,7 @@ def removeInitialSilence(cur_song_pcm):
     #plt.show()
 
     #detect first non-silent sample
-    threshold = 1500/2**16#(2**16)/10
+    threshold = .04
     
     endOfSilence = bisect.bisect(env,threshold)
     
