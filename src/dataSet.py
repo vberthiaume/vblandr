@@ -28,10 +28,10 @@ import stft as STFT
 from scipy.signal import get_window
 from scipy.fftpack import fft, ifft
 
-#ffmpeg stuff
+#ffmpeg + audio stuff 
 import subprocess as sp
 import scikits.audiolab
-
+import bisect
 #general stuff?
 import numpy as np
 import matplotlib.pyplot as plt
@@ -49,7 +49,7 @@ SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 exponent = math.log(SAMPLE_COUNT, 2)+1
 TOTAL_INPUTS = 2 ** int(exponent)
 
-FORCE_PICKLING = False
+FORCE_PICKLING = True
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 #overall_song_id = 0
 ONE_HOT = False
@@ -261,28 +261,17 @@ def removeInitialSilence(cur_song_pcm):
     env = np.multiply(env, 2)               #convert [0,.5] range into [0,1.0] 
     
     #convolving as a way to do a fast moving average
-    N = 100
+    N = 10
     env = np.convolve(env, np.ones((N,))/N)[(N-1):]
-    
+    print np.max(env)
+    print env[:10]
     #detect first non-silent sample
     threshold = .04
     
     endOfSilence = bisect.bisect(env,threshold)
     
-    print "end of silence: ", endOfSilence
+    print "\nend of silence: ", endOfSilence
     return cur_song_pcm[endOfSilence:]
-
-#def removeInitialSilence(cur_song_pcm):
-#    #using absolute value
-#    env = abs(cur_song_pcm)
-#    #convolving as a way to do a fast moving average
-#    N = 10
-#    env = np.convolve(env, np.ones((N,))/N)[(N-1):]
-#    #detect first non-silent sample
-#    threshold = .1
-#    endOfSilence = next(x[0] for x in enumerate(env) if x[1] > threshold)
-#    
-#    return cur_song_pcm[endOfSilence:]
 
 # load data for each genre
 def getDataForGenre(genre_folder):   
@@ -303,6 +292,7 @@ def getDataForGenre(genre_folder):
     for cur_song_file in all_song_paths:
         try:
             # convert current song to np.int16 array. 
+            print cur_song_file
             cur_song_pcm = songFile2pcm(cur_song_file)
 
             cleaned_cur_song_pcm = removeInitialSilence(cur_song_pcm)

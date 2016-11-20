@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 
 #--CONVERT MP3 TO WAV------------------------------------------
 #song_path = '/home/gris/Music/vblandr/test_small/punk/07 Alkaline Trio - Only Love.mp3'
-song_path = '/mnt/c/Users/barth/Documents/vblandr/train_small/punk/01 - True North.mp3'
+#song_path = '/mnt/c/Users/barth/Documents/vblandr/train_small/punk/01 - True North.mp3'
+song_path = '/mnt/c/Users/barth/Documents/vblandr/train_small/audiobook/Blaise_Pascal_-_Discours_sur_les_passions_de_l_amour.mp3'
 command = [ 'ffmpeg',
         '-i', song_path,
         '-f', 's16le',
@@ -39,17 +40,17 @@ def removeInitialSilence(cur_song_pcm):
     #print np.max(env[:44100])
     
     #at 1.5s, we're clearly into audio, what is the max amplitude?
-    print "before 1.5s, max: ", np.max(env[:66150])
+    print "before .5s, max: ", np.max(env[:.5*44100])
     
     #here we're still in noise part
-    print "in noise part, max: ", np.max(env[:45467])
+    print "in vocal part, max: ", np.max(env[.625*44100])
     
     #these don't work on hesse
     #plt.plot(env)
     #plt.show()
 
     #detect first non-silent sample
-    threshold = .04
+    threshold = .00004
     
     endOfSilence = bisect.bisect(env,threshold)
     
