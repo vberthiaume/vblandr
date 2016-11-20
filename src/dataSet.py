@@ -58,8 +58,14 @@ ONE_HOT = False
 # LIBRARY_PATH = '/media/kxstudio/LUSSIER/music/'
 # LIBRARY_PATH = '/media/sf_stuff_for_virtual_machines/music/'
 # LIBRARY_PATH = '/Volumes/Untitled/music/'
-#LIBRARY_PATH = '/home/gris/Music/vblandr/'
+
+#nicolai -- not installed at this point
+#LIBRARY_PATH = '/Users/nicolai/Music/vblandr'
+
+#hesse
 LIBRARY_PATH = '/mnt/c/Users/barth/Documents/vblandr/'
+
+#gris
 #LIBRARY_PATH = '/home/gris/Music/vblandr/'
 
 
