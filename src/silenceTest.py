@@ -23,12 +23,16 @@ pipe = sp.Popen(command, stdout=sp.PIPE)
 #read the output into a numpy array
 stdoutdata = pipe.stdout.read() 
 audio_array = np.fromstring(stdoutdata, dtype=np.int16)
-#audio_array = audio_array[:2**16]
 #--------------------------------------------------------------
 
 def removeInitialSilence(cur_song_pcm):
     #using absolute value
     env = abs(cur_song_pcm)
+    env = env.astype(np.float32)            #cast the array into float32
+    env = np.multiply(env, 1.0 / 65536)     #convert int16 range into [-.5, .5], but really because of the abs we're already between [0,.5]
+    env = np.multiply(env, 2)               #convert [0,.5] range into [0,1.0] 
+    
+    
     #convolving as a way to do a fast moving average
     N = 100
     env = np.convolve(env, np.ones((N,))/N)[(N-1):]
@@ -47,7 +51,7 @@ def removeInitialSilence(cur_song_pcm):
     #plt.show()
 
     #detect first non-silent sample
-    threshold = 1500#(2**16)/10
+    threshold = 1500/2**16#(2**16)/10
     
     endOfSilence = bisect.bisect(env,threshold)
     
@@ -56,18 +60,8 @@ def removeInitialSilence(cur_song_pcm):
 
 #---- REMOVE SILENCE --------------------
 ifft_output = removeInitialSilence(audio_array)
-
-
-
-#---- FFT THEN IFFT ------------------------
-#fft_output  = fft (audio_array)
-#ifft_output = ifft(fft_output).real
-
-#this stuff is equivalent
-#fft_output  = np.fft.rfft (audio_array, axis=0)
-#print "fft_output is type", type(fft_output[0])
-#ifft_output = np.fft.irfft(fft_output,  axis=0)
-#print "ifft_output is type", type(ifft_output[0])
+#truncate to 1 sec
+ifft_output = ifft_output[:1*44100]
 
 
 
@@ -77,7 +71,6 @@ ifft_output = np.round(ifft_output).astype('int16')
 wavfile.write('/mnt/c/Users/barth/Documents/vblandr/silenceTest.wav', 44100, ifft_output)
 
 
-#scikits.audiolab.wavwrite(ifft_output, '/home/gris/Music/vblandr/testIfft.wav', fs=44100, enc='pcm16')
 
 
 
