@@ -7,7 +7,6 @@ import bisect
 import matplotlib.pyplot as plt
 
 #--CONVERT MP3 TO WAV------------------------------------------
-
 #song_path = '/home/gris/Music/vblandr/test_small/punk/07 Alkaline Trio - Only Love.mp3'
 song_path = '/mnt/c/Users/barth/Documents/vblandr/train_small/punk/01 - True North.mp3'
 command = [ 'ffmpeg',
@@ -31,7 +30,6 @@ def removeInitialSilence(cur_song_pcm):
     env = env.astype(np.float32)            #cast the array into float32
     env = np.multiply(env, 1.0 / 65536)     #convert int16 range into [-.5, .5], but really because of the abs we're already between [0,.5]
     env = np.multiply(env, 2)               #convert [0,.5] range into [0,1.0] 
-    
     
     #convolving as a way to do a fast moving average
     N = 100
@@ -62,8 +60,6 @@ def removeInitialSilence(cur_song_pcm):
 ifft_output = removeInitialSilence(audio_array)
 #truncate to 1 sec
 ifft_output = ifft_output[:1*44100]
-
-
 
 #--SAVE WAVE AS NEW FILE ----------------
 ifft_output = np.round(ifft_output).astype('int16')

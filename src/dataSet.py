@@ -256,14 +256,33 @@ def getIndividualGenrePickles(p_strDataFolderNames, p_bForce=False):
 def removeInitialSilence(cur_song_pcm):
     #using absolute value
     env = abs(cur_song_pcm)
-    #convolving as a way to do a fast moving average
-    N = 10
-    env = np.convolve(env, np.ones((N,))/N)[(N-1):]
-    #detect first non-silent sample
-    threshold = .1
-    endOfSilence = next(x[0] for x in enumerate(env) if x[1] > threshold)
+    env = env.astype(np.float32)            #cast the array into float32
+    env = np.multiply(env, 1.0 / 65536)     #convert int16 range into [-.5, .5], but really because of the abs we're already between [0,.5]
+    env = np.multiply(env, 2)               #convert [0,.5] range into [0,1.0] 
     
+    #convolving as a way to do a fast moving average
+    N = 100
+    env = np.convolve(env, np.ones((N,))/N)[(N-1):]
+    
+    #detect first non-silent sample
+    threshold = .04
+    
+    endOfSilence = bisect.bisect(env,threshold)
+    
+    print "end of silence: ", endOfSilence
     return cur_song_pcm[endOfSilence:]
+
+#def removeInitialSilence(cur_song_pcm):
+#    #using absolute value
+#    env = abs(cur_song_pcm)
+#    #convolving as a way to do a fast moving average
+#    N = 10
+#    env = np.convolve(env, np.ones((N,))/N)[(N-1):]
+#    #detect first non-silent sample
+#    threshold = .1
+#    endOfSilence = next(x[0] for x in enumerate(env) if x[1] > threshold)
+#    
+#    return cur_song_pcm[endOfSilence:]
 
 # load data for each genre
 def getDataForGenre(genre_folder):   
