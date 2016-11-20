@@ -49,7 +49,7 @@ SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 exponent = math.log(SAMPLE_COUNT, 2)+1
 TOTAL_INPUTS = 2 ** int(exponent)
 
-FORCE_PICKLING = True
+FORCE_PICKLING = False
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 #overall_song_id = 0
 ONE_HOT = False
