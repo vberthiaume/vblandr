@@ -49,7 +49,7 @@ SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 exponent = math.log(SAMPLE_COUNT, 2)+1
 TOTAL_INPUTS = 2 ** int(exponent)
 
-FORCE_PICKLING = False
+FORCE_PICKLING = True
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 #overall_song_id = 0
 ONE_HOT = False
@@ -261,7 +261,7 @@ def removeInitialSilence(cur_song_pcm):
     env = np.convolve(env, np.ones((N,))/N)[(N-1):]
     #detect first non-silent sample
     threshold = .1
-    endOfSilence = next(x[0] for x in enumerate(L) if x[1] > threshold)
+    endOfSilence = next(x[0] for x in enumerate(env) if x[1] > threshold)
     
     return cur_song_pcm[endOfSilence:]
 
@@ -286,12 +286,12 @@ def getDataForGenre(genre_folder):
             # convert current song to np.int16 array. 
             cur_song_pcm = songFile2pcm(cur_song_file)
 
-            cur_song_pcm = removeInitialSilence(cur_song_pcm)
+            cleaned_cur_song_pcm = removeInitialSilence(cur_song_pcm)
             
             # only keep the first 2x TOTAL_INPUTS samples. since the fft is symetrical, we can use that to store more stuff
-            cur_song_pcm = cur_song_pcm[:2*TOTAL_INPUTS]
+            short_cur_song_pcm = cleaned_cur_song_pcm[:2*TOTAL_INPUTS]
             #do the fft, keeping only the real numbers, ie the magnitude. mX has same len as cur_song_pcm, but is np.float64
-            mX = fft(cur_song_pcm).real
+            mX = fft(short_cur_song_pcm).real
             #only keep the first half since symmetrical, and we know len(mX) is multiple of 2
             mX = mX[:len(mX)/2]
             
