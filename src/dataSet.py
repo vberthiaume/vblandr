@@ -63,10 +63,10 @@ ONE_HOT = False
 #LIBRARY_PATH = '/Users/nicolai/Music/vblandr'
 
 #hesse
-LIBRARY_PATH = '/mnt/c/Users/barth/Documents/vblandr/'
+#LIBRARY_PATH = '/mnt/c/Users/barth/Documents/vblandr/'
 
 #gris
-#LIBRARY_PATH = '/home/gris/Music/vblandr/'
+LIBRARY_PATH = '/home/gris/Music/vblandr/'
 
 
 def write_test_wav(cur_song_samples, str_id = ""):
