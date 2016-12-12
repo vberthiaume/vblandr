@@ -60,9 +60,9 @@ def removeInitialSilence(cur_song_pcm):
     #end_time = time.clock()
     #print ("time:", end_time - start_time)
     
-    mediaplt.plot(env)
+    plt.plot(env)
     plt.show()
-
+ 
     #convolving as a way to do a fast moving average
     N = 100
     env = np.convolve(env, np.ones((N,))/N)[(N-1):]

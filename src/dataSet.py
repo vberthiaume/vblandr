@@ -51,7 +51,7 @@ TOTAL_INPUTS = 2 ** int(exponent)
 
 FORCE_PICKLING = True
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
-#overall_song_id = 0
+overall_song_id = 0
 ONE_HOT = False
 
 
@@ -257,16 +257,15 @@ def removeInitialSilence(cur_song_pcm):
     #using absolute value
     env = abs(cur_song_pcm)
     env = env.astype(np.float32)            #cast the array into float32
-    env = np.multiply(env, 1.0 / 65536)     #convert int16 range into [-.5, .5], but really because of the abs we're already between [0,.5]
-    env = np.multiply(env, 2)               #convert [0,.5] range into [0,1.0] 
+    max = np.max(env)
+    env = np.multiply(env, 1.0 / max)       #normalize so that max value is == 1.0
     
     #convolving as a way to do a fast moving average
-    N = 10
+    N = 100
     env = np.convolve(env, np.ones((N,))/N)[(N-1):]
-    print np.max(env)
-    print env[:10]
+    
     #detect first non-silent sample
-    threshold = .04
+    threshold = .01
     
     endOfSilence = bisect.bisect(env,threshold)
     
@@ -276,6 +275,10 @@ def removeInitialSilence(cur_song_pcm):
 # load data for each genre
 def getDataForGenre(genre_folder):   
     """figure out the path to all the genre's song files, and how many songs we have"""
+    
+    
+    global overall_song_id
+    
     all_song_paths = []
     for path, dirs, files in os.walk(genre_folder):
         #insert file in correct label id
@@ -296,6 +299,9 @@ def getDataForGenre(genre_folder):
             cur_song_pcm = songFile2pcm(cur_song_file)
 
             cleaned_cur_song_pcm = removeInitialSilence(cur_song_pcm)
+            write_test_wav(cur_song_pcm, str(overall_song_id))
+            
+            overall_song_id = overall_song_id +1
             
             # only keep the first 2x TOTAL_INPUTS samples. since the fft is symetrical, we can use that to store more stuff
             short_cur_song_pcm = cleaned_cur_song_pcm[:2*TOTAL_INPUTS]
