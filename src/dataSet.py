@@ -76,7 +76,7 @@ def write_test_wav(cur_song_samples, str_id = ""):
 
 def getAllDataSets(train_dir, dtype=np.float32):
 
-    pickle_file = getAllDataPickle()
+    pickle_file = getAllDataPickle(FORCE_PICKLING)
 
     with open(pickle_file, 'rb') as f:
         save = pickle.load(f)
@@ -185,15 +185,15 @@ class DataSet(object):
         return self._songs[start:end], self._labels[start:end]
     # ENDOF DataSet 
 
-def getAllDataPickle():
+def getAllDataPickle(p_bForce=False):
     #get relevant paths
     trainGenreNames, trainGenrePaths = getAllGenrePaths(LIBRARY_PATH + 'train_small/')
     testGenreNames, testGenrePaths   = getAllGenrePaths(LIBRARY_PATH + 'test_small/')
     pickle_file =                                       LIBRARY_PATH + 'allData.pickle'
     
     #obtain data for each genre in their individual pickle file
-    allPickledTrainFilenames = getIndividualGenrePickles(trainGenrePaths, FORCE_PICKLING)
-    allPickledTestFilenames  = getIndividualGenrePickles(testGenrePaths,  FORCE_PICKLING)
+    allPickledTrainFilenames = getIndividualGenrePickles(trainGenrePaths, p_bForce)
+    allPickledTestFilenames  = getIndividualGenrePickles(testGenrePaths,  p_bForce)
 
     #merge and randomize data from all genres into wholedatasets for training, validation, and test
     wholeValidDataset, wholeValidLabels, wholeTrainDataset, wholeTrainLabels = getWholeDataFromIndividualGenrePickles(allPickledTrainFilenames, s_iTrainSize, s_iValid_size)
