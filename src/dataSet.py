@@ -49,7 +49,7 @@ SAMPLE_COUNT = 1 * 44100   # first 10 secs of audio
 exponent = math.log(SAMPLE_COUNT, 2)+1
 TOTAL_INPUTS = 2 ** int(exponent)
 
-FORCE_PICKLING = True
+FORCE_PICKLING = False
 Datasets = collections.namedtuple('Datasets', ['train', 'validation', 'test'])
 overall_song_id = 0
 ONE_HOT = False
@@ -63,10 +63,10 @@ ONE_HOT = False
 #LIBRARY_PATH = '/Users/nicolai/Music/vblandr'
 
 #hesse
-#LIBRARY_PATH = '/mnt/c/Users/barth/Documents/vblandr/'
+LIBRARY_PATH = '/mnt/c/Users/barth/Documents/vblandr/'
 
 #gris
-LIBRARY_PATH = '/home/gris/Music/vblandr/'
+#LIBRARY_PATH = '/home/gris/Music/vblandr/'
 
 
 def write_test_wav(cur_song_samples, str_id = ""):
